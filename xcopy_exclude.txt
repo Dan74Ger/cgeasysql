@@ -1,0 +1,11 @@
+bin\
+obj\
+.vs\
+.git\
+node_modules\
+packages\
+.nuget\
+*.user
+*.suo
+*.cache
+
