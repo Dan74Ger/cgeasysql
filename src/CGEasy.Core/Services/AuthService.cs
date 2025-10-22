@@ -25,31 +25,67 @@ namespace CGEasy.Core.Services
         /// <returns>Utente autenticato o null se credenziali errate</returns>
         public Utente? Login(string username, string password)
         {
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            var logFile = Path.Combine(Path.GetTempPath(), "CGEasy_Login_Debug.txt");
+            
+            try
+            {
+                File.AppendAllText(logFile, $"\n\n=== TENTATIVO LOGIN {DateTime.Now} ===\n");
+                File.AppendAllText(logFile, $"Username: '{username}'\n");
+                File.AppendAllText(logFile, $"Password length: {password?.Length ?? 0}\n");
+                
+                if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+                {
+                    File.AppendAllText(logFile, "❌ Username o password vuoti\n");
+                    return null;
+                }
+
+                // Cerca utente per username (case-insensitive)
+                var utente = _context.Utenti
+                    .FindOne(x => x.Username.ToLower() == username.ToLower());
+
+                if (utente == null)
+                {
+                    File.AppendAllText(logFile, $"❌ Utente '{username}' NON trovato nel DB\n");
+                    return null;
+                }
+
+                File.AppendAllText(logFile, $"✅ Utente trovato: ID={utente.Id}, Username={utente.Username}\n");
+                File.AppendAllText(logFile, $"Hash nel DB: {utente.PasswordHash.Substring(0, 30)}...\n");
+
+                // Verifica se utente è attivo
+                if (!utente.Attivo)
+                {
+                    File.AppendAllText(logFile, "❌ Utente NON attivo\n");
+                    return null;
+                }
+
+                File.AppendAllText(logFile, "✅ Utente attivo\n");
+
+                // Verifica password con BCrypt
+                File.AppendAllText(logFile, $"🔐 Verifico password '{password}' contro hash...\n");
+                bool passwordCorrect = BCrypt.Net.BCrypt.Verify(password, utente.PasswordHash);
+                File.AppendAllText(logFile, $"Risultato BCrypt.Verify: {passwordCorrect}\n");
+
+                if (!passwordCorrect)
+                {
+                    File.AppendAllText(logFile, "❌ Password ERRATA\n");
+                    return null;
+                }
+
+                File.AppendAllText(logFile, "✅ Password CORRETTA - Login riuscito!\n");
+
+                // Aggiorna ultimo accesso
+                utente.UltimoAccesso = DateTime.UtcNow;
+                _context.Utenti.Update(utente);
+                _context.Checkpoint(); // Forza salvataggio
+
+                return utente;
+            }
+            catch (Exception ex)
+            {
+                File.AppendAllText(logFile, $"❌ ECCEZIONE: {ex.Message}\n{ex.StackTrace}\n");
                 return null;
-
-            // Cerca utente per username (case-insensitive)
-            var utente = _context.Utenti
-                .FindOne(x => x.Username.ToLower() == username.ToLower());
-
-            if (utente == null)
-                return null;
-
-            // Verifica se utente è attivo
-            if (!utente.Attivo)
-                return null;
-
-            // Verifica password con BCrypt
-            bool passwordCorrect = BCrypt.Net.BCrypt.Verify(password, utente.PasswordHash);
-
-            if (!passwordCorrect)
-                return null;
-
-            // Aggiorna ultimo accesso
-            utente.UltimoAccesso = DateTime.UtcNow;
-            _context.Utenti.Update(utente);
-
-            return utente;
+            }
         }
 
         /// <summary>
@@ -116,57 +152,13 @@ namespace CGEasy.Core.Services
 
             _context.UserPermissions.Insert(permissions);
 
+            // FORZA checkpoint per salvare immediatamente
+            _context.Checkpoint();
+            System.Diagnostics.Debug.WriteLine($"✅ Utente {username} creato e salvato (ID: {userId})");
+
             return userId;
         }
 
-        /// <summary>
-        /// Cambia password utente
-        /// </summary>
-        /// <param name="userId">ID utente</param>
-        /// <param name="oldPassword">Vecchia password</param>
-        /// <param name="newPassword">Nuova password</param>
-        /// <returns>True se password cambiata con successo</returns>
-        public bool ChangePassword(int userId, string oldPassword, string newPassword)
-        {
-            if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
-                throw new ArgumentException("La nuova password deve essere di almeno 6 caratteri");
-
-            var utente = _context.Utenti.FindById(userId);
-            if (utente == null)
-                return false;
-
-            // Verifica vecchia password
-            bool oldPasswordCorrect = BCrypt.Net.BCrypt.Verify(oldPassword, utente.PasswordHash);
-            if (!oldPasswordCorrect)
-                return false;
-
-            // Aggiorna con nuova password hashata
-            utente.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
-            utente.DataModifica = DateTime.UtcNow;
-
-            return _context.Utenti.Update(utente);
-        }
-
-        /// <summary>
-        /// Reset password (solo per admin)
-        /// </summary>
-        /// <param name="userId">ID utente</param>
-        /// <param name="newPassword">Nuova password</param>
-        /// <returns>True se reset effettuato</returns>
-        public bool ResetPassword(int userId, string newPassword)
-        {
-            if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
-                throw new ArgumentException("La password deve essere di almeno 6 caratteri");
-
-            var utente = _context.Utenti.FindById(userId);
-            if (utente == null)
-                return false;
-
-            utente.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
-            utente.DataModifica = DateTime.UtcNow;
-
-            return _context.Utenti.Update(utente);
-        }
 
         /// <summary>
         /// Ottiene permessi utente
@@ -211,7 +203,14 @@ namespace CGEasy.Core.Services
             if (!attivo)
                 utente.DataCessazione = DateTime.UtcNow;
 
-            return _context.Utenti.Update(utente);
+            var success = _context.Utenti.Update(utente);
+            
+            if (success)
+            {
+                _context.Checkpoint(); // Forza salvataggio
+            }
+            
+            return success;
         }
 
         /// <summary>
@@ -238,6 +237,160 @@ namespace CGEasy.Core.Services
                 UserSenior: all.Count(x => x.Ruolo == RuoloUtente.UserSenior && x.Attivo),
                 Users: all.Count(x => x.Ruolo == RuoloUtente.User && x.Attivo)
             );
+        }
+
+        /// <summary>
+        /// Trova utente per username
+        /// </summary>
+        public Utente? FindUserByUsername(string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                return null;
+
+            return _context.Utenti.FindOne(x => x.Username.ToLower() == username.ToLower());
+        }
+
+        /// <summary>
+        /// Modifica dati utente esistente
+        /// </summary>
+        public bool UpdateUser(int userId, string email, string nome, string cognome, RuoloUtente ruolo, bool attivo)
+        {
+            var utente = _context.Utenti.FindById(userId);
+            if (utente == null)
+                return false;
+
+            utente.Email = email;
+            utente.Nome = nome;
+            utente.Cognome = cognome;
+            utente.Ruolo = ruolo;
+            utente.Attivo = attivo;
+            utente.DataModifica = DateTime.UtcNow;
+
+            if (!attivo && utente.DataCessazione == null)
+                utente.DataCessazione = DateTime.UtcNow;
+
+            var success = _context.Utenti.Update(utente);
+            
+            if (success)
+            {
+                // FORZA checkpoint per salvare immediatamente
+                _context.Checkpoint();
+                System.Diagnostics.Debug.WriteLine($"✅ Utente ID {userId} aggiornato e salvato");
+            }
+            
+            return success;
+        }
+
+        /// <summary>
+        /// Cambia password (solo nuova password - per admin che resetta)
+        /// </summary>
+        public bool ChangePassword(int userId, string newPassword)
+        {
+            var logFile = Path.Combine(Path.GetTempPath(), "CGEasy_ChangePassword_Debug.txt");
+            
+            try
+            {
+                File.AppendAllText(logFile, $"\n\n=== CAMBIO PASSWORD {DateTime.Now} ===\n");
+                
+                if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
+                {
+                    File.AppendAllText(logFile, "❌ Password troppo corta\n");
+                    throw new ArgumentException("La password deve essere di almeno 6 caratteri");
+                }
+
+                var utente = _context.Utenti.FindById(userId);
+                if (utente == null)
+                {
+                    File.AppendAllText(logFile, $"❌ Utente ID {userId} non trovato!\n");
+                    return false;
+                }
+
+                var oldHash = utente.PasswordHash;
+                var newPasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+                
+                File.AppendAllText(logFile, 
+                    $"UserId: {userId}\n" +
+                    $"Username: {utente.Username}\n" +
+                    $"Vecchio Hash: {oldHash.Substring(0, 30)}...\n" +
+                    $"Nuovo Hash: {newPasswordHash.Substring(0, 30)}...\n");
+                
+                // Aggiorna password e data modifica
+                utente.PasswordHash = newPasswordHash;
+                utente.DataModifica = DateTime.UtcNow;
+
+                // Salva nel database
+                var success = _context.Utenti.Update(utente);
+                File.AppendAllText(logFile, $"Update returned: {success}\n");
+                
+                if (success)
+                {
+                    // FORZA checkpoint per salvare immediatamente su disco
+                    _context.Checkpoint();
+                    File.AppendAllText(logFile, "Checkpoint eseguito\n");
+                    
+                    // Verifica che sia stata salvata
+                    var verificaUtente = _context.Utenti.FindById(userId);
+                    if (verificaUtente != null)
+                    {
+                        var hashSalvato = verificaUtente.PasswordHash;
+                        bool hashCorretto = (hashSalvato == newPasswordHash);
+                        bool passwordValida = BCrypt.Net.BCrypt.Verify(newPassword, hashSalvato);
+                        
+                        File.AppendAllText(logFile,
+                            $"\n=== VERIFICA POST-SALVATAGGIO ===\n" +
+                            $"Hash nel DB: {hashSalvato.Substring(0, 30)}...\n" +
+                            $"Hash atteso: {newPasswordHash.Substring(0, 30)}...\n" +
+                            $"Hash Match: {hashCorretto}\n" +
+                            $"Password valida: {passwordValida}\n" +
+                            $"✅ SUCCESSO!\n");
+                        
+                        return hashCorretto;
+                    }
+                }
+                
+                File.AppendAllText(logFile, "❌ Update fallito!\n");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                File.AppendAllText(logFile, $"❌ ECCEZIONE: {ex.Message}\n{ex.StackTrace}\n");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Salva permessi utente
+        /// </summary>
+        public bool SaveUserPermissions(UserPermissions permissions)
+        {
+            if (permissions == null || permissions.IdUtente == 0)
+                return false;
+
+            permissions.DataModifica = DateTime.UtcNow;
+
+            // Se esiste già un record, aggiorna; altrimenti, inserisci
+            var existing = _context.UserPermissions.FindOne(x => x.IdUtente == permissions.IdUtente);
+            
+            bool success;
+            if (existing != null)
+            {
+                permissions.Id = existing.Id;
+                permissions.DataCreazione = existing.DataCreazione; // Mantieni data creazione originale
+                success = _context.UserPermissions.Update(permissions);
+            }
+            else
+            {
+                permissions.DataCreazione = DateTime.UtcNow;
+                _context.UserPermissions.Insert(permissions);
+                success = true;
+            }
+            
+            if (success)
+            {
+                _context.Checkpoint(); // Forza salvataggio
+            }
+            
+            return success;
         }
     }
 }

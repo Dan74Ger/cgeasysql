@@ -3,10 +3,209 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CGEasy.LicenseGenerator"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="🔑 CGEasy - Generatore Licenze Moduli" 
+        Height="700" Width="900"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5">
 
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2196F3" CornerRadius="8" Padding="20" Margin="0,0,0,20">
+            <StackPanel>
+                <TextBlock Text="🔑 GENERATORE LICENZE CGEASY" 
+                           FontSize="24" FontWeight="Bold" Foreground="White" 
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Genera chiavi di attivazione per i moduli dell'applicazione" 
+                           FontSize="14" Foreground="White" Opacity="0.9"
+                           HorizontalAlignment="Center" Margin="0,5,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Info Box -->
+        <Border Grid.Row="1" Background="#E3F2FD" BorderBrush="#2196F3" BorderThickness="2" 
+                CornerRadius="6" Padding="15" Margin="0,0,0,20">
+            <StackPanel>
+                <TextBlock Text="ℹ️ INFORMAZIONI" FontWeight="Bold" Foreground="#1976D2" FontSize="14"/>
+                <TextBlock TextWrapping="Wrap" Foreground="#1976D2" Margin="0,8,0,0" LineHeight="22">
+                    <Run Text="• Seleziona il modulo che vuoi attivare"/>
+                    <LineBreak/>
+                    <Run Text="• Click su 'Genera Chiave' per creare la licenza"/>
+                    <LineBreak/>
+                    <Run Text="• Copia la chiave generata"/>
+                    <LineBreak/>
+                    <Run Text="• Inseriscila nella sezione 'Sistema > Licenze Moduli' dell'applicazione CGEasy"/>
+                    <LineBreak/>
+                    <Run Text="• ⚠️ Le chiavi sono permanenti e non scadono"/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- Moduli -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                
+                <!-- TODO STUDIO -->
+                <Border Background="White" CornerRadius="8" Padding="20" Margin="0,0,0,15"
+                        BorderBrush="#E0E0E0" BorderThickness="1">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="📝 TODO STUDIO" FontSize="18" FontWeight="Bold" 
+                                           Foreground="#2196F3"/>
+                                <TextBlock Text="Sistema di gestione TODO, calendario, task e scadenze"
+                                           Foreground="#666" Margin="0,5,0,0"/>
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Content="🔑 Genera Chiave" 
+                                    Click="GeneraTodoStudio_Click"
+                                    Height="40" Padding="20,0" FontSize="14" FontWeight="SemiBold"
+                                    Background="#4CAF50" Foreground="White" BorderThickness="0"
+                                    Cursor="Hand"/>
+                        </Grid>
+
+                        <TextBox x:Name="ChiaveTodoStudio" IsReadOnly="True" 
+                                 Margin="0,15,0,0" Height="40" FontSize="14" FontFamily="Consolas"
+                                 VerticalContentAlignment="Center" Background="#F5F5F5"/>
+
+                        <Button Content="📋 Copia Chiave" Click="CopiaTodoStudio_Click"
+                                Margin="0,10,0,0" HorizontalAlignment="Left"
+                                Height="32" Padding="15,0" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- BILANCI -->
+                <Border Background="White" CornerRadius="8" Padding="20" Margin="0,0,0,15"
+                        BorderBrush="#E0E0E0" BorderThickness="1">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="📊 BILANCI" FontSize="18" FontWeight="Bold" 
+                                           Foreground="#FF9800"/>
+                                <TextBlock Text="Gestione bilanci CEE, analisi e reportistica"
+                                           Foreground="#666" Margin="0,5,0,0"/>
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Content="🔑 Genera Chiave" 
+                                    Click="GeneraBilanci_Click"
+                                    Height="40" Padding="20,0" FontSize="14" FontWeight="SemiBold"
+                                    Background="#4CAF50" Foreground="White" BorderThickness="0"
+                                    Cursor="Hand"/>
+                        </Grid>
+
+                        <TextBox x:Name="ChiaveBilanci" IsReadOnly="True" 
+                                 Margin="0,15,0,0" Height="40" FontSize="14" FontFamily="Consolas"
+                                 VerticalContentAlignment="Center" Background="#F5F5F5"/>
+
+                        <Button Content="📋 Copia Chiave" Click="CopiaBilanci_Click"
+                                Margin="0,10,0,0" HorizontalAlignment="Left"
+                                Height="32" Padding="15,0" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- CIRCOLARI -->
+                <Border Background="White" CornerRadius="8" Padding="20" Margin="0,0,0,15"
+                        BorderBrush="#E0E0E0" BorderThickness="1">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="📢 CIRCOLARI" FontSize="18" FontWeight="Bold" 
+                                           Foreground="#9C27B0"/>
+                                <TextBlock Text="Gestione circolari, comunicazioni e documentazione"
+                                           Foreground="#666" Margin="0,5,0,0"/>
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Content="🔑 Genera Chiave" 
+                                    Click="GeneraCircolari_Click"
+                                    Height="40" Padding="20,0" FontSize="14" FontWeight="SemiBold"
+                                    Background="#4CAF50" Foreground="White" BorderThickness="0"
+                                    Cursor="Hand"/>
+                        </Grid>
+
+                        <TextBox x:Name="ChiaveCircolari" IsReadOnly="True" 
+                                 Margin="0,15,0,0" Height="40" FontSize="14" FontFamily="Consolas"
+                                 VerticalContentAlignment="Center" Background="#F5F5F5"/>
+
+                        <Button Content="📋 Copia Chiave" Click="CopiaCircolari_Click"
+                                Margin="0,10,0,0" HorizontalAlignment="Left"
+                                Height="32" Padding="15,0" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- CONTROLLO GESTIONE -->
+                <Border Background="White" CornerRadius="8" Padding="20" Margin="0,0,0,0"
+                        BorderBrush="#E0E0E0" BorderThickness="1">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="📈 CONTROLLO GESTIONE" FontSize="18" FontWeight="Bold" 
+                                           Foreground="#F44336"/>
+                                <TextBlock Text="Analisi costi, ricavi e controllo di gestione avanzato"
+                                           Foreground="#666" Margin="0,5,0,0"/>
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Content="🔑 Genera Chiave" 
+                                    Click="GeneraControlloGestione_Click"
+                                    Height="40" Padding="20,0" FontSize="14" FontWeight="SemiBold"
+                                    Background="#4CAF50" Foreground="White" BorderThickness="0"
+                                    Cursor="Hand"/>
+                        </Grid>
+
+                        <TextBox x:Name="ChiaveControlloGestione" IsReadOnly="True" 
+                                 Margin="0,15,0,0" Height="40" FontSize="14" FontFamily="Consolas"
+                                 VerticalContentAlignment="Center" Background="#F5F5F5"/>
+
+                        <Button Content="📋 Copia Chiave" Click="CopiaControlloGestione_Click"
+                                Margin="0,10,0,0" HorizontalAlignment="Left"
+                                Height="32" Padding="15,0" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Border Grid.Row="3" Background="#FFF3E0" BorderBrush="#FF9800" BorderThickness="1" 
+                CornerRadius="6" Padding="15" Margin="0,20,0,0">
+            <StackPanel>
+                <TextBlock Text="⚠️ IMPORTANTE" FontWeight="Bold" Foreground="#F57C00" FontSize="13"/>
+                <TextBlock TextWrapping="Wrap" Foreground="#F57C00" Margin="0,5,0,0" FontSize="12" LineHeight="20">
+                    <Run Text="• Conserva le chiavi generate in un luogo sicuro"/>
+                    <LineBreak/>
+                    <Run Text="• Le chiavi sono generate con algoritmo SHA256 e sono uniche per ogni modulo"/>
+                    <LineBreak/>
+                    <Run Text="• Non condividere le chiavi con persone non autorizzate"/>
+                    <LineBreak/>
+                    <Run Text="• Developer: Dott. Geron Daniele - © 2025 CGEasy v2.0"/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>

@@ -105,6 +105,27 @@ namespace CGEasy.Core.Services
         }
 
         /// <summary>
+        /// Alias per StartSession (compatibilità)
+        /// </summary>
+        public static void Login(Utente user, UserPermissions? permissions = null)
+        {
+            StartSession(user, permissions);
+        }
+
+        /// <summary>
+        /// Alias per EndSession (compatibilità)
+        /// </summary>
+        public static void Logout()
+        {
+            EndSession();
+        }
+
+        /// <summary>
+        /// Verifica se utente corrente è Admin (alias)
+        /// </summary>
+        public static bool IsAdmin => IsAdministrator;
+
+        /// <summary>
         /// Verifica se utente ha accesso a un modulo
         /// </summary>
         /// <param name="moduleName">Nome modulo (todo, bilanci, circolari, controllo)</param>

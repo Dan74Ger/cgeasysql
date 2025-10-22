@@ -52,6 +52,18 @@ namespace CGEasy.Core.Models
         [BsonField("professionisti_delete")]
         public bool ProfessionistiDelete { get; set; } = false;
 
+        [BsonField("tipopratiche_create")]
+        public bool TipoPraticheCreate { get; set; } = false;
+
+        [BsonField("tipopratiche_read")]
+        public bool TipoPraticheRead { get; set; } = true;
+
+        [BsonField("tipopratiche_update")]
+        public bool TipoPraticheUpdate { get; set; } = false;
+
+        [BsonField("tipopratiche_delete")]
+        public bool TipoPraticheDelete { get; set; } = false;
+
         // Gestione Utenti (Solo Admin)
         [BsonField("utenti_manage")]
         public bool UtentiManage { get; set; } = false;

@@ -1,0 +1,46 @@
+════════════════════════════════════════════════════════
+  🔑 LICENZE CGEASY - CHIAVI DI ATTIVAZIONE
+════════════════════════════════════════════════════════
+
+📝 TODO STUDIO
+Chiave: TODO-STUDIO-3V2WDCVTWZYM
+
+📊 BILANCI
+Chiave: BILANCI-KVRFBFODYKST
+
+📢 CIRCOLARI
+Chiave: CIRCOLARI-OBHSXPEDUKMT
+
+📈 CONTROLLO GESTIONE
+Chiave: CONTROLLO-GESTIONE-BSKXQMFBONUB
+
+════════════════════════════════════════════════════════
+
+⚠️ IMPORTANTE:
+• Le chiavi sono permanenti (non scadono)
+• Conserva questo file in un luogo sicuro
+• Puoi rigenerare le chiavi con GENERA_LICENZE.bat
+  (saranno sempre identiche)
+
+════════════════════════════════════════════════════════
+
+📋 COME ATTIVARE UN MODULO:
+
+1. Apri CGEasy
+2. Vai in: Impostazioni > Sistema
+3. Scorri a: "🔑 Licenze Moduli"
+4. Incolla la chiave nel campo del modulo
+5. Click su "✅ Attiva Licenza"
+6. Riavvia CGEasy
+7. Il modulo è attivo! ✅
+
+════════════════════════════════════════════════════════
+
+Developer: Dott. Geron Daniele
+Versione: CGEasy v2.0
+Data: 20 Ottobre 2025
+Copyright: © 2025 - Tutti i diritti riservati
+
+════════════════════════════════════════════════════════
+
+

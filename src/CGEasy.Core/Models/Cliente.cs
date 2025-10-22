@@ -81,8 +81,11 @@ namespace CGEasy.Core.Models
                 if (string.IsNullOrWhiteSpace(Indirizzo))
                     return string.Empty;
 
-                var parts = new[] { Indirizzo, Cap, Citta, Provincia }
-                    .Where(p => !string.IsNullOrWhiteSpace(p));
+                var parts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(Indirizzo)) parts.Add(Indirizzo);
+                if (!string.IsNullOrWhiteSpace(Cap)) parts.Add(Cap);
+                if (!string.IsNullOrWhiteSpace(Citta)) parts.Add(Citta);
+                if (!string.IsNullOrWhiteSpace(Provincia)) parts.Add(Provincia);
                 return string.Join(", ", parts);
             }
         }

@@ -56,6 +56,15 @@ namespace CGEasy.Core.Models
             RuoloUtente.User => "Utente",
             _ => "Sconosciuto"
         };
+
+        [BsonIgnore]
+        public string RuoloUtenteColor => Ruolo switch
+        {
+            RuoloUtente.Administrator => "#e74c3c",  // Rosso
+            RuoloUtente.UserSenior => "#f39c12",     // Arancione
+            RuoloUtente.User => "#27ae60",           // Verde
+            _ => "#95a5a6"                           // Grigio
+        };
     }
 
     /// <summary>

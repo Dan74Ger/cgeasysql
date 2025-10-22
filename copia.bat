@@ -83,6 +83,23 @@ if exist "%SOURCE_DIR%\Data\*.db" (
     echo       FATTO: Database Data\ copiato
 )
 
+REM Copia database da C:\Users\Public\Documents\CGEasy
+set DB_PUBLIC_PATH=C:\Users\Public\Documents\CGEasy
+if exist "%DB_PUBLIC_PATH%\cgeasy.db" (
+    echo.
+    echo [+] Database CGEasy trovato in Public Documents...
+    if not exist "%BACKUP_FOLDER%\Database\" mkdir "%BACKUP_FOLDER%\Database\"
+    copy "%DB_PUBLIC_PATH%\cgeasy.db" "%BACKUP_FOLDER%\Database\cgeasy.db" /Y >nul 2>&1
+    if errorlevel 1 (
+        echo       ATTENZIONE: Impossibile copiare database (potrebbe essere in uso)
+    ) else (
+        echo       FATTO: Database CGEasy copiato in \Database\cgeasy.db
+    )
+) else (
+    echo.
+    echo [!] Database CGEasy non trovato in %DB_PUBLIC_PATH%
+)
+
 echo.
 echo ========================================
 echo   BACKUP COMPLETATO CON SUCCESSO!
