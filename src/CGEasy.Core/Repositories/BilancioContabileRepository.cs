@@ -149,5 +149,37 @@ public class BilancioContabileRepository
         
         return gruppi;
     }
+
+    public List<BilancioGruppo> GetGruppiByCliente(int clienteId)
+    {
+        var bilanci = _context.BilancioContabile
+            .Find(b => b.ClienteId == clienteId)
+            .ToList();
+        
+        var gruppi = bilanci
+            .GroupBy(b => new { b.ClienteId, b.Mese, b.Anno })
+            .Select(g =>
+            {
+                var primaRiga = g.OrderBy(x => x.DataImport).First();
+                
+                return new BilancioGruppo
+                {
+                    ClienteId = g.Key.ClienteId,
+                    ClienteNome = primaRiga.ClienteNome,
+                    Mese = g.Key.Mese,
+                    Anno = g.Key.Anno,
+                    Descrizione = primaRiga.DescrizioneBilancio,
+                    DataImport = primaRiga.DataImport,
+                    ImportedByName = primaRiga.ImportedByName,
+                    NumeroRighe = g.Count(),
+                    TotaleImporti = g.Sum(b => b.Importo)
+                };
+            })
+            .OrderByDescending(g => g.Anno)
+            .ThenByDescending(g => g.Mese)
+            .ToList();
+        
+        return gruppi;
+    }
 }
 

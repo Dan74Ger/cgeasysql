@@ -85,6 +85,8 @@ namespace CGEasy.Core.Data
             mapper.Entity<LicenseKey>().Id(x => x.Id, autoId: true);
             mapper.Entity<BilancioContabile>().Id(x => x.Id, autoId: true);
             mapper.Entity<BilancioTemplate>().Id(x => x.Id, autoId: true);
+            mapper.Entity<AssociazioneMastrino>().Id(x => x.Id, autoId: true);
+            mapper.Entity<AssociazioneMastrinoDettaglio>().Id(x => x.Id, autoId: true);
 
             // Connection string per accesso diretto con commit immediato
             var connectionString = new ConnectionString
@@ -165,6 +167,18 @@ namespace CGEasy.Core.Data
                 licenseKeysCol.EnsureIndex(x => x.FullKey, unique: true);
                 licenseKeysCol.EnsureIndex(x => x.IsActive);
                 licenseKeysCol.EnsureIndex(x => x.DataGenerazione);
+
+                // Associazioni Mastrini
+                var associazioniCol = _database.GetCollection<AssociazioneMastrino>("associazioni_mastrini");
+                associazioniCol.EnsureIndex(x => x.ClienteId);
+                associazioniCol.EnsureIndex(x => x.Mese);
+                associazioniCol.EnsureIndex(x => x.Anno);
+                associazioniCol.EnsureIndex(x => x.DataCreazione);
+
+                // Associazioni Mastrini Dettagli
+                var associazioniDettagliCol = _database.GetCollection<AssociazioneMastrinoDettaglio>("associazioni_mastrini_dettagli");
+                associazioniDettagliCol.EnsureIndex(x => x.AssociazioneId);
+                associazioniDettagliCol.EnsureIndex(x => x.CodiceMastrino);
             }
         }
 
@@ -233,6 +247,18 @@ namespace CGEasy.Core.Data
         /// </summary>
         public ILiteCollection<LicenseKey> LicenseKeys =>
             _database.GetCollection<LicenseKey>("license_keys");
+
+        /// <summary>
+        /// Collection Associazioni Mastrini (testata associazioni)
+        /// </summary>
+        public ILiteCollection<AssociazioneMastrino> AssociazioniMastrini =>
+            _database.GetCollection<AssociazioneMastrino>("associazioni_mastrini");
+
+        /// <summary>
+        /// Collection Associazioni Mastrini Dettagli (dettagli mappature)
+        /// </summary>
+        public ILiteCollection<AssociazioneMastrinoDettaglio> AssociazioniMastriniDettagli =>
+            _database.GetCollection<AssociazioneMastrinoDettaglio>("associazioni_mastrini_dettagli");
 
         // ===== UTILITY METHODS =====
 
