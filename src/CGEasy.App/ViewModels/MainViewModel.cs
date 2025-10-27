@@ -168,6 +168,39 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void NavigateToStatisticheBilanci()
+    {
+        // VERIFICA PERMESSI UTENTE
+        if (!SessionManager.HasModuleAccess("bilanci"))
+        {
+            MessageBox.Show(
+                "ACCESSO NEGATO\n\n" +
+                "Non hai i permessi per accedere al modulo Bilanci.\n\n" +
+                "Contatta l'amministratore per richiedere l'accesso.",
+                "Permessi Insufficienti",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
+        // Verifica licenza modulo
+        if (!LicenseService.IsBilanciActive())
+        {
+            MessageBox.Show(
+                "MODULO BILANCI NON ACCESSIBILE\n\n" +
+                "Il modulo Bilanci richiede una licenza valida.",
+                "Modulo Bilanci - Licenza Non Valida",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+        
+        PageTitle = "Statistiche Bilanci";
+        var view = new Views.StatisticheBilanciView();
+        CurrentView = view;
+    }
+
+    [RelayCommand]
     private void NavigateToCircolari()
     {
         // VERIFICA PERMESSI UTENTE

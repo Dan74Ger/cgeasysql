@@ -91,6 +91,13 @@
                                    Height="40"
                                    Margin="0,0,0,5"/>
 
+                        <Button Content="📊 Statistiche" 
+                                   Command="{Binding NavigateToStatisticheBilanciCommand}"
+                                   HorizontalAlignment="Stretch"
+                                   HorizontalContentAlignment="Left"
+                                   Height="40"
+                                   Margin="0,0,0,5"/>
+
                         <Button Content="📄 Circolari" 
                                    Command="{Binding NavigateToCircolariCommand}"
                                    HorizontalAlignment="Stretch"
