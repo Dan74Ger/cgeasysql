@@ -216,9 +216,28 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
+        // Verifica licenza modulo
+        if (!LicenseService.IsCircolariActive())
+        {
+            MessageBox.Show(
+                "MODULO NON ATTIVATO\n\n" +
+                "Il modulo Circolari richiede una licenza.\n\n" +
+                "Per attivarlo:\n" +
+                "1. Vai in Impostazioni > Sistema\n" +
+                "2. Inserisci la chiave di attivazione\n" +
+                "3. Riavvia l'applicazione\n\n" +
+                "Contatta l'amministratore per ricevere la chiave.",
+                "Modulo Circolari",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
         PageTitle = "Circolari";
-        // TODO: implementare quando sara pronto il modulo
-        MessageBox.Show("Modulo Circolari in sviluppo...", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+        
+        // Apri vista gestione circolari come finestra separata
+        var circolariWindow = new Views.CircolariWindow();
+        circolariWindow.Show();
     }
 
     [RelayCommand]
@@ -320,6 +339,7 @@ public partial class MainViewModel : ObservableObject
             }
         }
     }
+
 }
 
 

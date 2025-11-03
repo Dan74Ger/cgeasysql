@@ -249,30 +249,30 @@ public class AssociazioneMastrinoService
                     throw new InvalidOperationException("Repository non inizializzato");
                 }
 
-                // Elimina i dettagli esistenti
-                _repository.DeleteDettagliByAssociazione(associazioneId);
+        // Elimina i dettagli esistenti
+        _repository.DeleteDettagliByAssociazione(associazioneId);
 
-                // Inserisce i nuovi dettagli
-                foreach (var dettaglio in dettagli)
-                {
-                    dettaglio.AssociazioneId = associazioneId;
-                    _repository.InsertDettaglio(dettaglio);
-                }
+        // Inserisce i nuovi dettagli
+        foreach (var dettaglio in dettagli)
+        {
+            dettaglio.AssociazioneId = associazioneId;
+            _repository.InsertDettaglio(dettaglio);
+        }
 
-                // Aggiorna il numero di mappature nella testata
-                var associazione = _repository.GetById(associazioneId);
-                if (associazione != null)
-                {
-                    associazione.NumeroMappature = dettagli.Count(x => x.IsAssociato);
-                    _repository.Update(associazione);
-                }
+        // Aggiorna il numero di mappature nella testata
+        var associazione = _repository.GetById(associazioneId);
+        if (associazione != null)
+        {
+            associazione.NumeroMappature = dettagli.Count(x => x.IsAssociato);
+            _repository.Update(associazione);
+        }
 
-                // Audit log
-                _auditService.LogFromSession(
-                    AuditAction.Update,
-                    "AssociazioneMastrino",
-                    associazioneId,
-                    $"Salvate {dettagli.Count} mappature");
+        // Audit log
+        _auditService.LogFromSession(
+            AuditAction.Update,
+            "AssociazioneMastrino",
+            associazioneId,
+            $"Salvate {dettagli.Count} mappature");
 
                 // Operazione riuscita
                 return;

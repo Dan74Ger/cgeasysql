@@ -109,6 +109,8 @@ namespace CGEasy.Core.Data
             mapper.Entity<BilancioTemplate>().Id(x => x.Id, autoId: true);
             mapper.Entity<AssociazioneMastrino>().Id(x => x.Id, autoId: true);
             mapper.Entity<AssociazioneMastrinoDettaglio>().Id(x => x.Id, autoId: true);
+            mapper.Entity<Argomento>().Id(x => x.Id, autoId: true);
+            mapper.Entity<Circolare>().Id(x => x.Id, autoId: true);
 
             // Connection string per accesso condiviso (multi-utente)
             var connectionString = new ConnectionString
@@ -201,6 +203,18 @@ namespace CGEasy.Core.Data
                 var associazioniDettagliCol = _database.GetCollection<AssociazioneMastrinoDettaglio>("associazioni_mastrini_dettagli");
                 associazioniDettagliCol.EnsureIndex(x => x.AssociazioneId);
                 associazioniDettagliCol.EnsureIndex(x => x.CodiceMastrino);
+
+                // Argomenti
+                var argomentiCol = _database.GetCollection<Argomento>("argomenti");
+                argomentiCol.EnsureIndex(x => x.Nome);
+                argomentiCol.EnsureIndex(x => x.DataCreazione);
+
+                // Circolari
+                var circolariCol = _database.GetCollection<Circolare>("circolari");
+                circolariCol.EnsureIndex(x => x.ArgomentoId);
+                circolariCol.EnsureIndex(x => x.Anno);
+                circolariCol.EnsureIndex(x => x.Descrizione);
+                circolariCol.EnsureIndex(x => x.DataImportazione);
             }
         }
 
@@ -281,6 +295,18 @@ namespace CGEasy.Core.Data
         /// </summary>
         public ILiteCollection<AssociazioneMastrinoDettaglio> AssociazioniMastriniDettagli =>
             _database.GetCollection<AssociazioneMastrinoDettaglio>("associazioni_mastrini_dettagli");
+
+        /// <summary>
+        /// Collection Argomenti (categorie circolari)
+        /// </summary>
+        public ILiteCollection<Argomento> Argomenti =>
+            _database.GetCollection<Argomento>("argomenti");
+
+        /// <summary>
+        /// Collection Circolari (documenti importati)
+        /// </summary>
+        public ILiteCollection<Circolare> Circolari =>
+            _database.GetCollection<Circolare>("circolari");
 
         // ===== UTILITY METHODS =====
 
@@ -440,8 +466,8 @@ namespace CGEasy.Core.Data
                     // NON chiudere il database se è Singleton (per modalità Shared multi-utente)
                     // Il Singleton rimane aperto per tutta la durata dell'applicazione
                     if (!_isSingleton)
-                    {
-                        _database?.Dispose();
+                {
+                    _database?.Dispose();
                     }
                 }
                 _disposed = true;
