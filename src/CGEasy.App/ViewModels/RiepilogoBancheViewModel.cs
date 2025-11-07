@@ -277,8 +277,8 @@ public partial class RiepilogoBancheViewModel : ObservableObject
             if (incasso.Incassato && incasso.DataIncassoEffettivo.HasValue)
                 continue;
 
-            // Anticipo (se presente e non incassato)
-            if (incasso.PercentualeAnticipo > 0 && incasso.DataInizioAnticipo.HasValue && !incasso.Incassato)
+            // Anticipo (se presente e non incassato e NON gestito in C/C)
+            if (incasso.PercentualeAnticipo > 0 && incasso.DataInizioAnticipo.HasValue && !incasso.Incassato && !incasso.AnticipoGestito_CC)
             {
                 var meseAnticipo = incasso.DataInizioAnticipo.Value.ToString("MMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("it-IT"));
                 if (margine.Incassi.ValoriMensili.ContainsKey(meseAnticipo))
@@ -341,10 +341,10 @@ public partial class RiepilogoBancheViewModel : ObservableObject
             }
         }
 
-        // Aggiungi storni anticipo nei pagamenti
+        // Aggiungi storni anticipo nei pagamenti (SOLO SE non chiuso in C/C)
         foreach (var (incasso, nomeBanca) in tuttiIncassi)
         {
-            if (incasso.PercentualeAnticipo > 0 && incasso.DataScadenzaAnticipo.HasValue && !incasso.Incassato)
+            if (incasso.PercentualeAnticipo > 0 && incasso.DataScadenzaAnticipo.HasValue && !incasso.Incassato && !incasso.AnticipoChiuso_CC)
             {
                 var meseStorno = incasso.DataScadenzaAnticipo.Value.ToString("MMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("it-IT"));
                 if (margine.Pagamenti.ValoriMensili.ContainsKey(meseStorno))
@@ -387,9 +387,11 @@ public partial class RiepilogoBancheViewModel : ObservableObject
                     if (incasso.Incassato)
                         continue;
 
+                    // ESCLUDI gli anticipi gestiti in C/C
                     if (incasso.PercentualeAnticipo > 0 &&
                         incasso.DataInizioAnticipo.HasValue &&
-                        incasso.DataInizioAnticipo.Value <= ultimoGiornoMese)
+                        incasso.DataInizioAnticipo.Value <= ultimoGiornoMese &&
+                        !incasso.AnticipoGestito_CC)
                     {
                         if (!incasso.DataScadenzaAnticipo.HasValue || incasso.DataScadenzaAnticipo.Value >= primoGiornoMese)
                         {

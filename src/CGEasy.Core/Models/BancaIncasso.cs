@@ -50,9 +50,19 @@ public class BancaIncasso
     public DateTime? DataInizioAnticipo { get; set; }
     
     /// <summary>
+    /// Anticipo gestito tramite C/C (non visibile in Saldo Previsto)
+    /// </summary>
+    public bool AnticipoGestito_CC { get; set; }
+    
+    /// <summary>
     /// Data scadenza anticipo
     /// </summary>
     public DateTime? DataScadenzaAnticipo { get; set; }
+    
+    /// <summary>
+    /// Anticipo chiuso tramite C/C (storno non visibile in Saldo Previsto)
+    /// </summary>
+    public bool AnticipoChiuso_CC { get; set; }
     
     /// <summary>
     /// Importo fattura a scadenza (Importo - ImportoAnticipato)

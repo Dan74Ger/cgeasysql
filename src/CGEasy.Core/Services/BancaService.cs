@@ -578,10 +578,11 @@ public class BancaService
         }
 
         // Calcola totale anticipi utilizzati dalla somma degli ImportoAnticipato degli incassi NON ancora incassati
+        // ESCLUDI gli anticipi gestiti in C/C
         decimal anticipoTotaleUtilizzato = 0;
         foreach (var banca in banche)
         {
-            var incassi = _incassoRepo.GetAll().Where(i => i.BancaId == banca.Id && !i.Incassato);
+            var incassi = _incassoRepo.GetAll().Where(i => i.BancaId == banca.Id && !i.Incassato && !i.AnticipoGestito_CC);
             anticipoTotaleUtilizzato += incassi.Sum(i => i.ImportoAnticipato);
         }
 
