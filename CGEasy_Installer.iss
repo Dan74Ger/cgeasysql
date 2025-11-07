@@ -29,7 +29,7 @@ DisableProgramGroupPage=yes
 ; Output
 OutputDir=installer_output
 OutputBaseFilename=CGEasy_Setup_v{#MyAppVersion}
-SetupIconFile=src\CGEasy.App\Assets\app_icon.ico
+; SetupIconFile=src\CGEasy.App\Assets\app_icon.ico  ; Commentato: icona non presente
 Compression=lzma2/max
 SolidCompression=yes
 
