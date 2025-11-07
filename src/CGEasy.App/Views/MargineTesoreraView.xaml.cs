@@ -319,81 +319,365 @@ namespace CGEasy.App.Views
                         Margin = new Thickness(0, 5, 0, 0)
                     };
 
-                    foreach (var dettaglio in dettagli.OrderBy(d => d.NomeBanca).ThenBy(d => d.DataScadenza))
+                    // Raggruppa i dettagli per tipo
+                    var anticipi = dettagli.Where(d => d.Descrizione.StartsWith("Anticipo ")).OrderBy(d => d.NomeBanca).ThenBy(d => d.DataScadenza).ToList();
+                    var incassiNormali = dettagli.Where(d => !d.Descrizione.StartsWith("Anticipo ") && !d.Descrizione.StartsWith("Storno anticipo")).OrderBy(d => d.NomeBanca).ThenBy(d => d.DataScadenza).ToList();
+                    var storni = dettagli.Where(d => d.Descrizione.StartsWith("Storno anticipo")).OrderBy(d => d.NomeBanca).ThenBy(d => d.DataScadenza).ToList();
+                    
+                    // Determina se siamo nella riga Incassi o Pagamenti
+                    bool isIncassi = riga.Categoria == "Incassi";
+                    
+                    // SEZIONE ANTICIPI (solo per Incassi)
+                    if (isIncassi && anticipi.Count > 0)
                     {
-                        var detailBorder = new Border
+                        // Intestazione "ANTICIPI"
+                        var anticipiHeader = new Border
                         {
                             BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BDC3C7")),
                             BorderThickness = new Thickness(1),
+                            Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4EDDA")),
                             Padding = new Thickness(5),
                             Margin = new Thickness(0, 2, 0, 0)
                         };
-
-                        // Colore di sfondo per anticipi e storni
-                        if (dettaglio.Descrizione.StartsWith("Anticipo "))
+                        var anticipiHeaderText = new TextBlock
                         {
-                            detailBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4EDDA"));
-                        }
-                        else if (dettaglio.Descrizione.StartsWith("Storno anticipo"))
-                        {
-                            detailBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFE4B5"));
-                        }
-                        else
-                        {
-                            detailBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F8F9FA"));
-                        }
-
-                        var detailStack = new StackPanel();
-                        
-                        var bancaText = new TextBlock
-                        {
-                            Text = $"🏦 {dettaglio.NomeBanca}",
-                            FontWeight = FontWeights.Bold,
-                            FontSize = 9,
-                            Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2C3E50"))
-                        };
-                        detailStack.Children.Add(bancaText);
-
-                        var descrizioneText = new TextBlock
-                        {
-                            Text = dettaglio.Descrizione,
-                            FontSize = 10,
-                            TextWrapping = TextWrapping.Wrap,
-                            Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#34495E"))
-                        };
-                        detailStack.Children.Add(descrizioneText);
-
-                        var importoText = new TextBlock
-                        {
-                            Text = dettaglio.Importo.ToString("N2", CultureInfo.GetCultureInfo("it-IT")) + " €",
-                            FontWeight = FontWeights.Bold,
+                            Text = $"📈 ANTICIPI ({anticipi.Count})",
                             FontSize = 11,
+                            FontWeight = FontWeights.Bold,
                             Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"))
                         };
-                        detailStack.Children.Add(importoText);
-
-                        if (!string.IsNullOrEmpty(dettaglio.NumeroFattura))
+                        anticipiHeader.Child = anticipiHeaderText;
+                        detailsStackPanel.Children.Add(anticipiHeader);
+                        
+                        // Lista anticipi
+                        foreach (var dettaglio in anticipi)
                         {
-                            var fatturaText = new TextBlock
+                            var detailBorder = new Border
                             {
-                                Text = $"Fatt. {dettaglio.NumeroFattura}" + 
-                                       (dettaglio.DataFattura.HasValue ? $" del {dettaglio.DataFattura.Value:dd/MM/yyyy}" : ""),
+                                BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BDC3C7")),
+                                BorderThickness = new Thickness(1),
+                                Padding = new Thickness(5),
+                                Margin = new Thickness(5, 2, 0, 0),
+                                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9"))
+                            };
+
+                            var detailStack = new StackPanel();
+                            
+                            var bancaText = new TextBlock
+                            {
+                                Text = $"🏦 {dettaglio.NomeBanca}",
+                                FontWeight = FontWeights.Bold,
+                                FontSize = 9,
+                                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2C3E50"))
+                            };
+                            detailStack.Children.Add(bancaText);
+
+                            var descrizioneText = new TextBlock
+                            {
+                                Text = dettaglio.Descrizione,
+                                FontSize = 10,
+                                TextWrapping = TextWrapping.Wrap,
+                                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#34495E"))
+                            };
+                            detailStack.Children.Add(descrizioneText);
+
+                            var importoText = new TextBlock
+                            {
+                                Text = dettaglio.Importo.ToString("N2", CultureInfo.GetCultureInfo("it-IT")) + " €",
+                                FontWeight = FontWeights.Bold,
+                                FontSize = 11,
+                                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"))
+                            };
+                            detailStack.Children.Add(importoText);
+
+                            if (!string.IsNullOrEmpty(dettaglio.NumeroFattura))
+                            {
+                                var fatturaText = new TextBlock
+                                {
+                                    Text = $"Fatt. {dettaglio.NumeroFattura}" + 
+                                           (dettaglio.DataFattura.HasValue ? $" del {dettaglio.DataFattura.Value:dd/MM/yyyy}" : ""),
+                                    FontSize = 9,
+                                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7F8C8D"))
+                                };
+                                detailStack.Children.Add(fatturaText);
+                            }
+
+                            var scadenzaText = new TextBlock
+                            {
+                                Text = $"Scad: {dettaglio.DataScadenza:dd/MM/yyyy}",
                                 FontSize = 9,
                                 Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7F8C8D"))
                             };
-                            detailStack.Children.Add(fatturaText);
+                            detailStack.Children.Add(scadenzaText);
+
+                            detailBorder.Child = detailStack;
+                            detailsStackPanel.Children.Add(detailBorder);
                         }
-
-                        var scadenzaText = new TextBlock
+                    }
+                    
+                    // SEZIONE INCASSI NORMALI (solo per Incassi)
+                    if (isIncassi && incassiNormali.Count > 0)
+                    {
+                        // Intestazione "INCASSI"
+                        var incassiHeader = new Border
                         {
-                            Text = $"Scad: {dettaglio.DataScadenza:dd/MM/yyyy}",
-                            FontSize = 9,
-                            Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7F8C8D"))
+                            BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BDC3C7")),
+                            BorderThickness = new Thickness(1),
+                            Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B3E5FC")),
+                            Padding = new Thickness(5),
+                            Margin = new Thickness(0, 5, 0, 0)
                         };
-                        detailStack.Children.Add(scadenzaText);
+                        var incassiHeaderText = new TextBlock
+                        {
+                            Text = $"💰 INCASSI ({incassiNormali.Count})",
+                            FontSize = 11,
+                            FontWeight = FontWeights.Bold,
+                            Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0277BD"))
+                        };
+                        incassiHeader.Child = incassiHeaderText;
+                        detailsStackPanel.Children.Add(incassiHeader);
+                        
+                        // Lista incassi
+                        foreach (var dettaglio in incassiNormali)
+                        {
+                            var detailBorder = new Border
+                            {
+                                BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BDC3C7")),
+                                BorderThickness = new Thickness(1),
+                                Padding = new Thickness(5),
+                                Margin = new Thickness(5, 2, 0, 0),
+                                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E1F5FE"))
+                            };
 
-                        detailBorder.Child = detailStack;
-                        detailsStackPanel.Children.Add(detailBorder);
+                            var detailStack = new StackPanel();
+                            
+                            var bancaText = new TextBlock
+                            {
+                                Text = $"🏦 {dettaglio.NomeBanca}",
+                                FontWeight = FontWeights.Bold,
+                                FontSize = 9,
+                                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2C3E50"))
+                            };
+                            detailStack.Children.Add(bancaText);
+
+                            var descrizioneText = new TextBlock
+                            {
+                                Text = dettaglio.Descrizione,
+                                FontSize = 10,
+                                TextWrapping = TextWrapping.Wrap,
+                                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#34495E"))
+                            };
+                            detailStack.Children.Add(descrizioneText);
+
+                            var importoText = new TextBlock
+                            {
+                                Text = dettaglio.Importo.ToString("N2", CultureInfo.GetCultureInfo("it-IT")) + " €",
+                                FontWeight = FontWeights.Bold,
+                                FontSize = 11,
+                                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0277BD"))
+                            };
+                            detailStack.Children.Add(importoText);
+
+                            if (!string.IsNullOrEmpty(dettaglio.NumeroFattura))
+                            {
+                                var fatturaText = new TextBlock
+                                {
+                                    Text = $"Fatt. {dettaglio.NumeroFattura}" + 
+                                           (dettaglio.DataFattura.HasValue ? $" del {dettaglio.DataFattura.Value:dd/MM/yyyy}" : ""),
+                                    FontSize = 9,
+                                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7F8C8D"))
+                                };
+                                detailStack.Children.Add(fatturaText);
+                            }
+
+                            var scadenzaText = new TextBlock
+                            {
+                                Text = $"Scad: {dettaglio.DataScadenza:dd/MM/yyyy}",
+                                FontSize = 9,
+                                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7F8C8D"))
+                            };
+                            detailStack.Children.Add(scadenzaText);
+
+                            detailBorder.Child = detailStack;
+                            detailsStackPanel.Children.Add(detailBorder);
+                        }
+                    }
+                    
+                    // SEZIONE STORNI ANTICIPO (solo per Pagamenti)
+                    if (!isIncassi && storni.Count > 0)
+                    {
+                        // Intestazione "STORNI ANTICIPO"
+                        var storniHeader = new Border
+                        {
+                            BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BDC3C7")),
+                            BorderThickness = new Thickness(1),
+                            Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFE4B5")),
+                            Padding = new Thickness(5),
+                            Margin = new Thickness(0, 2, 0, 0)
+                        };
+                        var storniHeaderText = new TextBlock
+                        {
+                            Text = $"🔄 STORNI ANTICIPO ({storni.Count})",
+                            FontSize = 11,
+                            FontWeight = FontWeights.Bold,
+                            Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57C00"))
+                        };
+                        storniHeader.Child = storniHeaderText;
+                        detailsStackPanel.Children.Add(storniHeader);
+                        
+                        // Lista storni
+                        foreach (var dettaglio in storni)
+                        {
+                            var detailBorder = new Border
+                            {
+                                BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BDC3C7")),
+                                BorderThickness = new Thickness(1),
+                                Padding = new Thickness(5),
+                                Margin = new Thickness(5, 2, 0, 0),
+                                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF3E0"))
+                            };
+
+                            var detailStack = new StackPanel();
+                            
+                            var bancaText = new TextBlock
+                            {
+                                Text = $"🏦 {dettaglio.NomeBanca}",
+                                FontWeight = FontWeights.Bold,
+                                FontSize = 9,
+                                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2C3E50"))
+                            };
+                            detailStack.Children.Add(bancaText);
+
+                            var descrizioneText = new TextBlock
+                            {
+                                Text = dettaglio.Descrizione,
+                                FontSize = 10,
+                                TextWrapping = TextWrapping.Wrap,
+                                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#34495E"))
+                            };
+                            detailStack.Children.Add(descrizioneText);
+
+                            var importoText = new TextBlock
+                            {
+                                Text = dettaglio.Importo.ToString("N2", CultureInfo.GetCultureInfo("it-IT")) + " €",
+                                FontWeight = FontWeights.Bold,
+                                FontSize = 11,
+                                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57C00"))
+                            };
+                            detailStack.Children.Add(importoText);
+
+                            if (!string.IsNullOrEmpty(dettaglio.NumeroFattura))
+                            {
+                                var fatturaText = new TextBlock
+                                {
+                                    Text = $"Fatt. {dettaglio.NumeroFattura}" + 
+                                           (dettaglio.DataFattura.HasValue ? $" del {dettaglio.DataFattura.Value:dd/MM/yyyy}" : ""),
+                                    FontSize = 9,
+                                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7F8C8D"))
+                                };
+                                detailStack.Children.Add(fatturaText);
+                            }
+
+                            var scadenzaText = new TextBlock
+                            {
+                                Text = $"Scad: {dettaglio.DataScadenza:dd/MM/yyyy}",
+                                FontSize = 9,
+                                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7F8C8D"))
+                            };
+                            detailStack.Children.Add(scadenzaText);
+
+                            detailBorder.Child = detailStack;
+                            detailsStackPanel.Children.Add(detailBorder);
+                        }
+                    }
+                    
+                    // SEZIONE PAGAMENTI NORMALI (solo per Pagamenti)
+                    var pagamentiNormali = dettagli.Where(d => !d.Descrizione.StartsWith("Anticipo ") && !d.Descrizione.StartsWith("Storno anticipo")).OrderBy(d => d.NomeBanca).ThenBy(d => d.DataScadenza).ToList();
+                    if (!isIncassi && pagamentiNormali.Count > 0)
+                    {
+                        // Intestazione "PAGAMENTI"
+                        var pagamentiHeader = new Border
+                        {
+                            BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BDC3C7")),
+                            BorderThickness = new Thickness(1),
+                            Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFCDD2")),
+                            Padding = new Thickness(5),
+                            Margin = new Thickness(0, 5, 0, 0)
+                        };
+                        var pagamentiHeaderText = new TextBlock
+                        {
+                            Text = $"💳 PAGAMENTI ({pagamentiNormali.Count})",
+                            FontSize = 11,
+                            FontWeight = FontWeights.Bold,
+                            Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C62828"))
+                        };
+                        pagamentiHeader.Child = pagamentiHeaderText;
+                        detailsStackPanel.Children.Add(pagamentiHeader);
+                        
+                        // Lista pagamenti
+                        foreach (var dettaglio in pagamentiNormali)
+                        {
+                            var detailBorder = new Border
+                            {
+                                BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BDC3C7")),
+                                BorderThickness = new Thickness(1),
+                                Padding = new Thickness(5),
+                                Margin = new Thickness(5, 2, 0, 0),
+                                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFEBEE"))
+                            };
+
+                            var detailStack = new StackPanel();
+                            
+                            var bancaText = new TextBlock
+                            {
+                                Text = $"🏦 {dettaglio.NomeBanca}",
+                                FontWeight = FontWeights.Bold,
+                                FontSize = 9,
+                                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2C3E50"))
+                            };
+                            detailStack.Children.Add(bancaText);
+
+                            var descrizioneText = new TextBlock
+                            {
+                                Text = dettaglio.Descrizione,
+                                FontSize = 10,
+                                TextWrapping = TextWrapping.Wrap,
+                                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#34495E"))
+                            };
+                            detailStack.Children.Add(descrizioneText);
+
+                            var importoText = new TextBlock
+                            {
+                                Text = dettaglio.Importo.ToString("N2", CultureInfo.GetCultureInfo("it-IT")) + " €",
+                                FontWeight = FontWeights.Bold,
+                                FontSize = 11,
+                                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C62828"))
+                            };
+                            detailStack.Children.Add(importoText);
+
+                            if (!string.IsNullOrEmpty(dettaglio.NumeroFattura))
+                            {
+                                var fatturaText = new TextBlock
+                                {
+                                    Text = $"Fatt. {dettaglio.NumeroFattura}" + 
+                                           (dettaglio.DataFattura.HasValue ? $" del {dettaglio.DataFattura.Value:dd/MM/yyyy}" : ""),
+                                    FontSize = 9,
+                                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7F8C8D"))
+                                };
+                                detailStack.Children.Add(fatturaText);
+                            }
+
+                            var scadenzaText = new TextBlock
+                            {
+                                Text = $"Scad: {dettaglio.DataScadenza:dd/MM/yyyy}",
+                                FontSize = 9,
+                                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7F8C8D"))
+                            };
+                            detailStack.Children.Add(scadenzaText);
+
+                            detailBorder.Child = detailStack;
+                            detailsStackPanel.Children.Add(detailBorder);
+                        }
                     }
 
                     expandButton.Click += (s, e) =>
