@@ -26,9 +26,9 @@ namespace CGEasy.Core.Data
         }
 
         /// <summary>
-        /// Percorso default database in cartella documenti pubblici condivisi
-        /// C:\Users\Public\Documents\CGEasy\ - Accessibile da tutti gli utenti Windows
-        /// Facilmente condivisibile in rete locale
+        /// Percorso default database per INSTALLAZIONE
+        /// C:\ProgramData\CGEasy\ - Accessibile da tutti gli utenti Windows
+        /// Facilmente condivisibile in rete locale come \\SERVER\CGEasy\
         /// Se esiste una configurazione personalizzata, usa quella invece del default
         /// </summary>
         public static string DefaultDatabasePath
@@ -42,8 +42,18 @@ namespace CGEasy.Core.Data
                     return configuredPath;
                 }
 
-                // 2. Altrimenti usa percorso di default
-                return Path.Combine(@"C:\devcg-group\dbtest_prova", "cgeasy.db");
+                // 2. Altrimenti usa percorso di INSTALLAZIONE
+                var installPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CGEasy", "cgeasy.db");
+                
+                // 3. Se non esiste ancora la cartella di installazione, usa il percorso di sviluppo
+                var installDir = Path.GetDirectoryName(installPath);
+                if (!Directory.Exists(installDir))
+                {
+                    // Percorso di SVILUPPO (solo per testing)
+                    return Path.Combine(@"C:\devcg-group\dbtest_prova", "cgeasy.db");
+                }
+                
+                return installPath;
             }
         }
 

@@ -27,11 +27,13 @@ public class DatabaseEncryptionService
     
     /// <summary>
     /// Ottiene la cartella dove si trova il database
+    /// Usa la stessa logica di LiteDbContext per coerenza
     /// </summary>
     private static string GetDatabaseDirectory()
     {
-        // Usa sempre la cartella di default del database
-        return @"C:\devcg-group\dbtest_prova";
+        // Usa sempre la cartella dove si trova il database
+        var dbPath = CGEasy.Core.Data.LiteDbContext.DefaultDatabasePath;
+        return Path.GetDirectoryName(dbPath) ?? @"C:\devcg-group\dbtest_prova";
     }
 
     /// <summary>
