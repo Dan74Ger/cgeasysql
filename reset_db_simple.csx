@@ -128,3 +128,5 @@ Console.WriteLine($"  Licenze: 0");
 
 
 
+
+

@@ -179,3 +179,5 @@ Write-Host "✅ Verifica completata" -ForegroundColor Green
 
 
 
+
+

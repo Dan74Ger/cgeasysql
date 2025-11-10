@@ -5,7 +5,7 @@
 ; Include: applicazione, database, licenze, configurazione
 
 #define MyAppName "CGEasy"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "2.0"
 #define MyAppPublisher "Dott. Geron Daniele"
 #define MyAppURL "https://github.com/Dan74Ger/CGEasy"
 #define MyAppExeName "CGEasy.App.exe"
@@ -178,6 +178,9 @@ begin
       LicensesJson := '{"LicenseInfo":{"ProductName":"CGEasy","Version":"1.0.0","LicenseType":"Trial","IsActivated":false},"Licenses":[]}';
       SaveStringToFile('C:\db_CGEASY\licenses.json', LicensesJson, False);
     end;
+    
+    { NOTA: db.key e cgeasy.db verranno creati automaticamente al primo avvio dell'applicazione }
+    { L'app rileva se il database non esiste e lo crea pulito con admin/admin1 }
   end;
 end;
 

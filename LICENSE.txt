@@ -1,6 +1,6 @@
 LICENZA SOFTWARE - CGEasy
 
-Copyright (c) 2025 Dott. Geron Daniele
+Copyright (c) 2025 Dott. Geron Daniele - Dottore Commercialista
 Tutti i diritti riservati.
 
 ACCORDO DI LICENZA D'USO DEL SOFTWARE
@@ -69,8 +69,8 @@ UTILIZZANDO IL SOFTWARE, ACCETTI DI ESSERE VINCOLATO DAI TERMINI DI QUESTO ACCOR
 
 CONTATTI:
 Per domande su questo Accordo o per richiedere permessi:
-Email: [da configurare]
-Sito web: https://github.com/Dan74Ger/CGEasy
+Email: danielegeron@gmail.com
+Sito web: www-cg-group.it
 
 DATA ULTIMO AGGIORNAMENTO: 07 Novembre 2025
 
