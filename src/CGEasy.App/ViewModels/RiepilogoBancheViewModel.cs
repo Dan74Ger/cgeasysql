@@ -849,5 +849,29 @@ public partial class RiepilogoBancheViewModel : ObservableObject
             MessageBox.Show($"Errore durante l'esportazione: {ex.Message}", "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
+
+    /// <summary>
+    /// Mostra il grafico andamento margine di tesoreria
+    /// </summary>
+    [RelayCommand]
+    private void MostraGrafico()
+    {
+        if (MargineTesoreria == null || !MargineTesoreria.Mesi.Any())
+        {
+            MessageBox.Show("Non ci sono dati da visualizzare nel grafico.", "Informazione", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        try
+        {
+            var viewModel = new GraficoMargineViewModel(MargineTesoreria);
+            var window = new Views.GraficoMargineView(viewModel);
+            window.Show();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Errore durante l'apertura del grafico: {ex.Message}", "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
 }
 
