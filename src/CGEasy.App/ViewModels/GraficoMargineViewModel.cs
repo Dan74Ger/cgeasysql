@@ -31,6 +31,10 @@ public partial class GraficoMargineViewModel : ObservableObject
     [ObservableProperty]
     private bool mostraUtilizzoFido;
 
+    // Mostra/Nascondi Valori
+    [ObservableProperty]
+    private bool mostraValori = true;
+
     // Filtro BANCHE
     [ObservableProperty]
     private ObservableCollection<string> bancheDisponibili = new();
@@ -65,6 +69,7 @@ public partial class GraficoMargineViewModel : ObservableObject
     partial void OnMostraPagamentiChanged(bool value) => AggiornaGrafico();
     partial void OnMostraUtilizzoFidoChanged(bool value) => AggiornaGrafico();
     partial void OnBancaSelezionataChanged(string? value) => AggiornaGrafico();
+    partial void OnMostraValoriChanged(bool value) => AggiornaGrafico();
 
     private void AggiornaGrafico()
     {
@@ -78,71 +83,162 @@ public partial class GraficoMargineViewModel : ObservableObject
         if (MostraSaldoCorrente)
         {
             var valori = OttieniValori(_datiMargine.SaldoCorrente, isTutteLeBanche);
-            var scatter = Plot.Add.Scatter(x, valori.Select(v => (double)v).ToArray());
+            var valoriDouble = valori.Select(v => (double)v).ToArray();
+            var scatter = Plot.Add.Scatter(x, valoriDouble);
             scatter.Label = "Saldo Corrente";
             scatter.Color = ScottPlot.Colors.DeepSkyBlue;
             scatter.LineWidth = 3;
             scatter.MarkerSize = 8;
+            
+            if (MostraValori)
+            {
+                for (int i = 0; i < x.Length; i++)
+                {
+                    var text = Plot.Add.Text($"{valori[i]:N0} €", x[i], valoriDouble[i]);
+                    text.LabelFontSize = 10;
+                    text.LabelFontColor = ScottPlot.Colors.DeepSkyBlue;
+                    text.LabelBold = true;
+                    text.OffsetY = -15;
+                }
+            }
         }
 
         if (MostraSaldoDisponibile)
         {
             var valori = OttieniValori(_datiMargine.SaldoDisponibile, isTutteLeBanche);
-            var scatter = Plot.Add.Scatter(x, valori.Select(v => (double)v).ToArray());
+            var valoriDouble = valori.Select(v => (double)v).ToArray();
+            var scatter = Plot.Add.Scatter(x, valoriDouble);
             scatter.Label = "Saldo Disponibile";
             scatter.Color = ScottPlot.Colors.Blue;
             scatter.LineWidth = 3;
             scatter.MarkerSize = 8;
+            
+            if (MostraValori)
+            {
+                for (int i = 0; i < x.Length; i++)
+                {
+                    var text = Plot.Add.Text($"{valori[i]:N0} €", x[i], valoriDouble[i]);
+                    text.LabelFontSize = 10;
+                    text.LabelFontColor = ScottPlot.Colors.Blue;
+                    text.LabelBold = true;
+                    text.OffsetY = -30;
+                }
+            }
         }
 
         if (MostraFatturatoAnticipato)
         {
             var valori = OttieniValori(_datiMargine.FatturatoAnticipato, isTutteLeBanche);
-            var scatter = Plot.Add.Scatter(x, valori.Select(v => (double)v).ToArray());
+            var valoriDouble = valori.Select(v => (double)v).ToArray();
+            var scatter = Plot.Add.Scatter(x, valoriDouble);
             scatter.Label = "Fatturato Anticipato";
             scatter.Color = ScottPlot.Colors.Purple;
             scatter.LineWidth = 3;
             scatter.MarkerSize = 8;
+            
+            if (MostraValori)
+            {
+                for (int i = 0; i < x.Length; i++)
+                {
+                    var text = Plot.Add.Text($"{valori[i]:N0} €", x[i], valoriDouble[i]);
+                    text.LabelFontSize = 10;
+                    text.LabelFontColor = ScottPlot.Colors.Purple;
+                    text.LabelBold = true;
+                    text.OffsetY = -45;
+                }
+            }
         }
 
         if (MostraResiduoAnticipabile)
         {
             var valori = OttieniValori(_datiMargine.ResiduoAnticipabile, isTutteLeBanche);
-            var scatter = Plot.Add.Scatter(x, valori.Select(v => (double)v).ToArray());
+            var valoriDouble = valori.Select(v => (double)v).ToArray();
+            var scatter = Plot.Add.Scatter(x, valoriDouble);
             scatter.Label = "Residuo Anticipabile";
             scatter.Color = ScottPlot.Colors.Orange;
             scatter.LineWidth = 3;
             scatter.MarkerSize = 8;
+            
+            if (MostraValori)
+            {
+                for (int i = 0; i < x.Length; i++)
+                {
+                    var text = Plot.Add.Text($"{valori[i]:N0} €", x[i], valoriDouble[i]);
+                    text.LabelFontSize = 10;
+                    text.LabelFontColor = ScottPlot.Colors.Orange;
+                    text.LabelBold = true;
+                    text.OffsetY = -60;
+                }
+            }
         }
 
         if (MostraIncassi)
         {
             var valori = OttieniValori(_datiMargine.Incassi, isTutteLeBanche);
-            var scatter = Plot.Add.Scatter(x, valori.Select(v => (double)v).ToArray());
+            var valoriDouble = valori.Select(v => (double)v).ToArray();
+            var scatter = Plot.Add.Scatter(x, valoriDouble);
             scatter.Label = "Incassi";
             scatter.Color = ScottPlot.Colors.Green;
             scatter.LineWidth = 3;
             scatter.MarkerSize = 8;
+            
+            if (MostraValori)
+            {
+                for (int i = 0; i < x.Length; i++)
+                {
+                    var text = Plot.Add.Text($"{valori[i]:N0} €", x[i], valoriDouble[i]);
+                    text.LabelFontSize = 10;
+                    text.LabelFontColor = ScottPlot.Colors.Green;
+                    text.LabelBold = true;
+                    text.OffsetY = -15;
+                }
+            }
         }
 
         if (MostraPagamenti)
         {
             var valori = OttieniValori(_datiMargine.Pagamenti, isTutteLeBanche);
-            var scatter = Plot.Add.Scatter(x, valori.Select(v => (double)v).ToArray());
+            var valoriDouble = valori.Select(v => (double)v).ToArray();
+            var scatter = Plot.Add.Scatter(x, valoriDouble);
             scatter.Label = "Pagamenti";
             scatter.Color = ScottPlot.Colors.Red;
             scatter.LineWidth = 3;
             scatter.MarkerSize = 8;
+            
+            if (MostraValori)
+            {
+                for (int i = 0; i < x.Length; i++)
+                {
+                    var text = Plot.Add.Text($"{valori[i]:N0} €", x[i], valoriDouble[i]);
+                    text.LabelFontSize = 10;
+                    text.LabelFontColor = ScottPlot.Colors.Red;
+                    text.LabelBold = true;
+                    text.OffsetY = -30;
+                }
+            }
         }
 
         if (MostraUtilizzoFido && _datiMargine.UtilizzoFidoCC != null)
         {
             var valori = OttieniValori(_datiMargine.UtilizzoFidoCC, isTutteLeBanche);
-            var scatter = Plot.Add.Scatter(x, valori.Select(v => (double)v).ToArray());
+            var valoriDouble = valori.Select(v => (double)v).ToArray();
+            var scatter = Plot.Add.Scatter(x, valoriDouble);
             scatter.Label = "Utilizzo Fido C/C";
             scatter.Color = ScottPlot.Colors.DarkRed;
             scatter.LineWidth = 3;
             scatter.MarkerSize = 8;
+            
+            if (MostraValori)
+            {
+                for (int i = 0; i < x.Length; i++)
+                {
+                    var text = Plot.Add.Text($"{valori[i]:N0} €", x[i], valoriDouble[i]);
+                    text.LabelFontSize = 10;
+                    text.LabelFontColor = ScottPlot.Colors.DarkRed;
+                    text.LabelBold = true;
+                    text.OffsetY = -45;
+                }
+            }
         }
 
         // Configurazione assi
