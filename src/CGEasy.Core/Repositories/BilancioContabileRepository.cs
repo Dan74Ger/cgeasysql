@@ -141,6 +141,8 @@ public class BilancioContabileRepository
             .Select(b => b.Id)
             .ToList();
         
+        System.Diagnostics.Debug.WriteLine($"[DELETE] Eliminazione {bilanciDaEliminare.Count} righe per Cliente={clienteId}, Periodo={mese}/{anno}, Descrizione='{desc}'");
+        
         // Elimina per ID
         int count = 0;
         foreach (var id in bilanciDaEliminare)
@@ -150,6 +152,14 @@ public class BilancioContabileRepository
         }
         
         _context.Checkpoint(); // Forza il flush su disco
+        
+        // ⚠️ IMPORTANTE: In modalità Shared, serve un piccolo delay per essere sicuri che la cancellazione sia completata
+        if (count > 0)
+        {
+            System.Threading.Thread.Sleep(200); // 200ms per sicurezza
+            System.Diagnostics.Debug.WriteLine($"[DELETE] Eliminazione completata: {count} righe eliminate");
+        }
+        
         return count;
     }
 
@@ -161,6 +171,40 @@ public class BilancioContabileRepository
             .Distinct()
             .OrderByDescending(a => a)
             .ToList();
+    }
+    
+    /// <summary>
+    /// 🐛 DEBUG: Verifica duplicati per un cliente/periodo/descrizione
+    /// </summary>
+    public Dictionary<string, int> VerificaDuplicati(int clienteId, int mese, int anno, string? descrizione)
+    {
+        var desc = descrizione?.Trim() ?? "";
+        
+        var bilanci = _context.BilancioContabile
+            .Find(b => b.ClienteId == clienteId && b.Mese == mese && b.Anno == anno)
+            .Where(b => (b.DescrizioneBilancio?.Trim() ?? "") == desc)
+            .ToList();
+        
+        var duplicati = bilanci
+            .GroupBy(b => b.CodiceMastrino)
+            .Where(g => g.Count() > 1)
+            .ToDictionary(g => g.Key, g => g.Count());
+        
+        if (duplicati.Any())
+        {
+            System.Diagnostics.Debug.WriteLine($"[DUPLICATI] Trovati {duplicati.Count} codici duplicati:");
+            foreach (var dup in duplicati)
+            {
+                System.Diagnostics.Debug.WriteLine($"  - Codice {dup.Key}: {dup.Value} righe");
+                var righe = bilanci.Where(b => b.CodiceMastrino == dup.Key).ToList();
+                foreach (var riga in righe)
+                {
+                    System.Diagnostics.Debug.WriteLine($"      ID:{riga.Id}, Desc:'{riga.DescrizioneMastrino}', Importo:{riga.Importo}, DataImport:{riga.DataImport:HH:mm:ss.fff}");
+                }
+            }
+        }
+        
+        return duplicati;
     }
 
     public List<string> GetDistinctCodiciMastrino()

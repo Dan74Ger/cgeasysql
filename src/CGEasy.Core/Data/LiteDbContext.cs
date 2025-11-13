@@ -443,6 +443,12 @@ namespace CGEasy.Core.Data
         public ILiteCollection<FinanziamentoImport> FinanziamentoImport =>
             _database.GetCollection<FinanziamentoImport>("finanziamenti_import");
 
+        /// <summary>
+        /// Collection statistiche SP salvate
+        /// </summary>
+        public ILiteCollection<StatisticaSPSalvata> StatisticheSPSalvate =>
+            _database.GetCollection<StatisticaSPSalvata>("statistiche_sp_salvate");
+
         // ===== UTILITY METHODS =====
 
         /// <summary>

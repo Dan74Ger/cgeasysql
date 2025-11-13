@@ -23,11 +23,16 @@ public class ExcelBilancioService
     {
         var bilanci = new List<BilancioContabile>();
 
+        System.Diagnostics.Debug.WriteLine($"[EXCEL IMPORT] Inizio lettura file: {filePath}");
+        
         using var workbook = new XLWorkbook(filePath);
         var worksheet = workbook.Worksheet(1); // Primo foglio
 
         // Trova ultima riga con dati
         var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? 1;
+        
+        System.Diagnostics.Debug.WriteLine($"[EXCEL IMPORT] Ultima riga Excel: {lastRow}");
+        System.Diagnostics.Debug.WriteLine($"[EXCEL IMPORT] Inizio lettura da riga 2 a riga {lastRow}");
 
         // Salta prima riga (intestazioni), parte da riga 2
         for (int row = 2; row <= lastRow; row++)
