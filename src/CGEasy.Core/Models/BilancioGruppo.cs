@@ -32,6 +32,9 @@ public class BilancioGruppo : INotifyPropertyChanged
     
     // Proprietà calcolate
     public string PeriodoDisplay => $"{MeseNome} {Anno}";
+    public string PeriodoConDescrizioneDisplay => string.IsNullOrWhiteSpace(Descrizione) 
+        ? $"{MeseNome} {Anno}" 
+        : $"{MeseNome} {Anno} - {Descrizione}";
     public string MeseNome => Mese switch
     {
         1 => "Gen",

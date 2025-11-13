@@ -1,5 +1,6 @@
 using CGEasy.Core.Data;
 using CGEasy.Core.Models;
+using CGEasy.Core.Helpers;
 
 namespace CGEasy.Core.Repositories;
 
@@ -45,7 +46,7 @@ public class BilancioContabileRepository
     {
         return _context.BilancioContabile
             .Find(b => b.ClienteId == clienteId && b.Mese == mese && b.Anno == anno)
-            .OrderBy(b => b.CodiceMastrino)
+            .OrderByCodiceMastrinoNumerico(b => b.CodiceMastrino)
             .ToList();
     }
 
@@ -68,7 +69,7 @@ public class BilancioContabileRepository
         // Filtra in memoria per descrizione normalizzata
         return bilanci
             .Where(b => (b.DescrizioneBilancio?.Trim() ?? "") == desc)
-            .OrderBy(b => b.CodiceMastrino)
+            .OrderByCodiceMastrinoNumerico(b => b.CodiceMastrino)
             .ToList();
     }
 

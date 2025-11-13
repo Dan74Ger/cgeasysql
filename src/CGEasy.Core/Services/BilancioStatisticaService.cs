@@ -1,6 +1,7 @@
 using CGEasy.Core.Data;
 using CGEasy.Core.Models;
 using CGEasy.Core.Repositories;
+using CGEasy.Core.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,7 +69,7 @@ public class BilancioStatisticaService
             ? _templateRepo.GetByPeriodo(templateMese.Value, templateAnno.Value)
             : _templateRepo.GetByPeriodo(mese, anno);
 
-        vociTemplate = vociTemplate.OrderBy(v => v.CodiceMastrino).ToList();
+        vociTemplate = vociTemplate.OrderByCodiceMastrinoNumerico(v => v.CodiceMastrino).ToList();
 
         // 7. Crea dizionario delle mappature per template_voce_id (SOLO quelle valide)
         var mappaturePerVoce = dettagliValidi
@@ -264,7 +265,7 @@ public class BilancioStatisticaService
             ? _templateRepo.GetByPeriodo(templateMese.Value, templateAnno.Value)
             : _templateRepo.GetByPeriodo(primoPerio.Mese, primoPerio.Anno);
 
-        vociTemplate = vociTemplate.OrderBy(v => v.CodiceMastrino).ToList();
+        vociTemplate = vociTemplate.OrderByCodiceMastrinoNumerico(v => v.CodiceMastrino).ToList();
 
         if (!vociTemplate.Any())
         {

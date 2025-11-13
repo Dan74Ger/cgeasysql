@@ -34,12 +34,11 @@ public class ExcelBilancioService
         {
             var codice = worksheet.Cell(row, 1).GetString().Trim();
             var descrizione = worksheet.Cell(row, 2).GetString().Trim();
-            var importoStr = worksheet.Cell(row, 3).GetString().Trim();
-
+            
             // Salta righe vuote
             if (string.IsNullOrWhiteSpace(codice) && 
                 string.IsNullOrWhiteSpace(descrizione) && 
-                string.IsNullOrWhiteSpace(importoStr))
+                worksheet.Cell(row, 3).IsEmpty())
                 continue;
 
             // Valida campi obbligatori
@@ -49,12 +48,39 @@ public class ExcelBilancioService
             if (string.IsNullOrWhiteSpace(descrizione))
                 throw new Exception($"Riga {row}: Descrizione obbligatoria");
 
-            // Parse importo
-            if (!decimal.TryParse(importoStr, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal importo))
+            // Parse importo - CORRETTO: legge direttamente come numero dalla cella Excel
+            decimal importo;
+            var cellImporto = worksheet.Cell(row, 3);
+            
+            if (cellImporto.IsEmpty())
             {
-                // Prova con cultura italiana
-                if (!decimal.TryParse(importoStr, NumberStyles.Any, CultureInfo.GetCultureInfo("it-IT"), out importo))
-                    throw new Exception($"Riga {row}: Importo '{importoStr}' non valido");
+                throw new Exception($"Riga {row}: Importo obbligatorio");
+            }
+            
+            // Prova a leggere come numero diretto (funziona sempre con celle numeri formattate)
+            if (cellImporto.TryGetValue(out double importoDouble))
+            {
+                importo = (decimal)importoDouble;
+            }
+            // Altrimenti prova a fare parsing della stringa
+            else
+            {
+                var importoStr = cellImporto.GetString().Trim();
+                
+                // Prova prima con cultura italiana (59.350,29)
+                if (decimal.TryParse(importoStr, NumberStyles.Any, CultureInfo.GetCultureInfo("it-IT"), out importo))
+                {
+                    // OK, parsato correttamente
+                }
+                // Poi prova con cultura invariante (59350.29 o 59,350.29)
+                else if (decimal.TryParse(importoStr, NumberStyles.Any, CultureInfo.InvariantCulture, out importo))
+                {
+                    // OK, parsato correttamente
+                }
+                else
+                {
+                    throw new Exception($"Riga {row}: Importo '{importoStr}' non valido. Usa formato italiano (es: 59.350,29) o americano (es: 59350.29)");
+                }
             }
 
             bilanci.Add(new BilancioContabile

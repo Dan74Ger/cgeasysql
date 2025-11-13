@@ -1,5 +1,6 @@
 using CGEasy.Core.Data;
 using CGEasy.Core.Models;
+using CGEasy.Core.Helpers;
 
 namespace CGEasy.Core.Repositories;
 
@@ -45,7 +46,7 @@ public class BilancioTemplateRepository
     {
         return _context.BilancioTemplate
             .Find(b => b.ClienteId == clienteId && b.Mese == mese && b.Anno == anno)
-            .OrderBy(b => b.CodiceMastrino)
+            .OrderByCodiceMastrinoNumerico(b => b.CodiceMastrino)
             .ToList();
     }
 

@@ -1,6 +1,7 @@
 using CGEasy.Core.Data;
 using CGEasy.Core.Models;
 using CGEasy.Core.Repositories;
+using CGEasy.Core.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,7 +77,7 @@ public class AssociazioneMastrinoService
     {
         return _templateRepository.GetByClienteAndPeriodo(clienteId, mese, anno)
             .Where(x => string.IsNullOrWhiteSpace(x.Formula))
-            .OrderBy(x => x.CodiceMastrino);
+            .OrderByCodiceMastrinoNumerico(x => x.CodiceMastrino);
     }
 
     /// <summary>
@@ -227,7 +228,7 @@ public class AssociazioneMastrinoService
             });
         }
 
-        return dettagli.OrderBy(x => x.CodiceMastrino).ToList();
+        return dettagli.OrderByCodiceMastrinoNumerico(x => x.CodiceMastrino).ToList();
     }
 
     /// <summary>
