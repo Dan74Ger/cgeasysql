@@ -23,6 +23,9 @@ public class AssociazioneMastrino
 
     [BsonField("anno")]
     public int Anno { get; set; }
+    
+    [BsonField("bilancio_descrizione")]
+    public string? BilancioDescrizione { get; set; }
 
     [BsonField("template_id")]
     public int? TemplateId { get; set; }

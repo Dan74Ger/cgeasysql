@@ -13,6 +13,7 @@ public class BilancioTemplate : INotifyPropertyChanged
     public int Mese { get; set; } // 1-12
     public int Anno { get; set; }
     public string? DescrizioneBilancio { get; set; }
+    public string TipoBilancio { get; set; } = "CE"; // CE = Conto Economico, SP = Stato Patrimoniale
     
     private string _codiceMastrino = string.Empty;
     public string CodiceMastrino

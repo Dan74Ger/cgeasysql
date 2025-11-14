@@ -196,6 +196,7 @@ public class BilancioTemplateRepository
                     Mese = g.Key.Mese,
                     Anno = g.Key.Anno,
                     Descrizione = primaRiga.DescrizioneBilancio,
+                    TipoBilancio = primaRiga.TipoBilancio ?? "CE", // ⭐ Popola TipoBilancio
                     DataImport = primaRiga.DataImport,
                     ImportedByName = primaRiga.ImportedByName,
                     NumeroRighe = g.Count(),
