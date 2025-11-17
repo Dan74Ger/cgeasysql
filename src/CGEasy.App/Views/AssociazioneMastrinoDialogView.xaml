@@ -1,0 +1,288 @@
+<Window x:Class="CGEasy.App.Views.AssociazioneMastrinoDialogView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        mc:Ignorable="d"
+        Title="🔗 Associazione Mastrini"
+        Height="850" Width="1400"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" 
+                Background="{DynamicResource SystemControlBackgroundAccentBrush}"
+                CornerRadius="8"
+                Padding="12,10"
+                Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="🔗" FontSize="24" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                <TextBlock FontSize="16" FontWeight="Bold" Foreground="White" VerticalAlignment="Center">
+                        <Run Text="{Binding IsModifica, Converter={StaticResource BoolToModificaTextConverter}, FallbackValue='Nuova'}"/>
+                        <Run Text=" Associazione Mastrini"/>
+                    </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- Testata Selezioni -->
+        <Border Grid.Row="1" 
+                Background="White"
+                CornerRadius="8"
+                Padding="15"
+                Margin="0,0,0,10"
+                ui:ThemeManager.HasThemeResources="True">
+            <ui:ThemeManager.RequestedTheme>
+                <ui:ElementTheme>Light</ui:ElementTheme>
+            </ui:ThemeManager.RequestedTheme>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Cliente -->
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,10">
+                    <TextBlock Text="Cliente *" FontWeight="SemiBold" Margin="0,0,0,5" FontSize="13"/>
+                    <ComboBox ItemsSource="{Binding Clienti}"
+                              SelectedItem="{Binding ClienteSelezionato}"
+                              DisplayMemberPath="NomeCliente"
+                              IsEnabled="{Binding IsModifica, Converter={StaticResource InverseBooleanConverter}}"
+                              Padding="10"
+                              FontSize="13">
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="ComboBoxItem">
+                                <Setter Property="Padding" Value="10,6"/>
+                            </Style>
+                        </ComboBox.ItemContainerStyle>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Bilancio Contabile -->
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="12,0,0,10">
+                    <TextBlock Text="Bilancio Contabile *" FontWeight="SemiBold" Margin="0,0,0,5" FontSize="13"/>
+                    <ComboBox ItemsSource="{Binding BilanciDisponibili}"
+                              SelectedItem="{Binding BilancioSelezionato}"
+                              DisplayMemberPath="PeriodoConDescrizioneDisplay"
+                              IsEnabled="{Binding IsModifica, Converter={StaticResource InverseBooleanConverter}}"
+                              Padding="10"
+                              FontSize="13"/>
+                </StackPanel>
+
+                <!-- Template -->
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,0">
+                    <TextBlock Text="Template *" FontWeight="SemiBold" Margin="0,0,0,5" FontSize="13"/>
+                    <ComboBox ItemsSource="{Binding TemplateDisponibili}"
+                              SelectedItem="{Binding TemplateSelezionato}"
+                              Padding="10"
+                              FontSize="13">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding PeriodoCompleto, Mode=OneWay}" 
+                                               FontWeight="SemiBold"
+                                               FontSize="13"/>
+                                    <TextBlock Text="{Binding DescrizioneBilancio, Mode=OneWay}" 
+                                               Foreground="#666" 
+                                               FontSize="11"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Descrizione -->
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="12,0,0,0">
+                    <TextBlock Text="Descrizione (opzionale)" FontWeight="SemiBold" Margin="0,0,0,5" FontSize="13"/>
+                    <TextBox Text="{Binding Descrizione, UpdateSourceTrigger=PropertyChanged}"
+                             Padding="10"
+                             FontSize="13"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- DataGrid Mappature -->
+        <Border Grid.Row="2" 
+                Background="White"
+                CornerRadius="8"
+                Padding="0"
+                ui:ThemeManager.HasThemeResources="True">
+            <ui:ThemeManager.RequestedTheme>
+                <ui:ElementTheme>Light</ui:ElementTheme>
+            </ui:ThemeManager.RequestedTheme>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header Tabella -->
+                <Border Grid.Row="0" 
+                        Background="#2196F3"
+                        Padding="12,8">
+                    <Grid>
+                        <TextBlock Text="📋 Mappatura Mastrini" 
+                                   FontSize="14" 
+                                   FontWeight="SemiBold" 
+                                   Foreground="White"/>
+                        <TextBlock HorizontalAlignment="Right" 
+                                   FontSize="12" 
+                                   Foreground="White" 
+                                   Opacity="0.9">
+                            <Run Text="Totale:"/>
+                            <Run Text="{Binding Mappature.Count, Mode=OneWay}" FontWeight="Bold"/>
+                            <Run Text=" mastrini"/>
+                        </TextBlock>
+                    </Grid>
+                </Border>
+
+                <!-- DataGrid -->
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding Mappature}"
+                          AutoGenerateColumns="False"
+                          SelectionMode="Single"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          CanUserResizeRows="False"
+                          AlternatingRowBackground="#F5F5F5"
+                          RowHeight="35"
+                          FontSize="13">
+                    <DataGrid.Columns>
+                        <!-- Codice Mastrino -->
+                        <DataGridTextColumn Header="Codice" 
+                                           Binding="{Binding CodiceMastrino}" 
+                                           Width="120"
+                                           IsReadOnly="True">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Padding" Value="10,0"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Foreground" Value="#2196F3"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Descrizione Mastrino -->
+                        <DataGridTextColumn Header="Descrizione Mastrino" 
+                                           Binding="{Binding DescrizioneMastrino}" 
+                                           Width="*"
+                                           IsReadOnly="True">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Padding" Value="10,0"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="TextWrapping" Value="NoWrap"/>
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Importo -->
+                        <DataGridTextColumn Header="Importo" 
+                                           Binding="{Binding ImportoFormatted}" 
+                                           Width="120"
+                                           IsReadOnly="True">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Padding" Value="10,0"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Voce Template -->
+                        <DataGridTemplateColumn Header="➜ Voce Template" Width="2*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox ItemsSource="{Binding VociDisponibili}"
+                                              SelectedItem="{Binding VoceTemplateSelezionata, UpdateSourceTrigger=PropertyChanged}"
+                                              Margin="5,4"
+                                              Padding="8,5"
+                                              FontSize="12"
+                                              BorderBrush="#2196F3"
+                                              BorderThickness="2">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding CodiceMastrino}" 
+                                                               FontWeight="Bold" 
+                                                               Foreground="#2196F3"
+                                                               Margin="0,0,10,0"/>
+                                                    <TextBlock Text="{Binding DescrizioneMastrino}" 
+                                                               Foreground="#333"
+                                                               Margin="0,0,10,0"/>
+                                                    <Border Background="#FFA726" 
+                                                            CornerRadius="3" 
+                                                            Padding="6,2">
+                                                        <TextBlock Text="{Binding Segno}" 
+                                                                   Foreground="White" 
+                                                                   FontWeight="Bold"
+                                                                   FontSize="12"/>
+                                                    </Border>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <!-- Footer Buttons -->
+        <Border Grid.Row="3" 
+                Background="White"
+                CornerRadius="8"
+                Padding="12"
+                Margin="0,10,0,0"
+                ui:ThemeManager.HasThemeResources="True">
+            <ui:ThemeManager.RequestedTheme>
+                <ui:ElementTheme>Light</ui:ElementTheme>
+            </ui:ThemeManager.RequestedTheme>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="📊 Esporta Excel" 
+                        Command="{Binding EsportaExcelCommand}"
+                        Style="{StaticResource AccentButtonStyle}"
+                        Padding="20,10"
+                        Margin="0,0,12,0"
+                        FontSize="13"
+                        MinWidth="140"
+                        ToolTip="Esporta associazione corrente in Excel"/>
+                <Button Content="❌ Annulla" 
+                        Command="{Binding AnnullaCommand}"
+                        Padding="20,10"
+                        Margin="0,0,12,0"
+                        FontSize="13"
+                        MinWidth="120"/>
+                <Button Content="💾 Salva" 
+                        Command="{Binding SalvaCommand}"
+                        Style="{StaticResource AccentButtonStyle}"
+                        Padding="20,10"
+                        FontSize="13"
+                        FontWeight="SemiBold"
+                        MinWidth="120"
+                        IsEnabled="{Binding IsSalvataggio, Converter={StaticResource InverseBooleanConverter}}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
+

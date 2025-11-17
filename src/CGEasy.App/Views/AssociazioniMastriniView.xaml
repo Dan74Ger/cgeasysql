@@ -1,0 +1,237 @@
+<UserControl x:Class="CGEasy.App.Views.AssociazioniMastriniView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ui="http://schemas.modernwpf.com/2019"
+             xmlns:vm="clr-namespace:CGEasy.App.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1400"
+             Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}">
+
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" 
+                Background="{DynamicResource SystemControlBackgroundAccentBrush}"
+                CornerRadius="12"
+                Padding="30"
+                Margin="0,0,0,30">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                    <TextBlock Text="🔗" FontSize="48" VerticalAlignment="Center" Margin="0,0,20,0"/>
+                    <StackPanel>
+                        <TextBlock Text="ASSOCIAZIONI MASTRINI" FontSize="32" FontWeight="Bold" Foreground="White"/>
+                        <TextBlock Text="Associa i mastrini contabili alle voci dei template" FontSize="16" Foreground="White" Opacity="0.9" Margin="0,5,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+                <TextBlock Foreground="White" 
+                           Opacity="0.85"
+                           TextWrapping="Wrap"
+                           FontSize="13"
+                           LineHeight="22">
+                    Crea associazioni tra i bilanci contabili importati e i template di riclassificazione.
+                    Le mappature verranno utilizzate per generare automaticamente le statistiche.
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- Barra Ricerca e Azioni -->
+        <Border Grid.Row="1" 
+                Background="White"
+                CornerRadius="8"
+                Padding="20"
+                Margin="0,0,0,20"
+                ui:ThemeManager.HasThemeResources="True">
+            <ui:ThemeManager.RequestedTheme>
+                <ui:ElementTheme>Light</ui:ElementTheme>
+            </ui:ThemeManager.RequestedTheme>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Ricerca -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <ui:AutoSuggestBox PlaceholderText="🔍 Cerca per cliente, periodo, descrizione..."
+                                      Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                      QueryIcon="Find"
+                                      Width="400"
+                                      Margin="0,0,10,0"
+                                      VerticalAlignment="Center">
+                        <ui:AutoSuggestBox.InputBindings>
+                            <KeyBinding Key="Return" Command="{Binding CercaCommand}"/>
+                        </ui:AutoSuggestBox.InputBindings>
+                    </ui:AutoSuggestBox>
+                    <Button Content="Cerca" 
+                            Command="{Binding CercaCommand}"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Padding="20,10"
+                            Margin="0,0,10,0"/>
+                    <Button Content="Pulisci" 
+                            Command="{Binding PulisciRicercaCommand}"
+                            Padding="15,10"/>
+                </StackPanel>
+
+                <!-- Azioni -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="➕ Nuova Associazione" 
+                            Command="{Binding NuovaAssociazioneCommand}"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Padding="20,10"
+                            Margin="0,0,10,0"
+                            FontWeight="SemiBold"/>
+                    <Button Content="✏️ Modifica" 
+                            Command="{Binding ModificaAssociazioneCommand}"
+                            Padding="20,10"
+                            Margin="0,0,10,0"/>
+                    <Button Content="🗑️ Elimina" 
+                            Command="{Binding EliminaAssociazioneCommand}"
+                            Padding="20,10"
+                            Background="#F44336"
+                            Foreground="White"
+                            BorderThickness="0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- DataGrid -->
+        <Border Grid.Row="2" 
+                Background="White"
+                CornerRadius="8"
+                Padding="0"
+                ui:ThemeManager.HasThemeResources="True">
+            <ui:ThemeManager.RequestedTheme>
+                <ui:ElementTheme>Light</ui:ElementTheme>
+            </ui:ThemeManager.RequestedTheme>
+            <DataGrid ItemsSource="{Binding Associazioni}"
+                      SelectedItem="{Binding AssociazioneSelezionata}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      SelectionMode="Single"
+                      GridLinesVisibility="None"
+                      HeadersVisibility="Column"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      CanUserResizeRows="False"
+                      AlternatingRowBackground="#F5F5F5"
+                      RowHeight="50"
+                      FontSize="14">
+                <DataGrid.InputBindings>
+                    <MouseBinding Gesture="LeftDoubleClick" Command="{Binding RigaDoppioClickCommand}"/>
+                </DataGrid.InputBindings>
+                <DataGrid.Columns>
+                    <!-- Cliente -->
+                    <DataGridTextColumn Header="Cliente" 
+                                       Binding="{Binding ClienteNome}" 
+                                       Width="*"
+                                       FontWeight="SemiBold">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Padding" Value="15,0"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- Periodo -->
+                    <DataGridTextColumn Header="Periodo" 
+                                       Binding="{Binding PeriodoDisplay}" 
+                                       Width="150">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Padding" Value="15,0"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- Template -->
+                    <DataGridTextColumn Header="Template" 
+                                       Binding="{Binding TemplatNome}" 
+                                       Width="250">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Padding" Value="15,0"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- Descrizione -->
+                    <DataGridTextColumn Header="Descrizione" 
+                                       Binding="{Binding Descrizione}" 
+                                       Width="*">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Padding" Value="15,0"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- Numero Mappature -->
+                    <DataGridTextColumn Header="Mappature" 
+                                       Binding="{Binding NumeroMappature}" 
+                                       Width="120">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Padding" Value="15,0"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- Data Creazione -->
+                    <DataGridTextColumn Header="Data Creazione" 
+                                       Binding="{Binding DataCreazione, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" 
+                                       Width="160">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Padding" Value="15,0"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Foreground" Value="Black"/>
+                                <Setter Property="FontSize" Value="12"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- Footer -->
+        <Border Grid.Row="3" 
+                Background="White"
+                CornerRadius="8"
+                Padding="20"
+                Margin="0,20,0,0"
+                ui:ThemeManager.HasThemeResources="True">
+            <ui:ThemeManager.RequestedTheme>
+                <ui:ElementTheme>Light</ui:ElementTheme>
+            </ui:ThemeManager.RequestedTheme>
+            <Grid>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="📊" FontSize="16" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock VerticalAlignment="Center" FontSize="14">
+                        <Run Text="Totale Associazioni:"/>
+                        <Run Text="{Binding TotalAssociazioni}" FontWeight="Bold" Foreground="#2196F3"/>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
+

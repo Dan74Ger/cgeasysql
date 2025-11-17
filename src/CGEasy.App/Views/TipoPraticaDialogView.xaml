@@ -1,0 +1,156 @@
+<Window x:Class="CGEasy.App.Views.TipoPraticaDialogView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        xmlns:models="clr-namespace:CGEasy.Core.Models;assembly=CGEasy.Core"
+        mc:Ignorable="d"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        Title="{Binding WindowTitle}"
+        Height="500" Width="650"
+        MinHeight="450" MinWidth="600"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Form Content -->
+        <ScrollViewer Grid.Row="0" 
+                      VerticalScrollBarVisibility="Auto"
+                      Padding="30,20">
+            <StackPanel>
+                <!-- Titolo -->
+                <TextBlock Text="{Binding WindowTitle}" 
+                           FontSize="24" 
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,25"/>
+
+                <!-- DATI PRATICA -->
+                <Border Background="White"
+                        CornerRadius="8"
+                        Padding="25"
+                        Margin="0,0,0,15"
+                        ui:ThemeManager.HasThemeResources="True">
+                    <ui:ThemeManager.RequestedTheme>
+                        <ui:ElementTheme>Light</ui:ElementTheme>
+                    </ui:ThemeManager.RequestedTheme>
+                    <StackPanel>
+                        <TextBlock Text="📋 Dati Pratica" 
+                                   FontSize="16" 
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,15"/>
+
+                        <!-- Nome Pratica -->
+                        <TextBlock Text="Nome Pratica *" 
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding Pratica.NomePratica, UpdateSourceTrigger=PropertyChanged}"
+                                 ui:ControlHelper.PlaceholderText="es: Dichiarazione Redditi"
+                                 Height="36"
+                                 Margin="0,0,0,15"/>
+
+                        <!-- Descrizione -->
+                        <TextBlock Text="Descrizione" 
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding Pratica.Descrizione, UpdateSourceTrigger=PropertyChanged}"
+                                 ui:ControlHelper.PlaceholderText="Descrizione dettagliata..."
+                                 Height="60"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Margin="0,0,0,15"/>
+
+                        <!-- Ordine -->
+                        <TextBlock Text="Ordine Visualizzazione" 
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding Pratica.Ordine, UpdateSourceTrigger=PropertyChanged}"
+                                 ui:ControlHelper.PlaceholderText="0 = automatico"
+                                 Height="36"
+                                 Margin="0,0,0,0"/>
+                        <TextBlock Text="0 = ordine automatico, altrimenti specifica l'ordine desiderato"
+                                   Foreground="Gray"
+                                   FontSize="11"
+                                   TextWrapping="Wrap"
+                                   Margin="0,5,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- STATO -->
+                <Border Background="White"
+                        CornerRadius="8"
+                        Padding="25"
+                        Margin="0,0,0,0"
+                        ui:ThemeManager.HasThemeResources="True">
+                    <ui:ThemeManager.RequestedTheme>
+                        <ui:ElementTheme>Light</ui:ElementTheme>
+                    </ui:ThemeManager.RequestedTheme>
+                    <StackPanel>
+                        <TextBlock Text="✅ Stato" 
+                                   FontSize="16" 
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,15"/>
+
+                        <!-- Checkbox Attivo -->
+                        <CheckBox Content="Pratica Attiva" 
+                                  IsChecked="{Binding Pratica.Attivo}"
+                                  FontWeight="SemiBold"/>
+                        <TextBlock Text="Le pratiche attive sono disponibili per la creazione di TODO nello studio"
+                                   Foreground="Gray"
+                                   FontSize="12"
+                                   TextWrapping="Wrap"
+                                   Margin="26,5,0,0"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Buttons -->
+        <Border Grid.Row="1" 
+                BorderBrush="#E0E0E0" 
+                BorderThickness="0,1,0,0"
+                Background="#F5F5F5"
+                Padding="30,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Info Required Fields -->
+                <TextBlock Grid.Column="0"
+                           Text="* Campi obbligatori"
+                           Foreground="Gray"
+                           FontSize="12"
+                           VerticalAlignment="Center"/>
+
+                <!-- Action Buttons -->
+                <StackPanel Grid.Column="1" 
+                            Orientation="Horizontal" 
+                            HorizontalAlignment="Right">
+                    <Button Content="✖ Annulla" 
+                            Click="CancelButton_Click"
+                            Height="36"
+                            Width="110"
+                            Margin="0,0,10,0"/>
+                    
+                    <Button Content="✓ Salva" 
+                            Click="SaveButton_Click"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Height="36"
+                            Width="110"
+                            FontWeight="SemiBold"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
+

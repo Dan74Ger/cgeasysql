@@ -1,0 +1,323 @@
+<Window x:Class="CGEasy.App.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        xmlns:vm="clr-namespace:CGEasy.App.ViewModels"
+        mc:Ignorable="d"
+        Title="CG Easy - Login" 
+        Height="750" 
+        Width="500"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#0a0e27"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:TitleBar.IsBackButtonVisible="False"
+        ui:TitleBar.Background="#0a0e27"
+        ui:TitleBar.Foreground="White"
+        ui:TitleBar.InactiveBackground="#0a0e27"
+        ui:TitleBar.InactiveForeground="White"
+        Loaded="Window_Loaded">
+
+    <Grid>
+        <!-- ========== SFONDO ANIMATO ========== -->
+        <Canvas x:Name="AnimatedBackground" ClipToBounds="True">
+            <Canvas.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#0a0e27" Offset="0"/>
+                    <GradientStop Color="#16213e" Offset="0.5"/>
+                    <GradientStop Color="#0a0e27" Offset="1"/>
+                </LinearGradientBrush>
+            </Canvas.Background>
+            
+            <!-- Cerchi animati -->
+            <Ellipse x:Name="Circle1" Width="350" Height="350" Canvas.Left="50" Canvas.Top="30" Opacity="0.8" Panel.ZIndex="1">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#4A90E2" Offset="0" />
+                        <GradientStop Color="#4A90E2" Offset="0.3" />
+                        <GradientStop Color="Transparent" Offset="1" />
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+                <Ellipse.Effect>
+                    <BlurEffect Radius="40"/>
+                </Ellipse.Effect>
+            </Ellipse>
+            
+            <Ellipse x:Name="Circle2" Width="400" Height="400" Canvas.Left="200" Canvas.Top="250" Opacity="0.8" Panel.ZIndex="1">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#E74C3C" Offset="0" />
+                        <GradientStop Color="#E74C3C" Offset="0.3" />
+                        <GradientStop Color="Transparent" Offset="1" />
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+                <Ellipse.Effect>
+                    <BlurEffect Radius="40"/>
+                </Ellipse.Effect>
+            </Ellipse>
+            
+            <Ellipse x:Name="Circle3" Width="300" Height="300" Canvas.Left="300" Canvas.Top="400" Opacity="0.8" Panel.ZIndex="1">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#9B59B6" Offset="0" />
+                        <GradientStop Color="#9B59B6" Offset="0.3" />
+                        <GradientStop Color="Transparent" Offset="1" />
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+                <Ellipse.Effect>
+                    <BlurEffect Radius="40"/>
+                </Ellipse.Effect>
+            </Ellipse>
+            
+            <Ellipse x:Name="Circle4" Width="320" Height="320" Canvas.Left="350" Canvas.Top="150" Opacity="0.8" Panel.ZIndex="1">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#F39C12" Offset="0" />
+                        <GradientStop Color="#F39C12" Offset="0.3" />
+                        <GradientStop Color="Transparent" Offset="1" />
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+                <Ellipse.Effect>
+                    <BlurEffect Radius="40"/>
+                </Ellipse.Effect>
+            </Ellipse>
+        </Canvas>
+
+        <!-- ========== CONTENUTO LOGIN ========== -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Card Login Centrata -->
+            <Border Grid.Column="0" 
+                    Width="420"
+                    MaxHeight="600"
+                    Background="#3d4463"
+                    CornerRadius="20"
+                    Padding="40,25"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Opacity="0.85"
+                    Panel.ZIndex="10">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" 
+                                     BlurRadius="40" 
+                                     ShadowDepth="0" 
+                                     Opacity="0.7"/>
+                </Border.Effect>
+                
+                <StackPanel VerticalAlignment="Center">
+                    
+                    <!-- Logo Immagine con sfondo chiaro -->
+                    <Border Background="White"
+                            CornerRadius="8"
+                            Padding="15,25,15,15"
+                            Margin="0,0,0,15"
+                            HorizontalAlignment="Center"
+                            ClipToBounds="True">
+                        <Image Source="/Images/logo.png" 
+                               Width="145"
+                               Stretch="UniformToFill"
+                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                    </Border>
+
+                    <!-- Welcome Text -->
+                    <TextBlock Text="CGEasy" 
+                              FontSize="28" 
+                              FontWeight="Bold" 
+                              Foreground="White"
+                              HorizontalAlignment="Center"
+                              Margin="0,0,0,5"/>
+                    
+                    <TextBlock Text="Accedi per continuare" 
+                              FontSize="13" 
+                              Foreground="#8892b0"
+                              HorizontalAlignment="Center"
+                              Margin="0,0,0,25"/>
+
+                    <!-- Username -->
+                    <TextBlock Text="USERNAME" 
+                              FontSize="11" 
+                              FontWeight="SemiBold"
+                              Foreground="#8892b0"
+                              Margin="0,0,0,8"/>
+                    
+                    <Border Background="#4A90E2"
+                            BorderBrush="#4A90E2"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,20"
+                            x:Name="UsernameBorder">
+                        <TextBox x:Name="UsernameBox"
+                                Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+                                ui:ControlHelper.PlaceholderText="Inserisci username"
+                                FontSize="13"
+                                Height="45"
+                                Padding="12,10"
+                                Background="Transparent"
+                                Foreground="White"
+                                BorderThickness="0"
+                                CaretBrush="Black"
+                                GotFocus="TextBox_GotFocus"
+                                LostFocus="TextBox_LostFocus">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Return" 
+                                           Command="{Binding LoginCommand}" 
+                                           CommandParameter="{Binding ElementName=PasswordBox, Path=Password}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                    </Border>
+
+                    <!-- Password -->
+                    <TextBlock Text="PASSWORD" 
+                              FontSize="11" 
+                              FontWeight="SemiBold"
+                              Foreground="#8892b0"
+                              Margin="0,0,0,8"/>
+                    
+                    <Border Background="#4A90E2"
+                            BorderBrush="#4A90E2"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,10"
+                            x:Name="PasswordBorder">
+                        <PasswordBox x:Name="PasswordBox"
+                                    ui:ControlHelper.PlaceholderText="Inserisci password"
+                                    FontSize="13"
+                                    Height="45"
+                                    Padding="12,10"
+                                    Background="Transparent"
+                                    Foreground="White"
+                                    BorderThickness="0"
+                                    CaretBrush="Black"
+                                    GotFocus="PasswordBox_GotFocus"
+                                    LostFocus="PasswordBox_LostFocus"
+                                    KeyDown="PasswordBox_KeyDown"/>
+                    </Border>
+
+                    <!-- Error Message -->
+                    <Border MinHeight="25" Margin="0,5,0,0">
+                        <TextBlock Text="{Binding ErrorMessage}" 
+                                  Foreground="#E74C3C" 
+                                  FontSize="12"
+                                  TextWrapping="Wrap"
+                                  HorizontalAlignment="Center"
+                                  Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"/>
+                    </Border>
+
+                    <!-- Login Button -->
+                    <Button x:Name="LoginButton"
+                            Click="LoginButton_Click"
+                            Height="45"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Margin="0,15,0,12"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#4A90E2" Offset="0"/>
+                                            <GradientStop Color="#5B9BD5" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                   CornerRadius="8"
+                                                   BorderThickness="0">
+                                                <Border.Effect>
+                                                    <DropShadowEffect Color="#4A90E2" 
+                                                                     BlurRadius="15" 
+                                                                     ShadowDepth="0" 
+                                                                     Opacity="0.5"/>
+                                                </Border.Effect>
+                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                                 VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                    <GradientStop Color="#5B9BD5" Offset="0"/>
+                                                    <GradientStop Color="#6CB0E8" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <ui:ProgressRing IsActive="{Binding IsLoading}" 
+                                            Width="16" 
+                                            Height="16"
+                                            Margin="0,0,10,0"
+                                            Foreground="White"
+                                            Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            <TextBlock Text="ACCEDI" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Exit Button -->
+                    <Button Content="Esci" 
+                            Command="{Binding ExitCommand}"
+                            Height="38"
+                            FontSize="13"
+                            BorderThickness="0"
+                            Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#E74C3C"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                   CornerRadius="8"
+                                                   BorderThickness="0">
+                                                <Border.Effect>
+                                                    <DropShadowEffect Color="#E74C3C" 
+                                                                     BlurRadius="10" 
+                                                                     ShadowDepth="0" 
+                                                                     Opacity="0.3"/>
+                                                </Border.Effect>
+                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                                 VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#C0392B"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <!-- Footer -->
+                    <TextBlock Text="CGEasy v1.0" 
+                              FontSize="10" 
+                              Foreground="#4a5568"
+                              HorizontalAlignment="Center"
+                              Margin="0,15,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

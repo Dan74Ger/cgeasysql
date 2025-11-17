@@ -1,0 +1,13 @@
+C:\devcg-group\appcg_easy_project\src\CGEasy.Core\bin\Debug\net8.0\CGEasy.Core.deps.json
+C:\devcg-group\appcg_easy_project\src\CGEasy.Core\bin\Debug\net8.0\CGEasy.Core.dll
+C:\devcg-group\appcg_easy_project\src\CGEasy.Core\bin\Debug\net8.0\CGEasy.Core.pdb
+C:\devcg-group\appcg_easy_project\src\CGEasy.Core\obj\Debug\net8.0\CGEasy.Core.csproj.AssemblyReference.cache
+C:\devcg-group\appcg_easy_project\src\CGEasy.Core\obj\Debug\net8.0\CGEasy.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\devcg-group\appcg_easy_project\src\CGEasy.Core\obj\Debug\net8.0\CGEasy.Core.AssemblyInfoInputs.cache
+C:\devcg-group\appcg_easy_project\src\CGEasy.Core\obj\Debug\net8.0\CGEasy.Core.AssemblyInfo.cs
+C:\devcg-group\appcg_easy_project\src\CGEasy.Core\obj\Debug\net8.0\CGEasy.Core.csproj.CoreCompileInputs.cache
+C:\devcg-group\appcg_easy_project\src\CGEasy.Core\obj\Debug\net8.0\CGEasy.Core.sourcelink.json
+C:\devcg-group\appcg_easy_project\src\CGEasy.Core\obj\Debug\net8.0\CGEasy.Core.dll
+C:\devcg-group\appcg_easy_project\src\CGEasy.Core\obj\Debug\net8.0\refint\CGEasy.Core.dll
+C:\devcg-group\appcg_easy_project\src\CGEasy.Core\obj\Debug\net8.0\CGEasy.Core.pdb
+C:\devcg-group\appcg_easy_project\src\CGEasy.Core\obj\Debug\net8.0\ref\CGEasy.Core.dll

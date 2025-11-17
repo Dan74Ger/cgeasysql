@@ -1,0 +1,135 @@
+<Window x:Class="CGEasy.App.Views.ModificaCircolareDialogView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Modifica Circolare"
+        Height="500"
+        Width="600"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#f8f9fa">
+
+    <Border Margin="20" 
+            Background="White" 
+            BorderBrush="#dee2e6" 
+            BorderThickness="1" 
+            CornerRadius="8" 
+            Padding="25">
+        <StackPanel>
+            <!-- Header -->
+            <TextBlock Text="✏️ Modifica Circolare" 
+                      FontSize="22" 
+                      FontWeight="Bold" 
+                      Foreground="#2c3e50" 
+                      Margin="0,0,0,20"/>
+
+            <!-- Nome file (readonly) -->
+            <TextBlock Text="📎 File" 
+                      FontSize="13" 
+                      FontWeight="SemiBold" 
+                      Foreground="#495057" 
+                      Margin="0,0,0,5"/>
+            <Border Background="#e9ecef" 
+                   BorderBrush="#ced4da" 
+                   BorderThickness="1" 
+                   CornerRadius="4" 
+                   Padding="12,10" 
+                   Margin="0,0,0,15">
+                <TextBlock Text="{Binding NomeFile}" 
+                          FontSize="13" 
+                          Foreground="#495057"
+                          TextTrimming="CharacterEllipsis"/>
+            </Border>
+
+            <!-- Argomento -->
+            <TextBlock Text="📂 Argomento *" 
+                      FontSize="13" 
+                      FontWeight="SemiBold" 
+                      Foreground="#495057" 
+                      Margin="0,0,0,5"/>
+            <ComboBox ItemsSource="{Binding ArgomentiDisponibili}" 
+                     SelectedItem="{Binding ArgomentoSelezionato}"
+                     DisplayMemberPath="Nome"
+                     FontSize="13" 
+                     Padding="12,10" 
+                     Margin="0,0,0,15"/>
+
+            <!-- Descrizione -->
+            <TextBlock Text="📝 Descrizione *" 
+                      FontSize="13" 
+                      FontWeight="SemiBold" 
+                      Foreground="#495057" 
+                      Margin="0,0,0,5"/>
+            <TextBox Text="{Binding Descrizione, UpdateSourceTrigger=PropertyChanged}" 
+                    FontSize="13" 
+                    Padding="12,10" 
+                    Height="100"
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    VerticalScrollBarVisibility="Auto"
+                    Margin="0,0,0,15"
+                    MaxLength="500"/>
+
+            <!-- Anno -->
+            <TextBlock Text="📅 Anno *" 
+                      FontSize="13" 
+                      FontWeight="SemiBold" 
+                      Foreground="#495057" 
+                      Margin="0,0,0,5"/>
+            <TextBox Text="{Binding Anno, UpdateSourceTrigger=PropertyChanged}" 
+                    FontSize="13" 
+                    Padding="12,10" 
+                    Margin="0,0,0,25"
+                    MaxLength="4"/>
+
+            <!-- Pulsanti -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="💾 Salva" 
+                       Command="{Binding SalvaCommand}"
+                       Background="#27ae60" 
+                       Foreground="White" 
+                       Padding="30,12" 
+                       FontSize="13" 
+                       FontWeight="SemiBold"
+                       BorderThickness="0"
+                       Margin="0,0,10,0"
+                       Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="Background" Value="#27ae60"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#229954"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <Button Content="✖️ Annulla" 
+                       Command="{Binding AnnullaCommand}"
+                       Background="#95a5a6" 
+                       Foreground="White" 
+                       Padding="30,12" 
+                       FontSize="13" 
+                       FontWeight="SemiBold"
+                       BorderThickness="0"
+                       Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="Background" Value="#95a5a6"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#7f8c8d"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
+

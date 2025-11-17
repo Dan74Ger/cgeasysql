@@ -1,0 +1,909 @@
+<UserControl x:Class="CGEasy.App.Views.SistemaView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="http://schemas.modernwpf.com/2019"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000">
+
+    <UserControl.Resources>
+        <!-- Converter per visibilità bool to visibility -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                  HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0">
+            <TextBlock Text="⚙️ Gestione Sistema" 
+                       FontSize="28" 
+                       FontWeight="Bold"
+                       Margin="0,0,0,10"/>
+            <TextBlock Text="Backup e ripristino database" 
+                       FontSize="14" 
+                       Foreground="Gray"/>
+        </StackPanel>
+
+        <!-- Developer Info Card -->
+        <Border Grid.Row="2" 
+                Background="#007ACC"
+                CornerRadius="8"
+                Padding="25">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Developer Info -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                    <TextBlock Text="👨‍💻" 
+                               FontSize="32" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,15,0"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Developer" 
+                                   FontSize="14" 
+                                   Foreground="White"
+                                   Opacity="0.9"/>
+                        <TextBlock Text="Dott. Geron Daniele" 
+                                   FontSize="20" 
+                                   FontWeight="Bold"
+                                   Foreground="White"/>
+                        <TextBlock Text="Commercialista e Revisore Legale dei Conti" 
+                                   FontSize="13" 
+                                   Foreground="White"
+                                   Opacity="0.85"
+                                   FontStyle="Italic"
+                                   Margin="0,3,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Version Info -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <TextBlock Text="CGEasy" 
+                               FontSize="16" 
+                               FontWeight="SemiBold"
+                               Foreground="White"
+                               HorizontalAlignment="Right"/>
+                    <TextBlock Text="Versione 2.0" 
+                               FontSize="14" 
+                               Foreground="White"
+                               Opacity="0.85"
+                               HorizontalAlignment="Right"/>
+                    <TextBlock Text="© 2025 - Tutti i diritti riservati" 
+                               FontSize="11" 
+                               Foreground="White"
+                               Opacity="0.75"
+                               HorizontalAlignment="Right"
+                               Margin="0,3,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Database Encryption Card -->
+        <Border Grid.Row="4" 
+                Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}"
+                CornerRadius="8"
+                Padding="20">
+            <StackPanel>
+                <TextBlock Text="🔐 Crittografia Database" 
+                           FontSize="18" 
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,15"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="15"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="15"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Stato Crittografia -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" 
+                               Text="Stato:" 
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Width="150"/>
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                        <TextBlock Text="{Binding StatoCrittografia}" 
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding StatoCrittografiaIcon}" 
+                                   FontSize="16"
+                                   Margin="10,0,0,0"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Nuova Password -->
+                    <TextBlock Grid.Row="2" Grid.Column="0" 
+                               Text="Password:" 
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                    <PasswordBox Grid.Row="2" Grid.Column="1" 
+                                 x:Name="PasswordBox"
+                                 ui:ControlHelper.PlaceholderText="Inserisci password (min 8 caratteri)"
+                                 Height="36"
+                                 MaxWidth="400"
+                                 HorizontalAlignment="Left"/>
+
+                    <!-- Pulsanti Azioni -->
+                    <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" 
+                                Orientation="Horizontal">
+                        <Button Content="🔒 Cripta Database" 
+                                Command="{Binding SetDatabasePasswordCommand}"
+                                CommandParameter="{Binding ElementName=PasswordBox}"
+                                Height="36"
+                                Padding="20,0"
+                                Margin="0,0,10,0"
+                                Style="{StaticResource AccentButtonStyle}"/>
+                        
+                        <Button Content="🔓 Rimuovi Password" 
+                                Command="{Binding RemoveDatabasePasswordCommand}"
+                                CommandParameter="{Binding ElementName=PasswordBox}"
+                                Height="36"
+                                Padding="20,0"
+                                Margin="0,0,10,0"
+                                Background="#FF9800"
+                                Foreground="White"/>
+                        
+                        <Button Content="🔑 Verifica Password" 
+                                Command="{Binding VerifyDatabasePasswordCommand}"
+                                CommandParameter="{Binding ElementName=PasswordBox}"
+                                Height="36"
+                                Padding="20,0"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Info Box -->
+                <Border Background="#E3F2FD" 
+                        BorderBrush="#2196F3"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="15"
+                        Margin="0,15,0,0">
+                    <StackPanel>
+                        <TextBlock Text="ℹ️ Informazioni Crittografia" 
+                                   FontWeight="SemiBold"
+                                   Foreground="#1976D2"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock TextWrapping="Wrap" 
+                                   Foreground="#1976D2"
+                                   LineHeight="20">
+                            <Run Text="• Database NON criptato: accessibile da chiunque"/>
+                            <LineBreak/>
+                            <Run Text="• Database CRIPTATO: protetto da password, illeggibile senza chiave"/>
+                            <LineBreak/>
+                            <Run Text="• Password Master di recupero sempre attiva (solo per admin)"/>
+                            <LineBreak/>
+                            <Run Text="• Backup automatico prima di ogni modifica alla crittografia"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Info Database Card -->
+        <Border Grid.Row="6" 
+                Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}"
+                CornerRadius="8"
+                Padding="20">
+            <StackPanel>
+                <TextBlock Text="📊 Informazioni Database" 
+                           FontSize="18" 
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,15"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Percorso -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" 
+                               Text="Percorso:" 
+                               FontWeight="SemiBold"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" 
+                               Text="{Binding PercorsoDatabase}"
+                               TextWrapping="Wrap"/>
+
+                    <!-- Dimensione -->
+                    <TextBlock Grid.Row="2" Grid.Column="0" 
+                               Text="Dimensione:" 
+                               FontWeight="SemiBold"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" 
+                               Text="{Binding DimensioneDatabase}"/>
+
+                    <!-- Ultimo Backup -->
+                    <TextBlock Grid.Row="4" Grid.Column="0" 
+                               Text="Ultimo Backup:" 
+                               FontWeight="SemiBold"/>
+                    <TextBlock Grid.Row="4" Grid.Column="1" 
+                               Text="{Binding UltimoBackup}"/>
+
+                    <!-- Numero Backups -->
+                    <TextBlock Grid.Row="6" Grid.Column="0" 
+                               Text="Backups Disponibili:" 
+                               FontWeight="SemiBold"/>
+                    <TextBlock Grid.Row="6" Grid.Column="1">
+                        <Run Text="{Binding NumeroBackups, Mode=OneWay}"/>
+                        <Run Text=" file"/>
+                    </TextBlock>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Configurazione Database Card -->
+        <Border Grid.Row="8" 
+                Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}"
+                CornerRadius="8"
+                Padding="20">
+            <StackPanel>
+                <TextBlock Text="🔗 Configurazione Percorso Database" 
+                           FontSize="18" 
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,15"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="15"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="15"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="15"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="15"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Percorso Corrente -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" 
+                               Text="Percorso Corrente:" 
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Width="180"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" 
+                               Text="{Binding PercorsoDatabase}"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Center"
+                               FontFamily="Consolas"
+                               FontSize="11"/>
+
+                    <!-- Tipo Percorso -->
+                    <TextBlock Grid.Row="2" Grid.Column="0" 
+                               Text="Tipo:" 
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" 
+                               Text="{Binding TipoPercorso}"
+                               VerticalAlignment="Center"
+                               FontWeight="Bold"
+                               Foreground="#2196F3"/>
+
+                    <!-- Info Configurazione -->
+                    <TextBlock Grid.Row="4" Grid.Column="0" 
+                               Text="Info:" 
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Top"
+                               Margin="0,5,0,0"/>
+                    <TextBlock Grid.Row="4" Grid.Column="1" 
+                               Text="{Binding InfoConfigurazione}"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Top"
+                               Margin="0,5,0,0"
+                               FontSize="11"
+                               Foreground="#666"/>
+
+                    <!-- Nuovo Percorso Database -->
+                    <TextBlock Grid.Row="6" Grid.Column="0" 
+                               Text="Nuovo Percorso:" 
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                    <Grid Grid.Row="6" Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding NuovoPercorsoDatabase, UpdateSourceTrigger=PropertyChanged}"
+                                 ui:ControlHelper.PlaceholderText="C:\Database\cgeasy.db oppure \\SERVER\Share\cgeasy.db"
+                                 Height="36"
+                                 FontFamily="Consolas"
+                                 FontSize="11"
+                                 VerticalContentAlignment="Center"/>
+                        
+                        <Button Grid.Column="2"
+                                Content="📂 Sfoglia"
+                                Command="{Binding BrowseDatabasePathCommand}"
+                                Height="36"
+                                Padding="15,0"
+                                FontSize="12"/>
+                    </Grid>
+
+                    <!-- Pulsanti Azioni -->
+                    <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" 
+                                Orientation="Horizontal"
+                                Margin="0,5,0,0">
+                        <Button Content="🧪 Test Connessione" 
+                                Command="{Binding TestDatabaseConnectionCommand}"
+                                Height="36"
+                                Padding="20,0"
+                                Margin="0,0,10,0"
+                                Style="{StaticResource AccentButtonStyle}"/>
+                        
+                        <Button Content="💾 Salva e Riavvia" 
+                                Command="{Binding SaveDatabaseConfigurationCommand}"
+                                Height="36"
+                                Padding="20,0"
+                                Margin="0,0,10,0"
+                                Background="#4CAF50"
+                                Foreground="White"
+                                FontWeight="SemiBold"/>
+                        
+                        <Button Content="🔄 Ripristina Default" 
+                                Command="{Binding ResetDatabaseConfigurationCommand}"
+                                Height="36"
+                                Padding="20,0"
+                                Background="#FF9800"
+                                Foreground="White"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Info Box -->
+                <Border Background="#E3F2FD" 
+                        BorderBrush="#2196F3"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="15"
+                        Margin="0,15,0,0">
+                    <StackPanel>
+                        <TextBlock Text="ℹ️ Configurazione Database Condiviso" 
+                                   FontWeight="SemiBold"
+                                   Foreground="#1976D2"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock TextWrapping="Wrap" 
+                                   Foreground="#1976D2"
+                                   LineHeight="20">
+                            <Run Text="• Percorso LOCALE: C:\Cartella\cgeasy.db"/>
+                            <LineBreak/>
+                            <Run Text="• Percorso RETE: \\SERVER\Share\cgeasy.db"/>
+                            <LineBreak/>
+                            <Run Text="• Testa sempre la connessione PRIMA di salvare"/>
+                            <LineBreak/>
+                            <Run Text="• Il server deve avere una cartella condivisa con permessi di lettura/scrittura"/>
+                            <LineBreak/>
+                            <Run Text="• Tutti i client devono configurare lo stesso percorso per condividere i dati"/>
+                            <LineBreak/>
+                            <Run Text="• Massimo 10-15 utenti simultanei consigliati"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Azioni Card -->
+        <Border Grid.Row="10" 
+                Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}"
+                CornerRadius="8"
+                Padding="20">
+            <StackPanel>
+                <TextBlock Text="🔧 Operazioni" 
+                           FontSize="18" 
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,15"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Backup -->
+                    <Border Grid.Column="0" 
+                            Background="#4CAF50"
+                            CornerRadius="6"
+                            Padding="20"
+                            Cursor="Hand">
+                        <Border.InputBindings>
+                            <MouseBinding MouseAction="LeftClick" 
+                                        Command="{Binding BackupDatabaseCommand}"/>
+                        </Border.InputBindings>
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="💾" 
+                                       FontSize="48" 
+                                       HorizontalAlignment="Center"
+                                       Margin="0,0,0,10"/>
+                            <TextBlock Text="Crea Backup" 
+                                       FontSize="16" 
+                                       FontWeight="SemiBold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Salva copia database" 
+                                       FontSize="12" 
+                                       Foreground="White"
+                                       Opacity="0.9"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Ripristina -->
+                    <Border Grid.Column="2" 
+                            Background="#FF9800"
+                            CornerRadius="6"
+                            Padding="20"
+                            Cursor="Hand">
+                        <Border.InputBindings>
+                            <MouseBinding MouseAction="LeftClick" 
+                                        Command="{Binding RestoreDatabaseCommand}"/>
+                        </Border.InputBindings>
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="⚠️" 
+                                       FontSize="48" 
+                                       HorizontalAlignment="Center"
+                                       Margin="0,0,0,10"/>
+                            <TextBlock Text="Ripristina" 
+                                       FontSize="16" 
+                                       FontWeight="SemiBold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Recupera da backup" 
+                                       FontSize="12" 
+                                       Foreground="White"
+                                       Opacity="0.9"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Apri Cartella -->
+                    <Border Grid.Column="4" 
+                            Background="#2196F3"
+                            CornerRadius="6"
+                            Padding="20"
+                            Cursor="Hand">
+                        <Border.InputBindings>
+                            <MouseBinding MouseAction="LeftClick" 
+                                        Command="{Binding OpenBackupFolderCommand}"/>
+                        </Border.InputBindings>
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="📁" 
+                                       FontSize="48" 
+                                       HorizontalAlignment="Center"
+                                       Margin="0,0,0,10"/>
+                            <TextBlock Text="Apri Cartella" 
+                                       FontSize="16" 
+                                       FontWeight="SemiBold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Visualizza backups" 
+                                       FontSize="12" 
+                                       Foreground="White"
+                                       Opacity="0.9"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Note -->
+                <Border Background="#FFF3CD" 
+                        BorderBrush="#FFC107"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="15"
+                        Margin="0,20,0,0">
+                    <StackPanel>
+                        <TextBlock Text="ℹ️ Note Importanti" 
+                                   FontWeight="SemiBold"
+                                   Foreground="#856404"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock TextWrapping="Wrap" 
+                                   Foreground="#856404"
+                                   LineHeight="20">
+                            <Run Text="• I backup vengono salvati automaticamente nella cartella Backups"/>
+                            <LineBreak/>
+                            <Run Text="• Prima di ogni ripristino viene creato un backup automatico di sicurezza"/>
+                            <LineBreak/>
+                            <Run Text="• Il ripristino richiede il riavvio dell'applicazione"/>
+                            <LineBreak/>
+                            <Run Text="• Si consiglia di fare backup regolari (es. settimanali)"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Licenze Moduli Card -->
+        <Border Grid.Row="12" 
+                Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}"
+                CornerRadius="8"
+                Padding="20">
+            <StackPanel>
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Grid.Column="0" Text="🔑 Licenze Moduli" 
+                               FontSize="18" 
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                    
+                    <Border Grid.Column="1" Background="#2196F3" CornerRadius="12" Padding="12,6">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Moduli Attivati:" Foreground="White" FontSize="12" Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding ModuliAttivati}" Foreground="White" FontWeight="Bold" FontSize="14"/>
+                            <TextBlock Text="/4" Foreground="White" FontSize="12" Margin="2,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Pulsante Gestione Licenze (solo admin) -->
+                    <Button Grid.Column="3" Content="🔧 Gestione Licenze Clienti" 
+                            Command="{Binding OpenLicenseManagerCommand}"
+                            Height="36" Padding="15,0" FontSize="12"
+                            Background="#FF9800" Foreground="White" FontWeight="SemiBold"
+                            Visibility="{Binding IsDeveloper, Converter={StaticResource BoolToVisibility}}"
+                            ToolTip="Solo account 'admin' può gestire il database licenze clienti"/>
+                </Grid>
+
+                <!-- TODO STUDIO -->
+                <Border Background="White" 
+                        CornerRadius="6" 
+                        Padding="15" 
+                        Margin="0,0,0,10"
+                        BorderBrush="#E0E0E0"
+                        BorderThickness="1">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="📝 TODO STUDIO" FontSize="16" FontWeight="Bold" Foreground="#2196F3"/>
+                                <TextBlock Text="Sistema di gestione TODO, calendario e scadenze" 
+                                           FontSize="12" Foreground="#666" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding LicenzaTodoStudio}" 
+                                           FontWeight="Bold" FontSize="14" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Info Durata/Scadenza -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8" HorizontalAlignment="Right">
+                            <TextBlock Text="⏱️ Durata: " FontSize="11" Foreground="#666" Margin="0,0,4,0"/>
+                            <TextBlock Text="{Binding DurataTodoStudio}" FontSize="11" FontWeight="SemiBold" Foreground="#2196F3" Margin="0,0,15,0"/>
+                            <TextBlock Text="📅 Scadenza: " FontSize="11" Foreground="#666" Margin="0,0,4,0"/>
+                            <TextBlock Text="{Binding ScadenzaTodoStudio}" FontSize="11" FontWeight="SemiBold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#666"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ScadenzaTodoStudio}" Value="Scaduta">
+                                                <Setter Property="Foreground" Value="#F44336"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBox Grid.Column="0" 
+                                     Text="{Binding ChiaveTodoStudio, UpdateSourceTrigger=PropertyChanged}"
+                                     ui:ControlHelper.PlaceholderText="Inserisci chiave di attivazione TODO-STUDIO-XXXXXXXXXXXX"
+                                     Height="36" FontFamily="Consolas" FontSize="12"/>
+                            
+                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                <Button Content="✅ Attiva" 
+                                        Command="{Binding AttivaLicenzaTodoStudioCommand}"
+                                        Height="36" Padding="12,0" Margin="0,0,5,0" FontSize="12"
+                                        Background="#4CAF50" Foreground="White"/>
+                                <Button Content="❌ Disattiva" 
+                                        Command="{Binding DisattivaLicenzaTodoStudioCommand}"
+                                        Height="36" Padding="12,0" FontSize="12"
+                                        Background="#F44336" Foreground="White"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- BILANCI -->
+                <Border Background="White" 
+                        CornerRadius="6" 
+                        Padding="15" 
+                        Margin="0,0,0,10"
+                        BorderBrush="#E0E0E0"
+                        BorderThickness="1">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="📊 BILANCI" FontSize="16" FontWeight="Bold" Foreground="#FF9800"/>
+                                <TextBlock Text="Gestione bilanci CEE, analisi e reportistica" 
+                                           FontSize="12" Foreground="#666" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding LicenzaBilanci}" 
+                                           FontWeight="Bold" FontSize="14" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Info Durata/Scadenza -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8" HorizontalAlignment="Right">
+                            <TextBlock Text="⏱️ Durata: " FontSize="11" Foreground="#666" Margin="0,0,4,0"/>
+                            <TextBlock Text="{Binding DurataBilanci}" FontSize="11" FontWeight="SemiBold" Foreground="#2196F3" Margin="0,0,15,0"/>
+                            <TextBlock Text="📅 Scadenza: " FontSize="11" Foreground="#666" Margin="0,0,4,0"/>
+                            <TextBlock Text="{Binding ScadenzaBilanci}" FontSize="11" FontWeight="SemiBold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#666"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ScadenzaBilanci}" Value="Scaduta">
+                                                <Setter Property="Foreground" Value="#F44336"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBox Grid.Column="0" 
+                                     Text="{Binding ChiaveBilanci, UpdateSourceTrigger=PropertyChanged}"
+                                     ui:ControlHelper.PlaceholderText="Inserisci chiave di attivazione BILANCI-XXXXXXXXXXXX"
+                                     Height="36" FontFamily="Consolas" FontSize="12"/>
+                            
+                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                <Button Content="✅ Attiva" 
+                                        Command="{Binding AttivaLicenzaBilanciCommand}"
+                                        Height="36" Padding="12,0" Margin="0,0,5,0" FontSize="12"
+                                        Background="#4CAF50" Foreground="White"/>
+                                <Button Content="❌ Disattiva" 
+                                        Command="{Binding DisattivaLicenzaBilanciCommand}"
+                                        Height="36" Padding="12,0" FontSize="12"
+                                        Background="#F44336" Foreground="White"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- CIRCOLARI -->
+                <Border Background="White" 
+                        CornerRadius="6" 
+                        Padding="15" 
+                        Margin="0,0,0,10"
+                        BorderBrush="#E0E0E0"
+                        BorderThickness="1">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="📢 CIRCOLARI" FontSize="16" FontWeight="Bold" Foreground="#9C27B0"/>
+                                <TextBlock Text="Gestione circolari, comunicazioni e documentazione" 
+                                           FontSize="12" Foreground="#666" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding LicenzaCircolari}" 
+                                           FontWeight="Bold" FontSize="14" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Info Durata/Scadenza -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8" HorizontalAlignment="Right">
+                            <TextBlock Text="⏱️ Durata: " FontSize="11" Foreground="#666" Margin="0,0,4,0"/>
+                            <TextBlock Text="{Binding DurataCircolari}" FontSize="11" FontWeight="SemiBold" Foreground="#2196F3" Margin="0,0,15,0"/>
+                            <TextBlock Text="📅 Scadenza: " FontSize="11" Foreground="#666" Margin="0,0,4,0"/>
+                            <TextBlock Text="{Binding ScadenzaCircolari}" FontSize="11" FontWeight="SemiBold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#666"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ScadenzaCircolari}" Value="Scaduta">
+                                                <Setter Property="Foreground" Value="#F44336"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBox Grid.Column="0" 
+                                     Text="{Binding ChiaveCircolari, UpdateSourceTrigger=PropertyChanged}"
+                                     ui:ControlHelper.PlaceholderText="Inserisci chiave di attivazione CIRCOLARI-XXXXXXXXXXXX"
+                                     Height="36" FontFamily="Consolas" FontSize="12"/>
+                            
+                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                <Button Content="✅ Attiva" 
+                                        Command="{Binding AttivaLicenzaCircolariCommand}"
+                                        Height="36" Padding="12,0" Margin="0,0,5,0" FontSize="12"
+                                        Background="#4CAF50" Foreground="White"/>
+                                <Button Content="❌ Disattiva" 
+                                        Command="{Binding DisattivaLicenzaCircolariCommand}"
+                                        Height="36" Padding="12,0" FontSize="12"
+                                        Background="#F44336" Foreground="White"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- CONTROLLO GESTIONE -->
+                <Border Background="White" 
+                        CornerRadius="6" 
+                        Padding="15" 
+                        Margin="0,0,0,10"
+                        BorderBrush="#E0E0E0"
+                        BorderThickness="1">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="📈 CONTROLLO GESTIONE" FontSize="16" FontWeight="Bold" Foreground="#F44336"/>
+                                <TextBlock Text="Analisi costi, ricavi e controllo di gestione avanzato" 
+                                           FontSize="12" Foreground="#666" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding LicenzaControlloGestione}" 
+                                           FontWeight="Bold" FontSize="14" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Info Durata/Scadenza -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8" HorizontalAlignment="Right">
+                            <TextBlock Text="⏱️ Durata: " FontSize="11" Foreground="#666" Margin="0,0,4,0"/>
+                            <TextBlock Text="{Binding DurataControlloGestione}" FontSize="11" FontWeight="SemiBold" Foreground="#2196F3" Margin="0,0,15,0"/>
+                            <TextBlock Text="📅 Scadenza: " FontSize="11" Foreground="#666" Margin="0,0,4,0"/>
+                            <TextBlock Text="{Binding ScadenzaControlloGestione}" FontSize="11" FontWeight="SemiBold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#666"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ScadenzaControlloGestione}" Value="Scaduta">
+                                                <Setter Property="Foreground" Value="#F44336"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBox Grid.Column="0" 
+                                     Text="{Binding ChiaveControlloGestione, UpdateSourceTrigger=PropertyChanged}"
+                                     ui:ControlHelper.PlaceholderText="Inserisci chiave CONTROLLO-GESTIONE-XXXXXXXXXXXX"
+                                     Height="36" FontFamily="Consolas" FontSize="12"/>
+                            
+                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                <Button Content="✅ Attiva" 
+                                        Command="{Binding AttivaLicenzaControlloGestioneCommand}"
+                                        Height="36" Padding="12,0" Margin="0,0,5,0" FontSize="12"
+                                        Background="#4CAF50" Foreground="White"/>
+                                <Button Content="❌ Disattiva" 
+                                        Command="{Binding DisattivaLicenzaControlloGestioneCommand}"
+                                        Height="36" Padding="12,0" FontSize="12"
+                                        Background="#F44336" Foreground="White"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Info Box -->
+                <Border Background="#E3F2FD" 
+                        BorderBrush="#2196F3" 
+                        BorderThickness="1" 
+                        CornerRadius="4" 
+                        Padding="12"
+                        Margin="0,5,0,0">
+                    <StackPanel>
+                        <TextBlock Text="ℹ️ Informazioni Licenze" FontWeight="SemiBold" Foreground="#1976D2" Margin="0,0,0,5"/>
+                        <TextBlock TextWrapping="Wrap" Foreground="#1976D2" FontSize="12" LineHeight="18">
+                            <Run Text="• Click 'Genera' per creare una chiave di attivazione"/>
+                            <LineBreak/>
+                            <Run Text="• Copia la chiave generata e conservala in un luogo sicuro"/>
+                            <LineBreak/>
+                            <Run Text="• Click 'Attiva' per attivare il modulo"/>
+                            <LineBreak/>
+                            <Run Text="• Riavvia l'applicazione dopo l'attivazione"/>
+                            <LineBreak/>
+                            <Run Text="• Le chiavi sono permanenti e non scadono"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+    </Grid>
+    </ScrollViewer>
+</UserControl>
+
+

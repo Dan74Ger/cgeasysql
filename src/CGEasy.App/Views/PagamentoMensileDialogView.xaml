@@ -1,0 +1,153 @@
+<Window x:Class="CGEasy.App.Views.PagamentoMensileDialogView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:viewmodels="clr-namespace:CGEasy.App.ViewModels"
+        Title="Nuovo Pagamento Mensile" 
+        Height="700" Width="900"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        Background="#FAFAFA"
+        Closing="Window_Closing">
+
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- TITOLO -->
+            <RowDefinition Height="Auto"/> <!-- CAMPI INIZIALI -->
+            <RowDefinition Height="Auto"/> <!-- PULSANTE GENERA -->
+            <RowDefinition Height="*"/>    <!-- GRIGLIA RIGHE -->
+            <RowDefinition Height="Auto"/> <!-- PULSANTI AZIONE -->
+        </Grid.RowDefinitions>
+
+        <!-- TITOLO -->
+        <TextBlock Grid.Row="0" Text="💳 Crea Pagamenti Mensili Ricorrenti" 
+                   FontSize="20" FontWeight="Bold" Foreground="#2C3E50" 
+                   Margin="0,0,0,20" HorizontalAlignment="Center"/>
+
+        <!-- CAMPI INIZIALI -->
+        <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="25" Margin="0,0,0,15"
+                BorderBrush="#E0E0E0" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- RIGA 1 -->
+                <StackPanel Grid.Row="0" Grid.Column="0">
+                    <TextBlock Text="Fornitore *" Margin="0,0,0,5" FontWeight="SemiBold" FontSize="13"/>
+                    <TextBox Text="{Binding NomeFornitore, UpdateSourceTrigger=PropertyChanged}" 
+                             Padding="10" Margin="0,0,0,15" FontSize="13"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="2">
+                    <TextBlock Text="Anno *" Margin="0,0,0,5" FontWeight="SemiBold" FontSize="13"/>
+                    <TextBox Text="{Binding Anno, UpdateSourceTrigger=PropertyChanged}" 
+                             Padding="10" Margin="0,0,0,15" FontSize="13"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="4">
+                    <TextBlock Text="Numero Mesi *" Margin="0,0,0,5" FontWeight="SemiBold" FontSize="13"/>
+                    <TextBox Text="{Binding NumeroMesi, UpdateSourceTrigger=PropertyChanged}" 
+                             Padding="10" Margin="0,0,0,15" FontSize="13"/>
+                </StackPanel>
+
+                <!-- RIGA 2 -->
+                <StackPanel Grid.Row="1" Grid.Column="0">
+                    <TextBlock Text="Importo Base (€) *" Margin="0,0,0,5" FontWeight="SemiBold" FontSize="13"/>
+                    <TextBox Text="{Binding ImportoBase, UpdateSourceTrigger=PropertyChanged}" 
+                             Padding="10" Margin="0,0,0,15" FontSize="13"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="2">
+                    <TextBlock Text="Data Scadenza Base *" Margin="0,0,0,5" FontWeight="SemiBold" FontSize="13"/>
+                    <DatePicker SelectedDate="{Binding DataScadenzaBase, UpdateSourceTrigger=PropertyChanged}" 
+                                Padding="10" Margin="0,0,0,15" FontSize="13"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="4">
+                    <TextBlock Text="Descrizione" Margin="0,0,0,5" FontWeight="SemiBold" FontSize="13"/>
+                    <TextBox Text="{Binding Descrizione, UpdateSourceTrigger=PropertyChanged}" 
+                             Padding="10" Margin="0,0,0,15" FontSize="13"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- PULSANTE GENERA -->
+        <Button Grid.Row="2" Content="🔄 Genera Righe Mensili" 
+                Command="{Binding GeneraRigheCommand}"
+                Padding="15,10" Margin="0,0,0,15" FontSize="14" FontWeight="SemiBold"
+                Background="#3498DB" Foreground="White" BorderThickness="0" 
+                Cursor="Hand" HorizontalAlignment="Center"/>
+
+        <!-- GRIGLIA RIGHE GENERATE -->
+        <Border Grid.Row="3" Background="White" CornerRadius="8" Padding="15" Margin="0,0,0,15"
+                BorderBrush="#E0E0E0" BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="📋 Righe Generate (Editabili)" 
+                           FontSize="14" FontWeight="Bold" Foreground="#34495E" Margin="0,0,0,10"/>
+
+                <DataGrid Grid.Row="1" ItemsSource="{Binding Righe}"
+                          AutoGenerateColumns="False" CanUserAddRows="False"
+                          IsReadOnly="False" SelectionMode="Single"
+                          GridLinesVisibility="Horizontal" AlternatingRowBackground="#F8F9FA"
+                          HeadersVisibility="Column" RowHeight="35">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Mese" Binding="{Binding NomeMese}" Width="*" MinWidth="150" IsReadOnly="True"/>
+                        <DataGridTemplateColumn Header="Importo (€)" Width="150">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Importo, StringFormat='{}{0:N2} €'}" VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding Importo, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Data Scadenza" Width="150">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DataScadenza, StringFormat=dd/MM/yyyy}" VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <DatePicker SelectedDate="{Binding DataScadenza, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Descrizione" Binding="{Binding Descrizione, UpdateSourceTrigger=PropertyChanged}" Width="*" MinWidth="200"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <!-- PULSANTI AZIONE -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+            <Button Content="💾 Salva Tutti i Pagamenti" 
+                    Command="{Binding SalvaCommand}" 
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Padding="20,12" Margin="0,0,10,0" FontSize="14" FontWeight="SemiBold"
+                    Background="#27AE60" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+            <Button Content="❌ Annulla" 
+                    Command="{Binding AnnullaCommand}" 
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Padding="20,12" FontSize="14" FontWeight="SemiBold"
+                    Background="#95A5A6" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+        </StackPanel>
+    </Grid>
+</Window>
+

@@ -1,0 +1,40 @@
+<UserControl x:Class="CGEasy.App.Views.MargineTesoreraView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1400"
+             Background="White">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- HEADER E PULSANTE EXPORT -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+            <TextBlock Text="💰 Margine di Tesoreria Consolidato" FontSize="24" FontWeight="Bold" Foreground="#2C3E50" VerticalAlignment="Center"/>
+            <Button Content="📊 Grafico Andamento" Command="{Binding MostraGraficoCommand}"
+                    Margin="30,0,10,0" Padding="15,8" Background="#3498DB" Foreground="White" BorderThickness="0" Cursor="Hand" FontSize="14" FontWeight="SemiBold"/>
+            <Button Content="📊 Export Excel" Command="{Binding ExportMargineTesoreriaExcelCommand}"
+                    Margin="0,0,0,0" Padding="15,8" Background="#27AE60" Foreground="White" BorderThickness="0" Cursor="Hand" FontSize="14"/>
+        </StackPanel>
+
+        <!-- MESSAGGIO SE NON CI SONO DATI -->
+        <Border Grid.Row="1" x:Name="NoDataBorder" Background="#ECF0F1" CornerRadius="10" Padding="40" Visibility="Collapsed">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="📊" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                <TextBlock Text="Nessun dato disponibile" FontSize="20" FontWeight="Bold" Foreground="#7F8C8D" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                <TextBlock Text="Aggiungi incassi o pagamenti nelle banche per vedere il margine di tesoreria" 
+                           FontSize="14" Foreground="#95A5A6" HorizontalAlignment="Center" TextWrapping="Wrap" MaxWidth="500" TextAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- GRID PIVOT -->
+        <ScrollViewer Grid.Row="1" x:Name="PivotScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <Grid x:Name="MarginePivotGrid" Background="White"/>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
+

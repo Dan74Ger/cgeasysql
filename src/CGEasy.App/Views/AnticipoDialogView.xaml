@@ -1,0 +1,96 @@
+<Window x:Class="CGEasy.App.Views.AnticipoDialogView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Anticipo Fatture / SBF" 
+        Height="550" Width="700"
+        WindowStartupLocation="CenterOwner"
+        Background="White">
+    <Border Padding="25">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- HEADER -->
+            <TextBlock Grid.Row="0" Text="💳 Anticipo Fatture / SBF" FontSize="20" FontWeight="Bold" Foreground="#2C3E50" Margin="0,0,0,10"/>
+
+            <!-- ALERT RESIDUO -->
+            <Border Grid.Row="1" Background="#E8F8F5" BorderBrush="#27AE60" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold" Foreground="#27AE60">
+                        <Run Text="💰 Anticipo Residuo Disponibile: "/>
+                        <Run Text="{Binding AnticipoResiduoDisponibile, StringFormat='{}{0:N2} €'}" FontWeight="Bold"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!-- FORM -->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- RIGA 1: FATTURATO E PERCENTUALE -->
+                <StackPanel Grid.Row="0" Grid.Column="0">
+                    <TextBlock Text="Fatturato (€) *" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding Fatturato, UpdateSourceTrigger=PropertyChanged}" Padding="8" Margin="0,0,0,15"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="2">
+                    <TextBlock Text="Percentuale Anticipo (%) *" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding PercentualeAnticipo, UpdateSourceTrigger=PropertyChanged}" Padding="8" Margin="0,0,0,15"/>
+                </StackPanel>
+
+                <!-- RIGA 2: IMPORTO CALCOLATO (READONLY) E DATA INIZIO -->
+                <StackPanel Grid.Row="1" Grid.Column="0">
+                    <TextBlock Text="Importo Utilizzo Calcolato (€)" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding ImportoUtilizzo, StringFormat=N2, Mode=OneWay}" 
+                             Padding="8" Margin="0,0,0,15" IsReadOnly="True" 
+                             Background="#ECF0F1" Foreground="#27AE60" FontWeight="Bold"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="2">
+                    <TextBlock Text="Data Inizio Utilizzo *" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                    <DatePicker SelectedDate="{Binding DataInizioUtilizzo}" Padding="8" Margin="0,0,0,15"/>
+                </StackPanel>
+
+                <!-- RIGA 3: DATA SCADENZA -->
+                <StackPanel Grid.Row="2" Grid.Column="0">
+                    <TextBlock Text="Data Scadenza Utilizzo *" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                    <DatePicker SelectedDate="{Binding DataScadenzaUtilizzo}" Padding="8" Margin="0,0,0,15"/>
+                </StackPanel>
+
+                <!-- NOTE (FULL WIDTH) -->
+                <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3">
+                    <TextBlock Text="Note" Margin="0,5,0,5" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}" 
+                             Padding="8" Height="60" TextWrapping="Wrap" AcceptsReturn="True" 
+                             VerticalScrollBarVisibility="Auto" FontSize="13"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- PULSANTI -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button Content="💾 Salva" Command="{Binding SalvaCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                        Padding="20,10" Margin="0,0,10,0" Background="#27AE60" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                <Button Content="❌ Annulla" Command="{Binding AnnullaCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                        Padding="20,10" Background="#95A5A6" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
+

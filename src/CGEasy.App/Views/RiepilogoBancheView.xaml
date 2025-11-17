@@ -1,0 +1,168 @@
+<UserControl x:Class="CGEasy.App.Views.RiepilogoBancheView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1400"
+             Background="White">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- HEADER -->
+            <TextBlock Grid.Row="0" Text="📊 Riepilogo Consolidato Banche" 
+                       FontSize="24" FontWeight="Bold" Foreground="#2C3E50" Margin="0,0,0,20"/>
+
+            <!-- RIEPILOGO TOTALE -->
+            <Border Grid.Row="1" Background="#ECF0F1" CornerRadius="10" Padding="25" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Grid.Column="0">
+                        <TextBlock Text="💰 Saldo Totale" FontSize="12" Foreground="#7F8C8D" Margin="0,0,0,5"/>
+                        <TextBlock Text="{Binding Riepilogo.SaldoTotale, StringFormat='{}{0:N2} €'}" FontSize="22" FontWeight="Bold" Foreground="#27AE60"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="0" Grid.Column="1">
+                        <TextBlock Text="📊 Fido Totale C/C Accordato" FontSize="12" Foreground="#7F8C8D" Margin="0,0,0,5"/>
+                        <TextBlock Text="{Binding Riepilogo.FidoTotaleAccordato, StringFormat='{}{0:N2} €'}" FontSize="22" FontWeight="Bold" Foreground="#3498DB"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="0" Grid.Column="2">
+                        <TextBlock Text="📈 Utilizzo Fido" FontSize="12" Foreground="#7F8C8D" Margin="0,0,0,5"/>
+                        <TextBlock Text="{Binding Riepilogo.PercentualeUtilizzoFido, StringFormat={}{0:F1}%}" FontSize="22" FontWeight="Bold" Foreground="#E67E22"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,15,0,0">
+                        <TextBlock Text="💳 Anticipo Totale Residuo" FontSize="12" Foreground="#7F8C8D" Margin="0,0,0,5"/>
+                        <TextBlock Text="{Binding Riepilogo.AnticipoTotaleResiduo, StringFormat='{}{0:N2} €'}" FontSize="22" FontWeight="Bold" Foreground="#9B59B6"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,15,0,0">
+                        <TextBlock Text="💸 Interessi Totali Maturati" FontSize="12" Foreground="#7F8C8D" Margin="0,0,0,5"/>
+                        <TextBlock Text="{Binding Riepilogo.InteressiTotaliMaturati, StringFormat='{}{0:N2} €'}" FontSize="22" FontWeight="Bold" Foreground="#E74C3C"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,15,0,0">
+                        <TextBlock Text="🏦 Numero Banche" FontSize="12" Foreground="#7F8C8D" Margin="0,0,0,5"/>
+                        <TextBlock Text="{Binding Riepilogo.NumeroBanche}" FontSize="22" FontWeight="Bold" Foreground="#34495E"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- TABCONTROL -->
+            <TabControl Grid.Row="2">
+                <!-- TAB SCADENZIARIO -->
+                <TabItem Header="📅 Scadenziario Consolidato">
+                    <Border Background="White" BorderBrush="#BDC3C7" BorderThickness="1" CornerRadius="8" Padding="20" Margin="10">
+                <StackPanel>
+                    <!-- FILTRI -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <TextBlock Text="Da:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <DatePicker SelectedDate="{Binding DataInizioScadenziario}" Width="120"/>
+                        <TextBlock Text="A:" VerticalAlignment="Center" Margin="20,0,10,0"/>
+                        <DatePicker SelectedDate="{Binding DataFineScadenziario}" Width="120"/>
+                        <Button Content="🔍 Filtra" Command="{Binding FiltraScadenziarioCommand}" 
+                                Margin="20,0,0,0" Padding="12,5" Background="#3498DB" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                    </StackPanel>
+
+                    <!-- RIEPILOGO SCADENZIARIO -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="📥 Totale Incassi Previsti" FontSize="11" Foreground="#7F8C8D" Margin="0,0,0,5"/>
+                            <TextBlock Text="{Binding ScadenziarioConsolidato.TotaleIncassiConsolidato, StringFormat='{}{0:N2} €'}" 
+                                       FontSize="18" FontWeight="Bold" Foreground="#27AE60"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="📤 Totale Pagamenti Previsti" FontSize="11" Foreground="#7F8C8D" Margin="0,0,0,5"/>
+                            <TextBlock Text="{Binding ScadenziarioConsolidato.TotalePagamentiConsolidato, StringFormat='{}{0:N2} €'}" 
+                                       FontSize="18" FontWeight="Bold" Foreground="#E74C3C"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="💵 Saldo Netto Previsto" FontSize="11" Foreground="#7F8C8D" Margin="0,0,0,5"/>
+                            <TextBlock Text="{Binding ScadenziarioConsolidato.SaldoNettoConsolidato, StringFormat='{}{0:N2} €'}" 
+                                       FontSize="18" FontWeight="Bold" Foreground="#3498DB"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- DATAGRID MOVIMENTI CONSOLIDATI -->
+                    <TextBlock Text="📋 Dettaglio Movimenti" FontSize="14" FontWeight="Bold" Margin="0,20,0,10"/>
+                    <DataGrid ItemsSource="{Binding ScadenziarioConsolidato.MovimentiConsolidati}" 
+                              AutoGenerateColumns="False" CanUserAddRows="False" 
+                              IsReadOnly="True" SelectionMode="Single"
+                              GridLinesVisibility="Horizontal" AlternatingRowBackground="#F8F9FA"
+                              MaxHeight="400">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Banca" Binding="{Binding NomeBanca}" Width="150" FontWeight="Bold"/>
+                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="90">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Tipo}" Value="Incasso">
+                                                <Setter Property="Foreground" Value="#27AE60"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Tipo}" Value="Pagamento">
+                                                <Setter Property="Foreground" Value="#E74C3C"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Cliente/Fornitore" Binding="{Binding ClienteFornitore}" Width="*" MinWidth="150"/>
+                            <DataGridTextColumn Header="Data Scadenza" Binding="{Binding DataScadenza, StringFormat=dd/MM/yyyy}" Width="110" FontWeight="Bold"/>
+                            <DataGridTextColumn Header="Anno" Binding="{Binding Anno}" Width="60"/>
+                            <DataGridTextColumn Header="Mese" Binding="{Binding Mese}" Width="60"/>
+                            <DataGridTextColumn Header="Importo" Binding="{Binding Importo, StringFormat='{}{0:N2} €'}" Width="120">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextAlignment" Value="Right"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Tipo}" Value="Incasso">
+                                                <Setter Property="Foreground" Value="#27AE60"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Tipo}" Value="Pagamento">
+                                                <Setter Property="Foreground" Value="#E74C3C"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="N. Fattura" Binding="{Binding NumeroFattura}" Width="110"/>
+                            <DataGridTextColumn Header="Data Fattura" Binding="{Binding DataFattura, StringFormat=dd/MM/yyyy}" Width="110"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+                    </Border>
+                </TabItem>
+            </TabControl>
+
+            <!-- PULSANTE AGGIORNA rimosso, ora è gestito dal tab attivo -->
+        </Grid>
+    </ScrollViewer>
+</UserControl>
+

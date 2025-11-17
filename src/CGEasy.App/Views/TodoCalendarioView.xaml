@@ -1,0 +1,442 @@
+<Window x:Class="CGEasy.App.Views.TodoCalendarioView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        xmlns:vm="clr-namespace:CGEasy.App.ViewModels"
+        xmlns:local="clr-namespace:CGEasy.App.Views"
+        mc:Ignorable="d"
+        Title="📅 Calendario TODO Studio" 
+        Height="900" Width="1600"
+        WindowStartupLocation="CenterScreen"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}">
+
+    <Window.Resources>
+        <!-- Converter per visibilità badge -->
+        <local:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+        
+        <!-- Wrappers per CompositeCollection -->
+        <CollectionViewSource x:Key="ProfessionistiWrapper" Source="{Binding Professionisti}"/>
+        <CollectionViewSource x:Key="TipiPraticaWrapper" Source="{Binding TipiPratica}"/>
+        <CollectionViewSource x:Key="ClientiWrapper" Source="{Binding Clienti}"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Toolbar filtri -->
+            <RowDefinition Height="Auto"/> <!-- Statistiche -->
+            <RowDefinition Height="*"/>    <!-- Calendario -->
+        </Grid.RowDefinitions>
+
+        <!-- ===== TOOLBAR FILTRI ===== -->
+        <Border Grid.Row="0" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="20">
+            <StackPanel>
+                <!-- Titolo e navigazione mese -->
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0" Content="⬅️ Mese Precedente" Command="{Binding PreviousMonthCommand}"
+                            Height="36" Padding="15,0" Margin="0,0,10,0"/>
+                    
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="📅" FontSize="28" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Text="{Binding CurrentMonthText}" 
+                                   FontSize="24" FontWeight="Bold" VerticalAlignment="Center"/>
+                        
+                        <!-- Salta a data specifica -->
+                        <Border BorderBrush="#2196F3" BorderThickness="2" CornerRadius="4" Margin="20,0,0,0" Padding="5">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🗓️ Vai a:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="12" FontWeight="SemiBold"/>
+                                <DatePicker SelectedDate="{Binding CurrentMonth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            Width="140" Height="28" FontSize="12"
+                                            ToolTip="Scegli mese/anno da visualizzare"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <Button Content="🏠 Oggi" Command="{Binding GoToTodayCommand}"
+                                Height="32" Padding="10,0" Margin="15,0,0,0" FontSize="12"/>
+                    </StackPanel>
+
+                    <Button Grid.Column="2" Content="Mese Successivo ➡️" Command="{Binding NextMonthCommand}"
+                            Height="36" Padding="15,0" Margin="10,0,0,0"/>
+                </Grid>
+
+                <!-- Sezione filtri -->
+                <Border Background="#F5F5F5" CornerRadius="6" Padding="15">
+                    <StackPanel>
+                        <TextBlock Text="🔍 FILTRI VISUALIZZAZIONE" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,10"/>
+
+                        <!-- Ricerca testuale -->
+                        <Grid Margin="0,0,0,10">
+                            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     ui:ControlHelper.PlaceholderText="🔍 Cerca per titolo o descrizione..."
+                                     Height="36" FontSize="13"/>
+                        </Grid>
+
+                        <!-- Riga 1: Professionista, Tipo Pratica, Stato -->
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="👤 Professionista:" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <ComboBox ItemsSource="{Binding Professionisti}"
+                                          SelectedItem="{Binding SelectedProfessionista}"
+                                          Height="36" FontSize="13">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock>
+                                                <Run Text="{Binding Cognome}"/>
+                                                <Run Text=" "/>
+                                                <Run Text="{Binding Nome}"/>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="📁 Tipo Pratica:" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <ComboBox ItemsSource="{Binding TipiPratica}"
+                                          SelectedItem="{Binding SelectedTipoPratica}"
+                                          DisplayMemberPath="NomePratica"
+                                          Height="36" FontSize="13"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="🔄 Stato/Fase:" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <ComboBox SelectedItem="{Binding SelectedStato}"
+                                          ItemsSource="{Binding Stati}"
+                                          Height="36" FontSize="13"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Riga 2: Categoria, Priorità, Cliente -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="🏷️ Categoria:" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <ComboBox SelectedItem="{Binding SelectedCategoria}"
+                                          ItemsSource="{Binding Categorie}"
+                                          Height="36" FontSize="13"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="⚡ Priorità:" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <ComboBox SelectedItem="{Binding SelectedPriorita}"
+                                          ItemsSource="{Binding Priorita}"
+                                          Height="36" FontSize="13"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="👥 Cliente:" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <ComboBox ItemsSource="{Binding Clienti}"
+                                          SelectedItem="{Binding SelectedCliente}"
+                                          DisplayMemberPath="NomeCliente"
+                                          Height="36" FontSize="13"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Pulsanti azione -->
+                        <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+                            <Button Content="🔄 Ripristina Tutti i Filtri" Command="{Binding ResetFiltersCommand}"
+                                    Height="36" Padding="15,0" Margin="0,0,10,0" Background="#FF9800" Foreground="White"/>
+                            <Button Content="🔃 Aggiorna Dati" Command="{Binding RefreshCommand}"
+                                    Height="36" Padding="15,0" Margin="0,0,10,0"/>
+                            <Button Content="📊 Esporta Excel" Command="{Binding EsportaExcelCommand}"
+                                    Height="36" Padding="15,0" Background="#4CAF50" Foreground="White"
+                                    ToolTip="Esporta i TODO del mese corrente in Excel"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- ===== STATISTICHE ===== -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="15,10">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                <StackPanel Orientation="Horizontal">
+                    <!-- Totale -->
+                    <Border Background="#2196F3" CornerRadius="4" Padding="12,8" Margin="0,0,8,0">
+                        <StackPanel>
+                            <TextBlock Text="📝 TOTALE" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="{Binding Totale}" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Da Fare -->
+                    <Border Background="#9E9E9E" CornerRadius="4" Padding="12,8" Margin="0,0,8,0">
+                        <StackPanel>
+                            <TextBlock Text="⏳ DA FARE" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="{Binding DaFare}" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock FontSize="9" Foreground="White" Opacity="0.9">
+                                <Run Text="🔴"/> <Run Text="{Binding DaFareUrgenti}"/>
+                                <Run Text="🟠"/> <Run Text="{Binding DaFareAlta}"/>
+                                <Run Text="🟡"/> <Run Text="{Binding DaFareMedia}"/>
+                                <Run Text="🟢"/> <Run Text="{Binding DaFareBassa}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- In Corso -->
+                    <Border Background="#2196F3" CornerRadius="4" Padding="12,8" Margin="0,0,8,0">
+                        <StackPanel>
+                            <TextBlock Text="⚙️ IN CORSO" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="{Binding InCorso}" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock FontSize="9" Foreground="White" Opacity="0.9">
+                                <Run Text="🔴"/> <Run Text="{Binding InCorsoUrgenti}"/>
+                                <Run Text="🟠"/> <Run Text="{Binding InCorsoAlta}"/>
+                                <Run Text="🟡"/> <Run Text="{Binding InCorsoMedia}"/>
+                                <Run Text="🟢"/> <Run Text="{Binding InCorsoBassa}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Completati -->
+                    <Border Background="#4CAF50" CornerRadius="4" Padding="12,8" Margin="0,0,8,0">
+                        <StackPanel>
+                            <TextBlock Text="✅ COMPLETATI" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="{Binding Completati}" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock FontSize="9" Foreground="White" Opacity="0.9">
+                                <Run Text="Oggi:"/> <Run Text="{Binding CompletatiOggi}"/>
+                                <Run Text="Sett:"/> <Run Text="{Binding CompletatiSettimana}"/>
+                                <Run Text="Mese:"/> <Run Text="{Binding CompletatiMese}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Annullati -->
+                    <Border Background="#795548" CornerRadius="4" Padding="12,8" Margin="0,0,8,0">
+                        <StackPanel>
+                            <TextBlock Text="❌ ANNULLATI" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="{Binding Annullati}" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Scaduti -->
+                    <Border Background="#F44336" CornerRadius="4" Padding="12,8" Margin="0,0,8,0">
+                        <StackPanel>
+                            <TextBlock Text="⚠️ SCADUTI" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="{Binding Scaduti}" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Separator -->
+                    <Border Width="2" Background="#E0E0E0" Margin="8,0"/>
+
+                    <!-- Priorità Urgenti -->
+                    <Border Background="#E91E63" CornerRadius="4" Padding="12,8" Margin="8,0,8,0">
+                        <StackPanel>
+                            <TextBlock Text="🔴 URGENTI" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="{Binding Urgenti}" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Alta -->
+                    <Border Background="#FF9800" CornerRadius="4" Padding="12,8" Margin="0,0,8,0">
+                        <StackPanel>
+                            <TextBlock Text="🟠 ALTA" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="{Binding Alta}" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Media -->
+                    <Border Background="#FFC107" CornerRadius="4" Padding="12,8" Margin="0,0,8,0">
+                        <StackPanel>
+                            <TextBlock Text="🟡 MEDIA" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="{Binding Media}" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Bassa -->
+                    <Border Background="#4CAF50" CornerRadius="4" Padding="12,8">
+                        <StackPanel>
+                            <TextBlock Text="🟢 BASSA" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="{Binding Bassa}" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- ===== CALENDARIO ===== -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Header giorni settimana -->
+                    <RowDefinition Height="*"/>    <!-- Griglia giorni -->
+                </Grid.RowDefinitions>
+
+                <!-- Header giorni settimana -->
+                <UniformGrid Grid.Row="0" Rows="1" Columns="7" Margin="0,0,0,5">
+                    <Border Background="#2196F3" Padding="10">
+                        <TextBlock Text="LUNEDÌ" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White" FontSize="12"/>
+                    </Border>
+                    <Border Background="#2196F3" Padding="10">
+                        <TextBlock Text="MARTEDÌ" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White" FontSize="12"/>
+                    </Border>
+                    <Border Background="#2196F3" Padding="10">
+                        <TextBlock Text="MERCOLEDÌ" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White" FontSize="12"/>
+                    </Border>
+                    <Border Background="#2196F3" Padding="10">
+                        <TextBlock Text="GIOVEDÌ" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White" FontSize="12"/>
+                    </Border>
+                    <Border Background="#2196F3" Padding="10">
+                        <TextBlock Text="VENERDÌ" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White" FontSize="12"/>
+                    </Border>
+                    <Border Background="#FF9800" Padding="10">
+                        <TextBlock Text="SABATO" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White" FontSize="12"/>
+                    </Border>
+                    <Border Background="#FF9800" Padding="10">
+                        <TextBlock Text="DOMENICA" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White" FontSize="12"/>
+                    </Border>
+                </UniformGrid>
+
+                <!-- Griglia giorni -->
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding CalendarDays}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="7"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="#E0E0E0" BorderThickness="1" MinHeight="120"
+                                    AllowDrop="True"
+                                    Drop="CalendarDay_Drop"
+                                    DragEnter="CalendarDay_DragEnter"
+                                    DragLeave="CalendarDay_DragLeave"
+                                    Tag="{Binding Date}">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{Binding BackgroundColor}"/>
+                                </Border.Background>
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsToday}" Value="True">
+                                                <Setter Property="BorderThickness" Value="3"/>
+                                                <Setter Property="BorderBrush" Value="#2196F3"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Numero giorno -->
+                                    <TextBlock Grid.Row="0" Text="{Binding DayNumber}" 
+                                               FontSize="16" FontWeight="Bold"
+                                               Margin="5" HorizontalAlignment="Right">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsCurrentMonth}" Value="False">
+                                                        <Setter Property="Foreground" Value="#BDBDBD"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsToday}" Value="True">
+                                                        <Setter Property="Foreground" Value="#2196F3"/>
+                                                        <Setter Property="FontSize" Value="20"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+
+                                    <!-- TODO del giorno -->
+                                    <ItemsControl Grid.Row="1" ItemsSource="{Binding Todos}" Margin="5">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border CornerRadius="3" Padding="5,3" Margin="0,0,0,2"
+                                                        BorderThickness="2" Cursor="Hand"
+                                                        MouseLeftButtonDown="Todo_MouseLeftButtonDown"
+                                                        PreviewMouseMove="Todo_PreviewMouseMove"
+                                                        Tag="{Binding}">
+                                                    <Border.InputBindings>
+                                                        <MouseBinding Gesture="LeftDoubleClick" Command="{Binding DataContext.OpenTodoCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"/>
+                                                    </Border.InputBindings>
+                                                    <!-- Colore priorità come bordo (più spesso) -->
+                                                    <Border.BorderBrush>
+                                                        <SolidColorBrush Color="{Binding ColorePriorita}"/>
+                                                    </Border.BorderBrush>
+                                                    <!-- Colore stato come sfondo (più visibile) -->
+                                                    <Border.Background>
+                                                        <SolidColorBrush Color="{Binding ColoreStato}" Opacity="0.3"/>
+                                                    </Border.Background>
+                                                    <Border.ToolTip>
+                                                        <ToolTip MaxWidth="400">
+                                                            <StackPanel>
+                                                                <TextBlock FontWeight="Bold" TextWrapping="Wrap">
+                                                                    <Run Text="{Binding IconaPriorita, Mode=OneWay}"/>
+                                                                    <Run Text=" "/>
+                                                                    <Run Text="{Binding Titolo, Mode=OneWay}"/>
+                                                                </TextBlock>
+                                                                <TextBlock Text="{Binding TestoCategoria}" FontSize="11" Margin="0,3,0,0"/>
+                                                                <TextBlock Text="{Binding ClienteNome, StringFormat='Cliente: {0}'}" 
+                                                                           FontSize="11" Margin="0,2,0,0"/>
+                                                                <TextBlock Text="{Binding ProfessionistiAssegnatiText, StringFormat='Assegnato: {0}'}" 
+                                                                           FontSize="11" Margin="0,2,0,0"/>
+                                                                <TextBlock Text="{Binding IconaStato}" FontSize="11" Margin="0,3,0,0"/>
+                                                            </StackPanel>
+                                                        </ToolTip>
+                                                    </Border.ToolTip>
+                                                    <StackPanel>
+                                                        <TextBlock FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis">
+                                                            <Run Text="{Binding IconaPriorita, Mode=OneWay}"/>
+                                                            <Run Text=" "/>
+                                                            <Run Text="{Binding Titolo, Mode=OneWay}"/>
+                                                        </TextBlock>
+                                                        <!-- Orario (se presente) -->
+                                                        <TextBlock FontSize="9" Foreground="#2196F3" FontWeight="SemiBold" Margin="0,1,0,0"
+                                                                   Text="{Binding TestoOrario}"/>
+                                                        <TextBlock Text="{Binding ClienteNome}" FontSize="9" Foreground="#666" TextTrimming="CharacterEllipsis"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <!-- Badge contatori -->
+                                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" 
+                                                VerticalAlignment="Bottom" Margin="3">
+                                        <Border Background="#E91E63" CornerRadius="10" Padding="5,2" Margin="2"
+                                                Visibility="{Binding UrgentiCount, Converter={StaticResource CountToVisibilityConverter}}">
+                                            <TextBlock Text="{Binding UrgentiCount}" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                                        </Border>
+                                        <Border Background="#FF9800" CornerRadius="10" Padding="5,2" Margin="2"
+                                                Visibility="{Binding AltaCount, Converter={StaticResource CountToVisibilityConverter}}">
+                                            <TextBlock Text="{Binding AltaCount}" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+
+</Window>
+

@@ -1,0 +1,101 @@
+<UserControl x:Class="CGEasy.App.Views.ImportBilancioTemplateView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ui="http://schemas.modernwpf.com/2019"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1200"
+             Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="{DynamicResource SystemControlBackgroundAccentBrush}"
+                CornerRadius="8" Padding="20" Margin="0,0,0,20">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="📄" FontSize="32" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                <StackPanel>
+                    <TextBlock Text="TEMPLATE RICLASSIFICAZIONE" FontSize="24" FontWeight="SemiBold" Foreground="White"/>
+                    <TextBlock Text="Gestione template riclassificazione - Click su 'Apri' per vedere il dettaglio" FontSize="13" 
+                               Foreground="White" Opacity="0.9" Margin="0,5,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Azioni -->
+        <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="15" Margin="0,0,0,15"
+                ui:ThemeManager.HasThemeResources="True">
+            <ui:ThemeManager.RequestedTheme>
+                <ui:ElementTheme>Light</ui:ElementTheme>
+            </ui:ThemeManager.RequestedTheme>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <Button Content="📂 Importa da Excel" Command="{Binding ImportExcelCommand}"
+                        Style="{StaticResource AccentButtonStyle}" Padding="15,10" Margin="0,0,10,0"/>
+                <Button Content="🔄 Aggiorna" Command="{Binding RefreshCommand}"
+                        Padding="15,10"/>
+            </StackPanel>
+        </Border>
+
+        <!-- DataGrid Gruppi -->
+        <Border Grid.Row="2" Background="White" CornerRadius="8" Padding="10"
+                ui:ThemeManager.HasThemeResources="True">
+            <ui:ThemeManager.RequestedTheme>
+                <ui:ElementTheme>Light</ui:ElementTheme>
+            </ui:ThemeManager.RequestedTheme>
+            <DataGrid ItemsSource="{Binding Gruppi}"
+                      SelectedItem="{Binding SelectedGruppo}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      SelectionMode="Single"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      CanUserResizeRows="False"
+                      GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column"
+                      AlternatingRowBackground="#F9F9F9"
+                      RowHeight="45">
+                
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="🏢 Cliente" Binding="{Binding ClienteNome}" Width="250"/>
+                    <DataGridTextColumn Header="📅 Periodo" Binding="{Binding PeriodoDisplay}" Width="150"/>
+                    <DataGridTextColumn Header="📝 Descrizione" Binding="{Binding Descrizione}" Width="*" MinWidth="300"/>
+                    <DataGridTextColumn Header="📊 Tipo" Binding="{Binding TipoBilancio}" Width="80"/>
+                    <DataGridTextColumn Header="📅 Data Import" Binding="{Binding DataImport, StringFormat=dd/MM/yyyy HH:mm}" Width="180"/>
+                    <DataGridTextColumn Header="👤 Importato Da" Binding="{Binding ImportedByName}" Width="200"/>
+                    
+                    <DataGridTemplateColumn Header="⚙️ Azioni" Width="200">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Content="📂 Apri" 
+                                            Command="{Binding DataContext.OpenDettaglioCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="Apri dettaglio template"
+                                            Padding="8,4" Margin="2"
+                                            Style="{StaticResource AccentButtonStyle}"/>
+                                    <Button Content="✏️" 
+                                            Command="{Binding DataContext.EditGruppoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="Modifica descrizione/periodo"
+                                            Padding="8,4" Margin="2"/>
+                                    <Button Content="🗑️" 
+                                            Command="{Binding DataContext.DeleteGruppoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="Elimina template"
+                                            Padding="8,4" Margin="2"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>
+

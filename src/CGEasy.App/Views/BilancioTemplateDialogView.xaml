@@ -1,0 +1,129 @@
+<Window x:Class="CGEasy.App.Views.BilancioTemplateDialogView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        Title="Gestione Riga Template"
+        Height="600" Width="700"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#F5F5F5">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2196F3" Padding="20,15">
+            <TextBlock Text="{Binding TitoloDialog}" 
+                       FontSize="18" FontWeight="Bold" Foreground="White"/>
+        </Border>
+
+        <!-- Form -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="20">
+            <StackPanel>
+                
+                <!-- Codice -->
+                <TextBlock Text="Codice *" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding Codice, UpdateSourceTrigger=PropertyChanged}"
+                         ui:ControlHelper.PlaceholderText="Es: 101"
+                         FontSize="14" Padding="10" Margin="0,0,0,15"
+                         IsReadOnly="{Binding IsCodiceReadonly}"
+                         FontFamily="Consolas" FontWeight="Bold"/>
+
+                <!-- Descrizione -->
+                <TextBlock Text="Descrizione *" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding Descrizione, UpdateSourceTrigger=PropertyChanged}"
+                         ui:ControlHelper.PlaceholderText="Es: Ricavi da vendite"
+                         FontSize="14" Padding="10" Margin="0,0,0,15"
+                         MaxLength="200"/>
+
+                <!-- Importo -->
+                <TextBlock Text="Importo" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding Importo, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}"
+                         ui:ControlHelper.PlaceholderText="Es: 50000.00"
+                         FontSize="14" Padding="10" Margin="0,0,0,15"
+                         FontFamily="Consolas"
+                         HorizontalContentAlignment="Right"/>
+
+                <!-- Segno -->
+                <TextBlock Text="Segno *" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                <ComboBox SelectedItem="{Binding Segno, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          FontSize="18" Padding="10" Margin="0,0,0,15"
+                          HorizontalContentAlignment="Center"
+                          FontWeight="Bold">
+                    <ComboBox.Items>
+                        <system:String xmlns:system="clr-namespace:System;assembly=mscorlib">+</system:String>
+                        <system:String xmlns:system="clr-namespace:System;assembly=mscorlib">-</system:String>
+                    </ComboBox.Items>
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding}" Value="+">
+                                                <Setter Property="Foreground" Value="#4CAF50"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding}" Value="-">
+                                                <Setter Property="Foreground" Value="#F44336"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <!-- Formula -->
+                <TextBlock Text="Formula (opzionale)" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                <TextBlock Text="Esempio: 101+102+103 oppure 101+102-103" 
+                           FontSize="11" Foreground="#666" Margin="0,0,0,5" FontStyle="Italic"/>
+                <TextBox Text="{Binding Formula, UpdateSourceTrigger=PropertyChanged}"
+                         ui:ControlHelper.PlaceholderText="Es: 101+102+103"
+                         FontSize="14" Padding="10" Margin="0,0,0,10"
+                         FontFamily="Consolas" Foreground="#FF6F00"/>
+
+                <!-- Info formula -->
+                <Border Background="#FFF3E0" BorderBrush="#FF9800" BorderThickness="1" 
+                        Padding="10" CornerRadius="4" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock FontSize="12" TextWrapping="Wrap" Foreground="#333">
+                            <Run Text="💡 " FontSize="14"/>
+                            <Run Text="La formula permette di calcolare automaticamente l'importo sommando/sottraendo altri codici."/>
+                        </TextBlock>
+                        <TextBlock FontSize="11" TextWrapping="Wrap" Foreground="#666" Margin="0,5,0,0">
+                            • Lascia vuoto per usare l'importo originale
+                        </TextBlock>
+                        <TextBlock FontSize="11" TextWrapping="Wrap" Foreground="#666">
+                            • Usa + per sommare, - per sottrarre
+                        </TextBlock>
+                        <TextBlock FontSize="11" TextWrapping="Wrap" Foreground="#666">
+                            • Es: 101+102+103 = somma dei codici 101, 102 e 103
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer Buttons -->
+        <Border Grid.Row="2" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="20">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="❌ Annulla" 
+                        Click="Annulla_Click"
+                        Background="#E0E0E0" Foreground="#333"
+                        Padding="20,10" Margin="0,0,10,0" FontSize="13"/>
+                
+                <Button Content="✅ Salva" 
+                        Click="Salva_Click"
+                        Background="#4CAF50" Foreground="White"
+                        Padding="20,10" FontSize="13" FontWeight="SemiBold"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
+

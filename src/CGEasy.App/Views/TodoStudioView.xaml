@@ -1,0 +1,372 @@
+<Window x:Class="CGEasy.App.Views.TodoStudioView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        xmlns:vm="clr-namespace:CGEasy.App.ViewModels"
+        Title="📝 TODO Studio - Lista" 
+        Height="900" Width="1600"
+        WindowStartupLocation="CenterScreen"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Toolbar -->
+            <RowDefinition Height="Auto"/> <!-- Statistiche -->
+            <RowDefinition Height="*"/>    <!-- DataGrid -->
+        </Grid.RowDefinitions>
+
+        <!-- TOOLBAR -->
+        <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="15" Margin="0,0,0,10">
+            <StackPanel>
+                <!-- Titolo e pulsanti azione -->
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="📝 TODO STUDIO - LISTA" 
+                               FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Content="📅 Vista Calendario" Command="{Binding OpenCalendarioCommand}"
+                                Height="40" Padding="15,0" Margin="0,0,10,0"
+                                Background="#2196F3" Foreground="White" FontWeight="SemiBold"/>
+                        <Button Content="📊 Vista Kanban" Command="{Binding OpenKanbanCommand}"
+                                Height="40" Padding="15,0" Margin="0,0,10,0"
+                                Background="#9C27B0" Foreground="White" FontWeight="SemiBold"/>
+                        <Button Content="➕ Nuovo TODO" Command="{Binding NewTodoCommand}"
+                                Height="40" Padding="15,0" Margin="0,0,10,0"
+                                Background="#4CAF50" Foreground="White" FontWeight="SemiBold"/>
+                        <Button Content="📊 Export Excel" Command="{Binding ExportExcelCommand}"
+                                Height="40" Padding="15,0"
+                                Background="#FF9800" Foreground="White" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Filtri -->
+                <Expander Header="🔍 FILTRI" IsExpanded="True" FontWeight="SemiBold">
+                    <StackPanel Margin="0,10,0,0">
+                        <!-- Ricerca testuale -->
+                        <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 ui:ControlHelper.PlaceholderText="🔍 Cerca per titolo o descrizione..."
+                                 Height="36" Margin="0,0,0,10"/>
+
+                        <!-- Riga 1 -->
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="👤 Professionista:" FontSize="11" Margin="0,0,0,3"/>
+                                <ComboBox ItemsSource="{Binding Professionisti}"
+                                          SelectedItem="{Binding SelectedProfessionista}"
+                                          Height="32">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock>
+                                                <Run Text="{Binding Cognome, Mode=OneWay}"/>
+                                                <Run Text=" "/>
+                                                <Run Text="{Binding Nome, Mode=OneWay}"/>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="📁 Tipo Pratica:" FontSize="11" Margin="0,0,0,3"/>
+                                <ComboBox ItemsSource="{Binding TipiPratica}"
+                                          SelectedItem="{Binding SelectedTipoPratica}"
+                                          Height="32" DisplayMemberPath="NomePratica"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="🔄 Stato:" FontSize="11" Margin="0,0,0,3"/>
+                                <ComboBox ItemsSource="{Binding Stati}"
+                                          SelectedItem="{Binding SelectedStato}"
+                                          Height="32"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Riga 2 -->
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="🏷️ Categoria:" FontSize="11" Margin="0,0,0,3"/>
+                                <ComboBox ItemsSource="{Binding Categorie}"
+                                          SelectedItem="{Binding SelectedCategoria}"
+                                          Height="32"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="⚡ Priorità:" FontSize="11" Margin="0,0,0,3"/>
+                                <ComboBox ItemsSource="{Binding Priorita}"
+                                          SelectedItem="{Binding SelectedPriorita}"
+                                          Height="32"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="👥 Cliente:" FontSize="11" Margin="0,0,0,3"/>
+                                <ComboBox ItemsSource="{Binding Clienti}"
+                                          SelectedItem="{Binding SelectedCliente}"
+                                          Height="32" DisplayMemberPath="NomeCliente"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Filtro scaduti + Reset -->
+                        <Grid>
+                            <CheckBox Content="⚠️ Mostra solo TODO scaduti" 
+                                      IsChecked="{Binding ShowOverdueOnly}"
+                                      FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            
+                            <Button Content="🔄 Ripristina Filtri" Command="{Binding ResetFiltersCommand}"
+                                    HorizontalAlignment="Right"
+                                    Height="32" Padding="15,0"
+                                    Background="#FF9800" Foreground="White"/>
+                        </Grid>
+                    </StackPanel>
+                </Expander>
+            </StackPanel>
+        </Border>
+
+        <!-- STATISTICHE -->
+        <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="15" Margin="0,0,0,10">
+            <WrapPanel>
+                <Border Background="#2196F3" CornerRadius="6" Padding="12,8" Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="📊" FontSize="18" Margin="0,0,8,0"/>
+                        <TextBlock Text="Totali: " Foreground="White" FontSize="14"/>
+                        <TextBlock Text="{Binding TotalTodos}" Foreground="White" FontWeight="Bold" FontSize="16"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="#4CAF50" CornerRadius="6" Padding="12,8" Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="✅" FontSize="18" Margin="0,0,8,0"/>
+                        <TextBlock Text="Completati: " Foreground="White" FontSize="14"/>
+                        <TextBlock Text="{Binding CompletatiCount}" Foreground="White" FontWeight="Bold" FontSize="16"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="#FF9800" CornerRadius="6" Padding="12,8" Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⏳" FontSize="18" Margin="0,0,8,0"/>
+                        <TextBlock Text="In Corso: " Foreground="White" FontSize="14"/>
+                        <TextBlock Text="{Binding InCorsoCount}" Foreground="White" FontWeight="Bold" FontSize="16"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="#F44336" CornerRadius="6" Padding="12,8" Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🔥" FontSize="18" Margin="0,0,8,0"/>
+                        <TextBlock Text="Scaduti: " Foreground="White" FontSize="14"/>
+                        <TextBlock Text="{Binding ScadutiCount}" Foreground="White" FontWeight="Bold" FontSize="16"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="#9C27B0" CornerRadius="6" Padding="12,8">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⚡" FontSize="18" Margin="0,0,8,0"/>
+                        <TextBlock Text="Urgenti: " Foreground="White" FontSize="14"/>
+                        <TextBlock Text="{Binding UrgentiCount}" Foreground="White" FontWeight="Bold" FontSize="16"/>
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+        </Border>
+
+        <!-- DATAGRID -->
+        <DataGrid Grid.Row="2" ItemsSource="{Binding FilteredTodos}"
+                  SelectedItem="{Binding SelectedTodo}"
+                  AutoGenerateColumns="False" IsReadOnly="True"
+                  CanUserAddRows="False" CanUserDeleteRows="False"
+                  GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                  RowHeight="50" AlternatingRowBackground="#F5F5F5"
+                  SelectionMode="Single"
+                  MouseDoubleClick="DataGrid_MouseDoubleClick">
+
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="✏️ Modifica" Command="{Binding EditTodoCommand}"/>
+                    <MenuItem Header="✅ Segna Completato" Command="{Binding ChangeTodoStatusCommand}" CommandParameter="Completata"/>
+                    <MenuItem Header="⏳ Segna In Corso" Command="{Binding ChangeTodoStatusCommand}" CommandParameter="InCorso"/>
+                    <Separator/>
+                    <MenuItem Header="🗑️ Elimina" Command="{Binding DeleteTodoCommand}"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+
+            <DataGrid.Columns>
+                <!-- Priorità -->
+                <DataGridTemplateColumn Header="⚡" Width="80">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border CornerRadius="4" Padding="6,3" HorizontalAlignment="Center" MinWidth="70">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Priorita}" Value="Urgente">
+                                                <Setter Property="Background" Value="#E91E63"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Priorita}" Value="Alta">
+                                                <Setter Property="Background" Value="#FF9800"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Priorita}" Value="Media">
+                                                <Setter Property="Background" Value="#FFC107"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Priorita}" Value="Bassa">
+                                                <Setter Property="Background" Value="#4CAF50"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding Priorita}" Foreground="White" FontWeight="Bold" FontSize="10" TextAlignment="Center"/>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Titolo -->
+                <DataGridTextColumn Header="Titolo" Binding="{Binding Titolo}" Width="*" MinWidth="200">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="TextWrapping" Value="Wrap"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <!-- Categoria -->
+                <DataGridTextColumn Header="Categoria" Binding="{Binding Categoria}" Width="120"/>
+
+                <!-- Professionista/i Assegnato/i -->
+                <DataGridTemplateColumn Header="👤 Professionista/i" Width="150">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ItemsControl ItemsSource="{Binding ProfessionistiAssegnatiNomi}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" FontSize="11" Margin="0,1"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Cliente -->
+                <DataGridTextColumn Header="🏢 Cliente" Binding="{Binding ClienteNome}" Width="150">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FontSize" Value="11"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <!-- Stato -->
+                <DataGridTemplateColumn Header="Stato" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border CornerRadius="4" Padding="8,4" HorizontalAlignment="Center">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Stato}" Value="DaFare">
+                                                <Setter Property="Background" Value="#9E9E9E"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Stato}" Value="InCorso">
+                                                <Setter Property="Background" Value="#2196F3"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Stato}" Value="Completata">
+                                                <Setter Property="Background" Value="#4CAF50"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Stato}" Value="Annullata">
+                                                <Setter Property="Background" Value="#F44336"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding Stato}" Foreground="White" FontWeight="Bold" FontSize="11"/>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Data Scadenza -->
+                <DataGridTemplateColumn Header="Scadenza" Width="120">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding DataScadenza, StringFormat='dd/MM/yyyy'}" 
+                                           FontSize="12" HorizontalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsScaduto}" Value="True">
+                                                    <Setter Property="Foreground" Value="#F44336"/>
+                                                    <Setter Property="FontWeight" Value="Bold"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock HorizontalAlignment="Center" FontSize="10">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="#666"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsScaduto}" Value="True">
+                                                    <Setter Property="Text" Value="⚠️ SCADUTO"/>
+                                                    <Setter Property="Foreground" Value="#F44336"/>
+                                                    <Setter Property="FontWeight" Value="Bold"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Data Creazione -->
+                <DataGridTextColumn Header="Creato il" Binding="{Binding DataCreazione, StringFormat='dd/MM/yyyy'}" Width="100"/>
+
+                <!-- Azioni -->
+                <DataGridTemplateColumn Header="Azioni" Width="120">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Content="✏️" 
+                                        Command="{Binding DataContext.EditTodoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        Width="32" Height="32" Margin="2" 
+                                        ToolTip="Modifica TODO"
+                                        Background="#2196F3" Foreground="White" FontSize="14"/>
+                                <Button Content="🗑️" 
+                                        Command="{Binding DataContext.DeleteTodoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        Width="32" Height="32" Margin="2" 
+                                        ToolTip="Elimina TODO"
+                                        Background="#F44336" Foreground="White" FontSize="14"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>
+

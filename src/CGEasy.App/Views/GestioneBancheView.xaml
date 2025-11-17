@@ -1,0 +1,241 @@
+<UserControl x:Class="CGEasy.App.Views.GestioneBancheView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1200"
+             Background="White">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- HEADER -->
+        <TextBlock Grid.Row="0" Text="🏦 Gestione Banche" FontSize="24" FontWeight="Bold" Foreground="#2C3E50" Margin="0,0,0,20"/>
+
+        <!-- FILTRO RICERCA -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,15">
+            <TextBlock Text="Cerca:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+            <TextBox Width="300" Text="{Binding FiltroRicerca, UpdateSourceTrigger=PropertyChanged}" 
+                     VerticalContentAlignment="Center" Padding="5"/>
+            <Button Content="🔍 Filtra" Command="{Binding FiltraCommand}" 
+                    Margin="10,0,0,0" Padding="15,5" Background="#3498DB" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+            <Button Content="➕ Nuova Banca" Command="{Binding NuovaBancaCommand}" 
+                    Margin="10,0,0,0" Padding="15,5" Background="#27AE60" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+            
+            <!-- HINT DOPPIO CLICK -->
+            <TextBlock Text="💡 Doppio click sulla banca per aprire il dettaglio" 
+                       VerticalAlignment="Center" Margin="20,0,0,0" 
+                       FontStyle="Italic" Foreground="#7F8C8D" FontSize="11"/>
+        </StackPanel>
+
+        <!-- DATAGRID BANCHE -->
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Banche}" 
+                  SelectedItem="{Binding BancaSelezionata, Mode=TwoWay}"
+                  AutoGenerateColumns="False" CanUserAddRows="False" 
+                  IsReadOnly="False" SelectionMode="Single"
+                  GridLinesVisibility="Horizontal" AlternatingRowBackground="#F8F9FA"
+                  HeadersVisibility="Column" RowHeight="35"
+                  MouseDoubleClick="DataGrid_MouseDoubleClick"
+                  CellEditEnding="BancheGrid_CellEditEnding">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
+                <DataGridTextColumn Header="Nome Banca" Binding="{Binding NomeBanca}" Width="*" MinWidth="200"/>
+                <DataGridTextColumn Header="IBAN" Binding="{Binding IBAN}" Width="200"/>
+                <DataGridTemplateColumn Header="Saldo Corrente" Width="150">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding SaldoDelGiorno, StringFormat='{}{0:N2} €'}" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding SaldoDelGiorno, UpdateSourceTrigger=PropertyChanged}" Background="#FFFACD" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                    <DataGridTemplateColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Background" Value="#FFFACD"/>
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="ToolTip" Value="Doppio click per modificare"/>
+                        </Style>
+                    </DataGridTemplateColumn.CellStyle>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Fido C/C" Width="120">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding FidoCCAccordato, StringFormat='{}{0:N2} €'}" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding FidoCCAccordato, UpdateSourceTrigger=PropertyChanged}" Background="#FFFACD" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                    <DataGridTemplateColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Background" Value="#FFFACD"/>
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="ToolTip" Value="Doppio click per modificare"/>
+                        </Style>
+                    </DataGridTemplateColumn.CellStyle>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Anticipo Max" Width="120">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding AnticipoFattureMassimo, StringFormat='{}{0:N2} €'}" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding AnticipoFattureMassimo, UpdateSourceTrigger=PropertyChanged}" Background="#FFFACD" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                    <DataGridTemplateColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Background" Value="#FFFACD"/>
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="ToolTip" Value="Doppio click per modificare"/>
+                        </Style>
+                    </DataGridTemplateColumn.CellStyle>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Interesse %" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding InteresseAnticipoFatture, StringFormat=F2}" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding InteresseAnticipoFatture, UpdateSourceTrigger=PropertyChanged}" Background="#FFFACD" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                    <DataGridTemplateColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Background" Value="#FFFACD"/>
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="ToolTip" Value="Doppio click per modificare"/>
+                        </Style>
+                    </DataGridTemplateColumn.CellStyle>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Azioni" Width="150">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Content="📋" Click="ApriDettaglioRiga_Click" 
+                                        Tag="{Binding}" Padding="5" Margin="2" Background="#3498DB" 
+                                        Foreground="White" BorderThickness="0" Cursor="Hand" ToolTip="Apri Dettaglio"/>
+                                <Button Content="✏️" Command="{Binding DataContext.ModificaBancaCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                        CommandParameter="{Binding}" Padding="5" Margin="2" Background="#F39C12" 
+                                        Foreground="White" BorderThickness="0" Cursor="Hand" ToolTip="Modifica"/>
+                                <Button Content="🗑️" Command="{Binding DataContext.EliminaBancaCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                        CommandParameter="{Binding}" Padding="5" Margin="2" Background="#E74C3C" 
+                                        Foreground="White" BorderThickness="0" Cursor="Hand" ToolTip="Elimina"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- FORM MODIFICA/CREAZIONE (POPUP) -->
+        <Border Grid.Row="0" Grid.RowSpan="4" Background="#80000000" 
+                Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Panel.ZIndex="100">
+            <Border Background="White" CornerRadius="10" Padding="30" Width="900" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <StackPanel>
+                    <TextBlock FontSize="22" FontWeight="Bold" Margin="0,0,0,20" Foreground="#2C3E50">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="Nuova Banca"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding BancaSelezionata}" Value="{x:Null}">
+                                        <Setter Property="Text" Value="Nuova Banca"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <!-- LAYOUT A 2 COLONNE -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- COLONNA 1 -->
+                        <!-- Nome Banca -->
+                        <StackPanel Grid.Row="0" Grid.Column="0">
+                            <TextBlock Text="Nome Banca *" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                            <TextBox Text="{Binding NomeBanca, UpdateSourceTrigger=PropertyChanged}" Padding="8" Margin="0,0,0,15"/>
+                        </StackPanel>
+
+                        <!-- IBAN -->
+                        <StackPanel Grid.Row="1" Grid.Column="0">
+                            <TextBlock Text="IBAN" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                            <TextBox Text="{Binding Iban, UpdateSourceTrigger=PropertyChanged}" Padding="8" Margin="0,0,0,15"/>
+                        </StackPanel>
+
+                        <!-- Fido C/C Accordato -->
+                        <StackPanel Grid.Row="2" Grid.Column="0">
+                            <TextBlock Text="Fido C/C Accordato (€)" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                            <TextBox Text="{Binding FidoCCAccordato, UpdateSourceTrigger=PropertyChanged}" Padding="8" Margin="0,0,0,15"/>
+                        </StackPanel>
+
+                        <!-- Interesse Anticipo Fatture -->
+                        <StackPanel Grid.Row="3" Grid.Column="0">
+                            <TextBlock Text="Interesse Anticipo Fatture (%)" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                            <TextBox Text="{Binding InteresseAnticipoFatture, UpdateSourceTrigger=PropertyChanged}" Padding="8" Margin="0,0,0,15"/>
+                        </StackPanel>
+
+                        <!-- COLONNA 2 -->
+                        <!-- Codice Identificativo -->
+                        <StackPanel Grid.Row="0" Grid.Column="2">
+                            <TextBlock Text="Codice Identificativo" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                            <TextBox Text="{Binding CodiceIdentificativo, UpdateSourceTrigger=PropertyChanged}" Padding="8" Margin="0,0,0,15"/>
+                        </StackPanel>
+
+                        <!-- Saldo del Giorno -->
+                        <StackPanel Grid.Row="1" Grid.Column="2">
+                            <TextBlock Text="Saldo del Giorno (€)" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                            <TextBox Text="{Binding SaldoDelGiorno, UpdateSourceTrigger=PropertyChanged}" Padding="8" Margin="0,0,0,15"/>
+                        </StackPanel>
+
+                        <!-- Anticipo Fatture Massimo -->
+                        <StackPanel Grid.Row="2" Grid.Column="2">
+                            <TextBlock Text="Anticipo Fatture Massimo (€)" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                            <TextBox Text="{Binding AnticipoFattureMassimo, UpdateSourceTrigger=PropertyChanged}" Padding="8" Margin="0,0,0,15"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- NOTE (FULL WIDTH) -->
+                    <TextBlock Text="Note" Margin="0,5,0,5" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}" 
+                             Padding="8" Height="70" TextWrapping="Wrap" AcceptsReturn="True" 
+                             VerticalScrollBarVisibility="Auto" Margin="0,0,0,20"/>
+
+                    <!-- PULSANTI -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="💾 Salva" Command="{Binding SalvaBancaCommand}" 
+                                Padding="20,10" Margin="0,0,10,0" Background="#27AE60" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                        <Button Content="❌ Annulla" Command="{Binding AnnullaModificaCommand}" 
+                                Padding="20,10" Background="#95A5A6" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+    </Grid>
+</UserControl>
+
