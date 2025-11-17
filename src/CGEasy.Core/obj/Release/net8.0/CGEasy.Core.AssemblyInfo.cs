@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CGEasy.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+99ba893ecee568da04d4ca5eb843c4423021a405")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2e4cbca76401d3509480a50bef734bf62e6135a2")]
 [assembly: System.Reflection.AssemblyProductAttribute("CGEasy.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CGEasy.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
