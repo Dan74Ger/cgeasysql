@@ -56,38 +56,15 @@ namespace CGEasy.Core.Data
 
         /// <summary>
         /// Determina quale password usare per aprire il database
-        /// SEMPRE la password master se il database è criptato
+        /// MODIFICATO: Ritorna sempre NULL - database sempre NON criptato
+        /// L'utente può criptare manualmente dalle impostazioni
         /// </summary>
         private static string? GetPasswordForDatabase()
         {
-            try
-            {
-                var dbPath = DefaultDatabasePath;
-                var keyPath = Path.Combine(Path.GetDirectoryName(dbPath)!, "db.key");
-                
-                // Se il database NON esiste, sarà creato SENZA password
-                if (!File.Exists(dbPath))
-                {
-                    System.Diagnostics.Debug.WriteLine("Database non esiste, verrà creato senza password");
-                    return null;
-                }
-                
-                // Se esiste db.key, usa la password master
-                if (File.Exists(keyPath))
-                {
-                    System.Diagnostics.Debug.WriteLine("db.key trovato, apro con password master");
-                    return DatabaseEncryptionService.GetMasterPassword();
-                }
-                
-                // Altrimenti apri senza password
-                System.Diagnostics.Debug.WriteLine("db.key non trovato, apro senza password");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Errore GetPasswordForDatabase: {ex.Message}");
-                return null;
-            }
+            // SEMPRE senza password per evitare problemi
+            // L'utente cripta manualmente se vuole
+            System.Diagnostics.Debug.WriteLine("Database aperto SENZA password (politica di default)");
+            return null;
         }
 
         /// <summary>

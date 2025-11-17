@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CGEasy.App")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e4d3c4041a006cb5454e6353c8e29a41ecb9bc79")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+78e797ea39a9c988eb1c30b595d9f631dfef619e")]
 [assembly: System.Reflection.AssemblyProductAttribute("CGEasy.App")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CGEasy.App")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

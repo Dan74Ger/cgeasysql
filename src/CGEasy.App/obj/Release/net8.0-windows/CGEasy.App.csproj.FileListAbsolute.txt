@@ -348,3 +348,14 @@ C:\devcg-group\appcg_easy_project\src\CGEasy.App\obj\Release\net8.0-windows\View
 C:\devcg-group\appcg_easy_project\src\CGEasy.App\obj\Release\net8.0-windows\Views\StatisticheBilanciSPView.baml
 C:\devcg-group\appcg_easy_project\src\CGEasy.App\obj\Release\net8.0-windows\Views\InputDialogView.baml
 C:\devcg-group\appcg_easy_project\src\CGEasy.App\obj\Release\net8.0-windows\Views\InputDialogView.g.cs
+C:\devcg-group\appcg_easy_project\src\CGEasy.App\bin\Release\net8.0-windows\OxyPlot.dll
+C:\devcg-group\appcg_easy_project\src\CGEasy.App\bin\Release\net8.0-windows\OxyPlot.Wpf.dll
+C:\devcg-group\appcg_easy_project\src\CGEasy.App\bin\Release\net8.0-windows\OxyPlot.Wpf.Shared.dll
+C:\devcg-group\appcg_easy_project\src\CGEasy.App\obj\Release\net8.0-windows\Views\ConfigurazioneIndiciView.baml
+C:\devcg-group\appcg_easy_project\src\CGEasy.App\obj\Release\net8.0-windows\Views\GraficiView.baml
+C:\devcg-group\appcg_easy_project\src\CGEasy.App\obj\Release\net8.0-windows\Views\IndicePersonalizzatoDialogView.baml
+C:\devcg-group\appcg_easy_project\src\CGEasy.App\obj\Release\net8.0-windows\Views\IndiciDiBilancioView.baml
+C:\devcg-group\appcg_easy_project\src\CGEasy.App\obj\Release\net8.0-windows\Views\ConfigurazioneIndiciView.g.cs
+C:\devcg-group\appcg_easy_project\src\CGEasy.App\obj\Release\net8.0-windows\Views\GraficiView.g.cs
+C:\devcg-group\appcg_easy_project\src\CGEasy.App\obj\Release\net8.0-windows\Views\IndicePersonalizzatoDialogView.g.cs
+C:\devcg-group\appcg_easy_project\src\CGEasy.App\obj\Release\net8.0-windows\Views\IndiciDiBilancioView.g.cs

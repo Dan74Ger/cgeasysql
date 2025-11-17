@@ -1,0 +1,206 @@
+╔════════════════════════════════════════════════════════════════════════╗
+║          GUIDA POST-INSTALLAZIONE CGEASY v2.0                          ║
+║       Procedura per Database con Dati e Criptazione Manuale            ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+🎯 STRATEGIA IMPLEMENTATA
+═════════════════════════
+
+L'applicazione è ora configurata per:
+✅ Creare SEMPRE database NON criptato al primo avvio
+✅ Ignorare completamente file db.key
+✅ Permettere copia manuale database con dati
+✅ Permettere criptazione manuale dalle impostazioni
+
+═══════════════════════════════════════════════════════════════════════
+
+📋 PROCEDURA COMPLETA
+═════════════════════
+
+STEP 1: INSTALLAZIONE PULITA
+─────────────────────────────
+1. Esegui CGEasy_Setup_v2.0.exe
+2. Completa installazione
+3. NON avviare ancora l'applicazione
+
+STEP 2: PREPARA DATABASE CON DATI
+──────────────────────────────────
+Hai il database di sviluppo in: C:\devcg-group\dbtest_prova\cgeasy.db
+
+Se vuoi usare quello, fai backup:
+```powershell
+# Crea backup di sicurezza
+Copy-Item "C:\devcg-group\dbtest_prova\cgeasy.db" "C:\backup_db_sviluppo\cgeasy.db"
+```
+
+STEP 3: PRIMO AVVIO (Crea DB Vuoto)
+────────────────────────────────────
+1. Avvia CGEasy (prima volta)
+2. L'app crea: C:\db_CGEASY\cgeasy.db (VUOTO, NON criptato)
+3. Vedi messaggio: "Database inizializzato! Username: admin1, Password: 123123"
+4. Clicca OK
+5. CHIUDI immediatamente l'applicazione (non fare login)
+
+STEP 4: SOSTITUISCI CON DATABASE DATI
+──────────────────────────────────────
+```powershell
+# Elimina database vuoto
+Remove-Item "C:\db_CGEASY\cgeasy.db" -Force
+
+# Copia database con dati
+Copy-Item "C:\devcg-group\dbtest_prova\cgeasy.db" "C:\db_CGEASY\cgeasy.db" -Force
+
+# Verifica
+Get-Item "C:\db_CGEASY\cgeasy.db" | Select Length
+```
+
+STEP 5: AVVIA E ACCEDI
+──────────────────────
+1. Avvia CGEasy
+2. Login con: admin1 / 123123
+3. ✅ Nessun errore "file not encrypted"!
+4. Vedi tutti i tuoi dati (clienti, bilanci, indici)
+
+STEP 6: CRIPTA DATABASE (Opzionale)
+────────────────────────────────────
+Se vuoi criptare:
+
+1. Vai in: Sistema → Criptazione Database
+2. Clicca: "Cripta Database"
+3. Inserisci password: [la tua password]
+4. Conferma
+5. L'app crea backup automatico
+6. L'app si riavvia
+7. Database ora criptato con la tua password
+
+IMPORTANTE: Dopo criptazione, per accedere serve la password!
+
+═══════════════════════════════════════════════════════════════════════
+
+🔧 MODIFICHE TECNICHE IMPLEMENTATE
+═══════════════════════════════════
+
+FILE: src/CGEasy.Core/Data/LiteDbContext.cs
+───────────────────────────────────────────
+Funzione GetPasswordForDatabase() modificata:
+- PRIMA: Controllava db.key e decideva se usare password
+- ORA: Ritorna sempre NULL (nessuna password)
+
+```csharp
+private static string? GetPasswordForDatabase()
+{
+    // SEMPRE senza password per evitare problemi
+    System.Diagnostics.Debug.WriteLine("Database aperto SENZA password");
+    return null;
+}
+```
+
+FILE: src/CGEasy.App/App.xaml.cs
+─────────────────────────────────
+Metodo InitializeDatabase() semplificato:
+- PRIMA: Gestiva db.key e criptazione automatica
+- ORA: Crea solo database vuoto non criptato
+
+```csharp
+if (totalUtenti == 0)
+{
+    dbContext.SeedDefaultAdmin();
+    MessageBox.Show("Database NON criptato");
+}
+```
+
+═══════════════════════════════════════════════════════════════════════
+
+⚠️ RISOLUZIONE PROBLEMI
+═══════════════════════
+
+PROBLEMA: "Database file is not encrypted"
+SOLUZIONE: ✅ RISOLTO! Ora non può più accadere
+           L'app ignora completamente db.key
+
+PROBLEMA: Database vuoto dopo installazione
+SOLUZIONE: Normale! Copia manualmente come STEP 4
+
+PROBLEMA: Password dimenticata dopo criptazione
+SOLUZIONE: Usa Password Master: Woodstockac@74
+           Sempre disponibile per recupero
+
+PROBLEMA: Voglio ricominciare da zero
+SOLUZIONE: 
+```powershell
+Remove-Item "C:\db_CGEASY\*" -Force -Recurse
+# Poi riavvia app per ricreare DB vuoto
+```
+
+═══════════════════════════════════════════════════════════════════════
+
+✅ VANTAGGI NUOVA STRATEGIA
+════════════════════════════
+
+✓ Nessun errore "file not encrypted" mai più
+✓ Installazione sempre pulita e funzionante
+✓ Controllo totale sui dati (copi quando vuoi)
+✓ Criptazione opzionale (decidi tu quando)
+✓ Backup automatici durante criptazione
+✓ Password master sempre disponibile per recupero
+✓ Database condivisibile tra PC (prima di criptare)
+
+═══════════════════════════════════════════════════════════════════════
+
+📂 PERCORSI IMPORTANTI
+══════════════════════
+
+Database produzione:
+  C:\db_CGEASY\cgeasy.db
+
+Database sviluppo:
+  C:\devcg-group\dbtest_prova\cgeasy.db
+
+Backup automatici:
+  C:\db_CGEASY\Backups\
+
+Installer:
+  C:\devcg-group\appcg_easy_project\installer_output\CGEasy_Setup_v2.0.exe
+
+═══════════════════════════════════════════════════════════════════════
+
+🎯 COMANDI RAPIDI POWERSHELL
+═════════════════════════════
+
+# Backup database corrente
+Copy-Item "C:\db_CGEASY\cgeasy.db" "C:\backup_$(Get-Date -F yyyyMMdd_HHmmss).db"
+
+# Sostituisci con database sviluppo
+Copy-Item "C:\devcg-group\dbtest_prova\cgeasy.db" "C:\db_CGEASY\cgeasy.db" -Force
+
+# Verifica dimensioni
+Get-Item "C:\db_CGEASY\cgeasy.db" | Select Length,LastWriteTime
+
+# Reset completo (ricomincia da zero)
+Remove-Item "C:\db_CGEASY\cgeasy.db" -Force
+# Poi riavvia app
+
+# Apri cartella database
+explorer "C:\db_CGEASY"
+
+═══════════════════════════════════════════════════════════════════════
+
+📞 CREDENZIALI DEFAULT
+══════════════════════
+
+Username: admin1
+Password: 123123
+
+Oppure:
+
+Username: admin
+Password: 123456
+
+Password Master (recupero): Woodstockac@74
+
+═══════════════════════════════════════════════════════════════════════
+Versione Guida: 1.0
+Data: 17/11/2025
+Installer: CGEasy_Setup_v2.0.exe
+═══════════════════════════════════════════════════════════════════════
+

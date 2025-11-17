@@ -413,12 +413,14 @@ public partial class App : Application
                         // Crea admin di default
                         dbContext.SeedDefaultAdmin();
                         System.Diagnostics.Debug.WriteLine("✅ Database inizializzato con utente admin");
+                        System.Diagnostics.Debug.WriteLine("ℹ️ Database creato SENZA criptazione");
                         
-                        // 🔐 Criptazione manuale tramite menu Sistema
-                        // Database creato NON criptato per evitare problemi al primo avvio
-                        System.Diagnostics.Debug.WriteLine("ℹ️ Database creato senza criptazione");
-                        
-                        MessageBox.Show("Database inizializzato!\n\nCredenziali di accesso:\nUsername: admin1\nPassword: 123123", 
+                        MessageBox.Show("✅ Database inizializzato!\n\n" +
+                                      "Credenziali di accesso:\n" +
+                                      "Username: admin1\n" +
+                                      "Password: 123123\n\n" +
+                                      "⚠️ Database NON criptato.\n" +
+                                      "Puoi criptarlo dalle impostazioni Sistema.", 
                                       "Primo Avvio", 
                                       MessageBoxButton.OK, 
                                       MessageBoxImage.Information);
