@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Incasso da Cliente" 
-        Height="820" Width="700"
+        Height="1200" Width="750"
         WindowStartupLocation="CenterOwner"
         Background="White">
     <Border Padding="25">
@@ -19,24 +19,26 @@
             <!-- HEADER -->
             <TextBlock Grid.Row="0" Text="📥 Incasso da Cliente" FontSize="20" FontWeight="Bold" Foreground="#2C3E50" Margin="0,0,0,20"/>
 
-            <!-- FORM -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="15"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/> <!-- Nuova riga per note -->
-                </Grid.RowDefinitions>
+            <!-- FORM CON SCROLL -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/> <!-- Checkbox Incassato -->
+                        <RowDefinition Height="Auto"/> <!-- Note -->
+                    </Grid.RowDefinitions>
 
                 <!-- COLONNA 1 -->
                 <StackPanel Grid.Row="0" Grid.Column="0">
@@ -126,21 +128,23 @@
                                Foreground="#FF9800" ToolTip="Anticipo chiuso tramite C/C, storno non visibile in Saldo Previsto"/>
                 </StackPanel>
 
-                <!-- CHECKBOX INCASSATO -->
-                <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <!-- RIGA 8: CHECKBOX INCASSATO -->
+                <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10,0,15">
                     <CheckBox IsChecked="{Binding Incassato, UpdateSourceTrigger=PropertyChanged}" 
                               VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBlock Text="Incassato" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <TextBlock Text="✅ Incassato" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Foreground="#27AE60"/>
                 </StackPanel>
 
-                <!-- NOTE (FULL WIDTH) -->
-                <StackPanel Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3">
-                    <TextBlock Text="Note" Margin="0,5,0,5" FontWeight="SemiBold"/>
+                <!-- RIGA 9: NOTE (FULL WIDTH) -->
+                <StackPanel Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,10">
+                    <TextBlock Text="📝 Note" Margin="0,0,0,8" FontWeight="Bold" FontSize="13"/>
                     <TextBox Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}" 
-                             Padding="8" Height="60" TextWrapping="Wrap" AcceptsReturn="True" 
-                             VerticalScrollBarVisibility="Auto" FontSize="13"/>
+                             Padding="10" Height="100" TextWrapping="Wrap" AcceptsReturn="True" 
+                             VerticalScrollBarVisibility="Auto" FontSize="13"
+                             BorderBrush="#BDC3C7" BorderThickness="1"/>
                 </StackPanel>
             </Grid>
+        </ScrollViewer>
 
             <!-- PULSANTI -->
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">

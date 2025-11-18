@@ -303,6 +303,27 @@
                                     </Style>
                                 </DataGridTemplateColumn.CellStyle>
                             </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Note" Width="200">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Note}" VerticalAlignment="Center" TextWrapping="Wrap" MaxHeight="60"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}" 
+                                                 Background="#FFFACD" TextWrapping="Wrap" AcceptsReturn="True" 
+                                                 VerticalScrollBarVisibility="Auto"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                                <DataGridTemplateColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="Background" Value="#FFFACD"/>
+                                        <Setter Property="Foreground" Value="Black"/>
+                                        <Setter Property="ToolTip" Value="Doppio click per modificare"/>
+                                    </Style>
+                                </DataGridTemplateColumn.CellStyle>
+                            </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Azioni" Width="100">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
