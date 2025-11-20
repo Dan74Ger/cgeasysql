@@ -1,18 +1,18 @@
 @echo off
 REM ========================================================
-REM SCRIPT BACKUP PROGETTO CG EASY
+REM SCRIPT BACKUP PROGETTO CG EASY SQL SERVER
 REM Copia progetto completo + database in cartella backup
 REM ========================================================
 
 echo.
 echo ========================================
-echo   BACKUP PROGETTO CG EASY v2.0
+echo   BACKUP PROGETTO CG EASY SQL v2.1
 echo ========================================
 echo.
 
 REM Imposta percorsi
 set SOURCE_DIR=%~dp0
-set BACKUP_DIR=c:\devcg-group\backup
+set BACKUP_DIR=C:\CGEASY_sql\backup
 set TIMESTAMP=%date:~-4%%date:~3,2%%date:~0,2%_%time:~0,2%%time:~3,2%%time:~6,2%
 set TIMESTAMP=%TIMESTAMP: =0%
 set BACKUP_FOLDER=%BACKUP_DIR%\cgeasy_backup_%TIMESTAMP%
@@ -65,40 +65,27 @@ echo       File .cs copiati: %CS_COUNT%
 echo       File .csproj copiati: %PROJ_COUNT%
 echo       File .xaml copiati: %XAML_COUNT%
 
-REM Cerca database LiteDB (se esiste)
-if exist "%SOURCE_DIR%\*.db" (
+REM Copia connection string SQL Server
+set DB_CONFIG_PATH=C:\db_CGEASY
+if exist "%DB_CONFIG_PATH%\connectionstring.txt" (
     echo.
-    echo [+] Database LiteDB trovato - Copia database...
-    copy "%SOURCE_DIR%\*.db" "%BACKUP_FOLDER%\" /Y >nul 2>&1
-    echo       FATTO: Database copiato
-) else (
-    echo.
-    echo [!] Nessun database .db trovato (verra' incluso nei backup futuri)
-)
-
-REM Cerca database in cartella Data
-if exist "%SOURCE_DIR%\Data\*.db" (
-    echo [+] Database in cartella Data trovato...
-    xcopy "%SOURCE_DIR%\Data\*.db" "%BACKUP_FOLDER%\Data\" /I /Y >nul 2>&1
-    echo       FATTO: Database Data\ copiato
-)
-
-REM Copia database da C:\Users\Public\Documents\CGEasy
-set DB_PUBLIC_PATH=C:\Users\Public\Documents\CGEasy
-if exist "%DB_PUBLIC_PATH%\cgeasy.db" (
-    echo.
-    echo [+] Database CGEasy trovato in Public Documents...
+    echo [+] Connection string SQL Server trovata...
     if not exist "%BACKUP_FOLDER%\Database\" mkdir "%BACKUP_FOLDER%\Database\"
-    copy "%DB_PUBLIC_PATH%\cgeasy.db" "%BACKUP_FOLDER%\Database\cgeasy.db" /Y >nul 2>&1
-    if errorlevel 1 (
-        echo       ATTENZIONE: Impossibile copiare database (potrebbe essere in uso)
-    ) else (
-        echo       FATTO: Database CGEasy copiato in \Database\cgeasy.db
-    )
-) else (
-    echo.
-    echo [!] Database CGEasy non trovato in %DB_PUBLIC_PATH%
+    copy "%DB_CONFIG_PATH%\connectionstring.txt" "%BACKUP_FOLDER%\Database\connectionstring.txt" /Y >nul 2>&1
+    echo       FATTO: Connection string copiata in \Database\
 )
+
+REM Copia migrations EF Core
+if exist "%SOURCE_DIR%\src\CGEasy.Core\Migrations\" (
+    echo [+] Migrations EF Core trovate...
+    xcopy "%SOURCE_DIR%\src\CGEasy.Core\Migrations\*.*" "%BACKUP_FOLDER%\src\CGEasy.Core\Migrations\" /I /Y /S >nul 2>&1
+    echo       FATTO: Migrations copiate
+)
+
+REM Note: Database SQL Server non viene copiato (gestito da backup SQL Server separato)
+echo.
+echo [INFO] Database SQL Server: Backup gestito separatamente dal server
+echo        Repository: https://github.com/Dan74Ger/cgeasysql
 
 echo.
 echo ========================================

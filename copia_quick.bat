@@ -1,15 +1,15 @@
 @echo off
 REM ========================================================
-REM BACKUP RAPIDO PROGETTO CG EASY (senza timestamp)
-REM Sovrascrive backup precedente in c:\devcg-group\backup\cgeasy_latest
+REM BACKUP RAPIDO PROGETTO CG EASY SQL SERVER (senza timestamp)
+REM Sovrascrive backup precedente in C:\CGEASY_sql\backup\cgeasy_latest
 REM ========================================================
 
 echo.
-echo === BACKUP RAPIDO CG EASY v2.0 ===
+echo === BACKUP RAPIDO CG EASY SQL v2.1 ===
 echo.
 
 set SOURCE_DIR=%~dp0
-set BACKUP_DIR=c:\devcg-group\backup\cgeasy_latest
+set BACKUP_DIR=C:\CGEASY_sql\backup\cgeasy_latest
 
 echo Backup in corso...
 echo Da: %SOURCE_DIR%
