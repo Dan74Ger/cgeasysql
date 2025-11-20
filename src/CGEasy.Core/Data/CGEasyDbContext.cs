@@ -381,25 +381,32 @@ namespace CGEasy.Core.Data
         {
             try
             {
-                // Percorso file connection string
-                var configPath = Path.Combine(@"C:\db_CGEASY", "connectionstring.txt");
-
-                if (File.Exists(configPath))
+                // NUOVO SISTEMA: Carica configurazione da sqlconfig.json
+                // Supporta server remoti, istanze SQL diverse, autenticazione SQL/Windows
+                var sqlConfig = SqlServerConfig.Load();
+                
+                // Valida configurazione
+                if (!sqlConfig.IsValid(out string errorMessage))
                 {
-                    var connectionString = File.ReadAllText(configPath).Trim();
-                    Console.WriteLine($"✅ Connection string caricata da: {configPath}");
-                    return connectionString;
+                    throw new InvalidOperationException($"Configurazione SQL non valida: {errorMessage}");
                 }
-
-                // Fallback: connection string di default
-                var defaultConnectionString = "Server=localhost\\SQLEXPRESS;Database=CGEasy;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True;";
-                Console.WriteLine($"⚠️ File {configPath} non trovato, uso connection string di default");
-                return defaultConnectionString;
+                
+                var connectionString = sqlConfig.GetConnectionString();
+                Console.WriteLine($"✅ Connection string generata da: {SqlServerConfig.ConfigFilePath}");
+                Console.WriteLine($"   Server: {sqlConfig.GetServerInstance()}");
+                Console.WriteLine($"   Database: {sqlConfig.Database}");
+                Console.WriteLine($"   Auth: {sqlConfig.AuthenticationType}");
+                
+                return connectionString;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Errore lettura connection string: {ex.Message}");
-                throw;
+                Console.WriteLine($"❌ Errore caricamento configurazione SQL: {ex.Message}");
+                Console.WriteLine($"   Creo configurazione di default per localhost\\SQLEXPRESS");
+                
+                // Fallback estremo: connection string hardcoded
+                var fallbackConnectionString = "Server=localhost\\SQLEXPRESS;Database=CGEasy;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True;Connection Timeout=30;";
+                return fallbackConnectionString;
             }
         }
 

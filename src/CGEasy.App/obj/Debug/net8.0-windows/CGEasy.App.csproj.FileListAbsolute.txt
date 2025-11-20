@@ -459,3 +459,5 @@ C:\CGEASY_sql\appcg_easy_projectsql\src\CGEasy.App\obj\Debug\net8.0-windows\refi
 C:\CGEASY_sql\appcg_easy_projectsql\src\CGEasy.App\obj\Debug\net8.0-windows\CGEasy.App.pdb
 C:\CGEASY_sql\appcg_easy_projectsql\src\CGEasy.App\obj\Debug\net8.0-windows\CGEasy.App.genruntimeconfig.cache
 C:\CGEASY_sql\appcg_easy_projectsql\src\CGEasy.App\obj\Debug\net8.0-windows\ref\CGEasy.App.dll
+C:\CGEASY_sql\appcg_easy_projectsql\src\CGEasy.App\obj\Debug\net8.0-windows\Views\ConfigurazioneSqlView.baml
+C:\CGEASY_sql\appcg_easy_projectsql\src\CGEasy.App\obj\Debug\net8.0-windows\Views\ConfigurazioneSqlView.g.cs

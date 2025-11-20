@@ -1,0 +1,28 @@
+{
+  "_ISTRUZIONI": "File di configurazione SQL Server per CGEasy - Modifica i parametri secondo necessità",
+  "_SCENARI_COMUNI": {
+    "PC_Singolo": "server: localhost, instance: SQLEXPRESS, authentication_type: Windows",
+    "Server_Dedicato": "server: 192.168.1.100, instance: SQLEXPRESS o MSSQLSERVER, authentication_type: Windows o SQL",
+    "Istanza_Nominata": "server: SERVER01, instance: ISTANZAPROD, authentication_type: Windows"
+  },
+  
+  "server": "localhost",
+  "instance": "SQLEXPRESS",
+  "database": "CGEasy",
+  "authentication_type": "Windows",
+  "username": null,
+  "password": null,
+  "connection_timeout": 30,
+  "multiple_active_result_sets": true,
+  "trust_server_certificate": true,
+  
+  "_NOTE": {
+    "server": "Nome o IP del server SQL (localhost per PC locale, 192.168.x.x per server in rete)",
+    "instance": "Istanza SQL Server (SQLEXPRESS, MSSQLSERVER, o nome personalizzato). Lasciare vuoto per istanza default",
+    "authentication_type": "Tipo autenticazione: 'Windows' (consigliato) o 'SQL' (richiede username e password)",
+    "username": "Username SQL Server (solo se authentication_type = SQL)",
+    "password": "Password SQL Server (solo se authentication_type = SQL). ATTENZIONE: Salvata in chiaro!",
+    "riavvio": "IMPORTANTE: Riavviare l'applicazione dopo aver modificato questo file"
+  }
+}
+
