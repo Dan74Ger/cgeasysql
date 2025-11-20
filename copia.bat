@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 REM ========================================================
 REM SCRIPT BACKUP PROGETTO CG EASY SQL SERVER
 REM Copia progetto completo + database in cartella backup
