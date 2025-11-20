@@ -1,6 +1,7 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using CGEasy.Core.Data;
 using CGEasy.Core.Models;
 using CGEasy.Core.Repositories;
@@ -8,7 +9,7 @@ using CGEasy.Core.Repositories;
 namespace CGEasy.Core.Services
 {
     /// <summary>
-    /// Service per gestione circolari con file system
+    /// Service per gestione circolari con file system (ASYNC)
     /// Gestisce salvataggio/spostamento/eliminazione file
     /// </summary>
     public class CircolariService
@@ -17,15 +18,13 @@ namespace CGEasy.Core.Services
         private readonly ArgomentiRepository _argomentiRepo;
         private readonly string _basePath;
 
-        public CircolariService(LiteDbContext context)
+        public CircolariService(CGEasyDbContext context)
         {
             _circolariRepo = new CircolariRepository(context);
             _argomentiRepo = new ArgomentiRepository(context);
 
-            // Percorso base: stessa cartella del database + \Circolari
-            var dbPath = LiteDbContext.DefaultDatabasePath;
-            var dbDirectory = Path.GetDirectoryName(dbPath) ?? @"C:\devcg-group\dbtest_prova";
-            _basePath = Path.Combine(dbDirectory, "Circolari");
+            // Percorso base: C:\db_CGEASY\Circolari
+            _basePath = Path.Combine(@"C:\db_CGEASY", "Circolari");
 
             // Assicura esistenza cartella base
             if (!Directory.Exists(_basePath))
@@ -35,9 +34,9 @@ namespace CGEasy.Core.Services
         }
 
         /// <summary>
-        /// Importa una nuova circolare con file
+        /// Importa una nuova circolare con file (ASYNC)
         /// </summary>
-        public int ImportaCircolare(int argomentoId, string descrizione, int anno, string sourceFilePath, int utenteId)
+        public async Task<int> ImportaCircolareAsync(int argomentoId, string descrizione, int anno, string sourceFilePath, int utenteId)
         {
             // Validazione
             if (argomentoId <= 0) throw new ArgumentException("Argomento non valido");
@@ -46,7 +45,7 @@ namespace CGEasy.Core.Services
             if (!File.Exists(sourceFilePath)) throw new FileNotFoundException("File non trovato", sourceFilePath);
 
             // Ottiene nome argomento
-            var argomento = _argomentiRepo.GetById(argomentoId);
+            var argomento = await _argomentiRepo.GetByIdAsync(argomentoId);
             if (argomento == null) throw new ArgumentException("Argomento non trovato");
 
             // Crea struttura cartelle: Circolari\[Anno]\[Argomento]
@@ -86,23 +85,23 @@ namespace CGEasy.Core.Services
                 UtenteId = utenteId
             };
 
-            return _circolariRepo.Insert(circolare);
+            return await _circolariRepo.InsertAsync(circolare);
         }
 
         /// <summary>
-        /// Modifica circolare esistente (aggiorna metadati e sposta file se necessario)
+        /// Modifica circolare esistente (ASYNC)
         /// </summary>
-        public bool ModificaCircolare(int circolareId, int nuovoArgomentoId, string nuovaDescrizione, int nuovoAnno)
+        public async Task<bool> ModificaCircolareAsync(int circolareId, int nuovoArgomentoId, string nuovaDescrizione, int nuovoAnno)
         {
             // Validazione
             if (nuovoArgomentoId <= 0) throw new ArgumentException("Argomento non valido");
             if (string.IsNullOrWhiteSpace(nuovaDescrizione)) throw new ArgumentException("Descrizione obbligatoria");
             if (nuovoAnno < 1900 || nuovoAnno > 2100) throw new ArgumentException("Anno non valido");
 
-            var circolare = _circolariRepo.GetById(circolareId);
+            var circolare = await _circolariRepo.GetByIdAsync(circolareId);
             if (circolare == null) return false;
 
-            var argomento = _argomentiRepo.GetById(nuovoArgomentoId);
+            var argomento = await _argomentiRepo.GetByIdAsync(nuovoArgomentoId);
             if (argomento == null) throw new ArgumentException("Argomento non trovato");
 
             // Verifica se serve spostare il file
@@ -148,15 +147,15 @@ namespace CGEasy.Core.Services
             circolare.Descrizione = nuovaDescrizione;
             circolare.Anno = nuovoAnno;
 
-            return _circolariRepo.Update(circolare);
+            return await _circolariRepo.UpdateAsync(circolare);
         }
 
         /// <summary>
-        /// Elimina circolare (record DB + file fisico)
+        /// Elimina circolare (ASYNC)
         /// </summary>
-        public bool EliminaCircolare(int circolareId)
+        public async Task<bool> EliminaCircolareAsync(int circolareId)
         {
-            var circolare = _circolariRepo.GetById(circolareId);
+            var circolare = await _circolariRepo.GetByIdAsync(circolareId);
             if (circolare == null) return false;
 
             // Elimina file fisico
@@ -175,15 +174,15 @@ namespace CGEasy.Core.Services
             }
 
             // Elimina record database
-            return _circolariRepo.Delete(circolareId);
+            return await _circolariRepo.DeleteAsync(circolareId);
         }
 
         /// <summary>
-        /// Apre il file della circolare con applicazione predefinita
+        /// Apre il file della circolare con applicazione predefinita (ASYNC)
         /// </summary>
-        public bool ApriCircolare(int circolareId)
+        public async Task<bool> ApriCircolareAsync(int circolareId)
         {
-            var circolare = _circolariRepo.GetById(circolareId);
+            var circolare = await _circolariRepo.GetByIdAsync(circolareId);
             if (circolare == null) return false;
 
             var percorsoCompleto = Path.Combine(_basePath, circolare.PercorsoFile);
@@ -205,24 +204,45 @@ namespace CGEasy.Core.Services
         }
 
         /// <summary>
-        /// Ottiene il percorso completo del file
+        /// Ottiene il percorso completo del file (ASYNC)
         /// </summary>
-        public string? GetPercorsoCompleto(int circolareId)
+        public async Task<string?> GetPercorsoCompletoAsync(int circolareId)
         {
-            var circolare = _circolariRepo.GetById(circolareId);
+            var circolare = await _circolariRepo.GetByIdAsync(circolareId);
             if (circolare == null) return null;
 
             return Path.Combine(_basePath, circolare.PercorsoFile);
         }
 
         /// <summary>
-        /// Verifica se il file esiste fisicamente
+        /// Verifica se il file esiste fisicamente (ASYNC)
         /// </summary>
-        public bool FileExists(int circolareId)
+        public async Task<bool> FileExistsAsync(int circolareId)
         {
-            var percorso = GetPercorsoCompleto(circolareId);
+            var percorso = await GetPercorsoCompletoAsync(circolareId);
             return percorso != null && File.Exists(percorso);
+        }
+
+        // ===== WRAPPER SINCRONI PER COMPATIBILITÀ =====
+
+        public int ImportaCircolare(int argomentoId, string descrizione, int anno, string sourceFilePath, int utenteId)
+        {
+            return ImportaCircolareAsync(argomentoId, descrizione, anno, sourceFilePath, utenteId).GetAwaiter().GetResult();
+        }
+
+        public bool ModificaCircolare(int circolareId, int nuovoArgomentoId, string nuovaDescrizione, int nuovoAnno)
+        {
+            return ModificaCircolareAsync(circolareId, nuovoArgomentoId, nuovaDescrizione, nuovoAnno).GetAwaiter().GetResult();
+        }
+
+        public bool EliminaCircolare(int circolareId)
+        {
+            return EliminaCircolareAsync(circolareId).GetAwaiter().GetResult();
+        }
+
+        public bool ApriCircolare(int circolareId)
+        {
+            return ApriCircolareAsync(circolareId).GetAwaiter().GetResult();
         }
     }
 }
-

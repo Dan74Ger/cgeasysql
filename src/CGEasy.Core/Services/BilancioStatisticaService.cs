@@ -1,4 +1,4 @@
-using CGEasy.Core.Data;
+﻿using CGEasy.Core.Data;
 using CGEasy.Core.Models;
 using CGEasy.Core.Repositories;
 using CGEasy.Core.Helpers;
@@ -17,7 +17,7 @@ public class BilancioStatisticaService
     private readonly BilancioTemplateRepository _templateRepo;
     private readonly BilancioContabileRepository _bilancioRepo;
 
-    public BilancioStatisticaService(LiteDbContext context)
+    public BilancioStatisticaService(CGEasyDbContext context)
     {
         _associazioneRepo = new AssociazioneMastrinoRepository(context);
         _templateRepo = new BilancioTemplateRepository(context);

@@ -1,97 +1,87 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using CGEasy.Core.Data;
 using CGEasy.Core.Models;
 
 namespace CGEasy.Core.Repositories
 {
     /// <summary>
-    /// Repository per gestione Argomenti (categorie circolari)
-    /// Pattern Shared mode per multi-client
+    /// Repository per gestione Argomenti (EF Core async)
     /// </summary>
     public class ArgomentiRepository
     {
-        private readonly LiteDbContext _context;
+        private readonly CGEasyDbContext _context;
 
-        public ArgomentiRepository(LiteDbContext context)
+        public ArgomentiRepository(CGEasyDbContext context)
         {
             _context = context;
         }
 
-        /// <summary>
-        /// Ottiene tutti gli argomenti ordinati per nome
-        /// </summary>
-        public List<Argomento> GetAll()
+        public async Task<List<Argomento>> GetAllAsync()
         {
-            return _context.Argomenti
-                .FindAll()
+            return await _context.Argomenti
+                .AsNoTracking()
                 .OrderBy(x => x.Nome)
-                .ToList(); // Materializza per evitare conflitti reader in Shared mode
+                .ToListAsync();
         }
 
-        /// <summary>
-        /// Ottiene un argomento per ID
-        /// </summary>
-        public Argomento? GetById(int id)
+        public async Task<Argomento?> GetByIdAsync(int id)
         {
-            return _context.Argomenti.FindById(id);
+            return await _context.Argomenti.FindAsync(id);
         }
 
-        /// <summary>
-        /// Cerca argomenti per nome (case-insensitive)
-        /// </summary>
-        public List<Argomento> Search(string searchTerm)
+        public async Task<List<Argomento>> SearchAsync(string searchTerm)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
-                return GetAll();
+                return await GetAllAsync();
 
             var term = searchTerm.ToLowerInvariant();
-            return _context.Argomenti
-                .Find(x => x.Nome.ToLower().Contains(term) || 
+            return await _context.Argomenti
+                .Where(x => x.Nome.ToLower().Contains(term) || 
                            (x.Descrizione != null && x.Descrizione.ToLower().Contains(term)))
                 .OrderBy(x => x.Nome)
-                .ToList();
+                .ToListAsync();
         }
 
-        /// <summary>
-        /// Inserisce nuovo argomento
-        /// </summary>
-        public int Insert(Argomento argomento)
+        public async Task<int> InsertAsync(Argomento argomento)
         {
-            return _context.Argomenti.Insert(argomento);
+            _context.Argomenti.Add(argomento);
+            await _context.SaveChangesAsync();
+            return argomento.Id;
         }
 
-        /// <summary>
-        /// Aggiorna argomento esistente
-        /// </summary>
-        public bool Update(Argomento argomento)
+        public async Task<bool> UpdateAsync(Argomento argomento)
         {
-            return _context.Argomenti.Update(argomento);
+            _context.Argomenti.Update(argomento);
+            return await _context.SaveChangesAsync() > 0;
         }
 
-        /// <summary>
-        /// Elimina argomento per ID
-        /// </summary>
-        public bool Delete(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            return _context.Argomenti.Delete(id);
+            var entity = await GetByIdAsync(id);
+            if (entity == null) return false;
+            _context.Argomenti.Remove(entity);
+            return await _context.SaveChangesAsync() > 0;
         }
 
-        /// <summary>
-        /// Verifica se esistono circolari associate all'argomento
-        /// </summary>
-        public bool HasCircolariAssociate(int argomentoId)
+        public async Task<bool> HasCircolariAssociateAsync(int argomentoId)
         {
-            return _context.Circolari.Exists(c => c.ArgomentoId == argomentoId);
+            return await _context.Circolari.AnyAsync(c => c.ArgomentoId == argomentoId);
         }
 
-        /// <summary>
-        /// Conta circolari per argomento
-        /// </summary>
-        public int CountCircolari(int argomentoId)
+        public async Task<int> CountCircolariAsync(int argomentoId)
         {
-            return _context.Circolari.Count(c => c.ArgomentoId == argomentoId);
+            return await _context.Circolari.CountAsync(c => c.ArgomentoId == argomentoId);
         }
+
+        // ===== WRAPPER SINCRONI PER COMPATIBILITÀ =====
+
+        public List<Argomento> GetAll() => GetAllAsync().GetAwaiter().GetResult();
+        public Argomento? GetById(int id) => GetByIdAsync(id).GetAwaiter().GetResult();
+        public int Insert(Argomento argomento) => InsertAsync(argomento).GetAwaiter().GetResult();
+        public bool Update(Argomento argomento) => UpdateAsync(argomento).GetAwaiter().GetResult();
+        public bool Delete(int id) => DeleteAsync(id).GetAwaiter().GetResult();
     }
 }
-

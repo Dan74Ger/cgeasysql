@@ -10,7 +10,7 @@ namespace CGEasy.App.Views;
 
 public partial class BilancioTemplateGruppoEditDialogView : Window
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly BilancioTemplateRepository _repository;
     private readonly int _clienteId;
     private readonly int _meseOriginale;
@@ -26,7 +26,7 @@ public partial class BilancioTemplateGruppoEditDialogView : Window
     {
         InitializeComponent();
 
-        _context = ((App)Application.Current).Services!.GetRequiredService<LiteDbContext>();
+        _context = ((App)Application.Current).Services!.GetRequiredService<CGEasyDbContext>();
         _repository = new BilancioTemplateRepository(_context);
         _clienteId = clienteId;
         _meseOriginale = mese;

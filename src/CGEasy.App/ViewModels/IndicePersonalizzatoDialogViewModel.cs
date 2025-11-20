@@ -41,7 +41,7 @@ public class MoltiplicatoreItem
 
 public partial class IndicePersonalizzatoDialogViewModel : ObservableObject
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly IndicePersonalizzatoRepository _indiceRepo;
     private readonly Cliente _cliente;
     private readonly IndicePersonalizzato? _indiceEsistente;
@@ -155,8 +155,8 @@ public partial class IndicePersonalizzatoDialogViewModel : ObservableObject
         StatisticaSPSalvata statisticaSP,
         IndicePersonalizzato? indiceEsistente = null)
     {
-        _context = App.GetService<LiteDbContext>() ?? new LiteDbContext();
-        _context.MarkAsSingleton();
+        _context = App.GetService<CGEasyDbContext>() ?? new CGEasyDbContext();
+        // Singleton context - no special marking needed in EF Core
 
         _indiceRepo = new IndicePersonalizzatoRepository(_context);
         _cliente = cliente;

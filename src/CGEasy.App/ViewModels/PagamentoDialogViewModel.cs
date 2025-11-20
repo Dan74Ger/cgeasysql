@@ -52,7 +52,7 @@ public partial class PagamentoDialogViewModel : ObservableObject
 
     public bool DialogResult { get; private set; }
 
-    public PagamentoDialogViewModel(LiteDbContext context, int bancaId, BancaPagamento? pagamentoEsistente = null)
+    public PagamentoDialogViewModel(CGEasyDbContext context, int bancaId, BancaPagamento? pagamentoEsistente = null)
     {
         _pagamentoRepo = new BancaPagamentoRepository(context);
         _auditService = new AuditLogService(context);

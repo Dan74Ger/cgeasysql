@@ -21,7 +21,7 @@ public partial class LicenseKeyEditDialogView : Window
         _licenseKey = licenseKey;
         _clienteName = clienteName;
         
-        var context = ((App)Application.Current).Services!.GetRequiredService<LiteDbContext>();
+        var context = ((App)Application.Current).Services!.GetRequiredService<CGEasyDbContext>();
         _repository = new LicenseRepository(context);
         
         LoadData();

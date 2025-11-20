@@ -61,7 +61,7 @@ public partial class AssociazioneMastrinoDialogViewModel : ObservableObject
 
     private bool _isLoading = false; // Flag per bloccare eventi durante caricamento
 
-    public AssociazioneMastrinoDialogViewModel(LiteDbContext context, int? associazioneId)
+    public AssociazioneMastrinoDialogViewModel(CGEasyDbContext context, int? associazioneId)
     {
         // ✅ Crea SOLO repository (come TODO)
         _associazioneRepository = new AssociazioneMastrinoRepository(context);
@@ -787,7 +787,7 @@ public partial class AssociazioneMastrinoDialogViewModel : ObservableObject
 
             // ✅ Log audit
             var app = (App)Application.Current;
-            var auditService = new AuditLogService(app.Services!.GetRequiredService<LiteDbContext>());
+            var auditService = new AuditLogService(app.Services!.GetRequiredService<CGEasyDbContext>());
             auditService.Log(
                 SessionManager.CurrentUser?.Id ?? 0,
                 SessionManager.CurrentUser?.Username ?? "System",

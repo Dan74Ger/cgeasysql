@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -293,7 +293,7 @@ public class LicenseService
     /// <summary>
     /// Valida una chiave di licenza (controlla se esiste nel database)
     /// </summary>
-    private static bool ValidateLicense(string moduleName, string licenseKey, LiteDbContext? context = null)
+    private static bool ValidateLicense(string moduleName, string licenseKey, CGEasyDbContext? context = null)
     {
         if (string.IsNullOrWhiteSpace(licenseKey))
             return false;
@@ -311,7 +311,7 @@ public class LicenseService
                 // Fallback: crea context temporaneo (può fallire se DB già aperto)
                 try
                 {
-                    using var tempContext = new LiteDbContext();
+                    using var tempContext = new CGEasyDbContext();
                     var repo = new LicenseRepository(tempContext);
                     return repo.IsKeyValid(licenseKey);
                 }
@@ -380,8 +380,8 @@ public class LicenseService
             // Fallback: apri nuovo contesto (solo se repository non disponibile)
             LogDebug($"🔍 Tentativo apertura database per validazione {moduleName}");
             
-            // Usa LiteDbContext che gestisce automaticamente la password
-            using var context = new LiteDbContext();
+            // Usa CGEasyDbContext
+            using var context = new CGEasyDbContext();
             var repo = new LicenseRepository(context);
             
             LogDebug($"🔍 Database aperto, cerco chiave nel DB");
@@ -446,7 +446,7 @@ public class LicenseService
     /// Genera chiave completa per modulo con cliente (DA USARE NELLA VISTA GESTIONE LICENZE)
     /// OGNI CHIAVE È UNICA E VIENE SALVATA NEL DATABASE
     /// </summary>
-    public static string GenerateLicenseKey(string moduleName, int licenseClientId, int generatedByUserId, LiteDbContext context)
+    public static string GenerateLicenseKey(string moduleName, int licenseClientId, int generatedByUserId, CGEasyDbContext context)
     {
         var guid = Guid.NewGuid().ToString();
         var hash = GenerateLicenseHash(moduleName, guid);

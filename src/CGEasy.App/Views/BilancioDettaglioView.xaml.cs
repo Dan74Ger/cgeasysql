@@ -9,7 +9,7 @@ public partial class BilancioDettaglioView : Window
     {
         InitializeComponent();
 
-        var context = ((App)Application.Current).Services!.GetRequiredService<CGEasy.Core.Data.LiteDbContext>();
+        var context = ((App)Application.Current).Services!.GetRequiredService<CGEasy.Core.Data.CGEasyDbContext>();
         DataContext = new ViewModels.BilancioDettaglioViewModel(context, clienteId, mese, anno, titolo);
     }
 }

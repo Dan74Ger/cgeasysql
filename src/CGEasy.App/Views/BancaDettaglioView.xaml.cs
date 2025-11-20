@@ -16,7 +16,7 @@ namespace CGEasy.App.Views
         public BancaDettaglioView(int bancaId)
         {
             InitializeComponent();
-            DataContext = new BancaDettaglioViewModel(new Core.Data.LiteDbContext(), bancaId);
+            DataContext = new BancaDettaglioViewModel(new Core.Data.CGEasyDbContext(), bancaId);
             DataContextChanged += BancaDettaglioView_DataContextChanged;
         }
 
@@ -735,7 +735,7 @@ namespace CGEasy.App.Views
                         System.Diagnostics.Debug.WriteLine($"Incasso modificato: {incasso.NomeCliente}, AnticipoGestito_CC: {incasso.AnticipoGestito_CC}, AnticipoChiuso_CC: {incasso.AnticipoChiuso_CC}");
                         
                         // Salva l'incasso modificato
-                        var incassoRepo = new Core.Repositories.BancaIncassoRepository(App.GetService<Core.Data.LiteDbContext>()!);
+                        var incassoRepo = new Core.Repositories.BancaIncassoRepository(App.GetService<Core.Data.CGEasyDbContext>()!);
                         incassoRepo.Update(incasso);
                         
                         // Ricarica i dati (il Saldo Previsto viene sempre aggiornato)
@@ -775,7 +775,7 @@ namespace CGEasy.App.Views
                     if (DataContext is BancaDettaglioViewModel vm && e.Row.Item is Core.Models.BancaPagamento pagamento)
                     {
                         // Salva il pagamento modificato
-                        var pagamentoRepo = new Core.Repositories.BancaPagamentoRepository(App.GetService<Core.Data.LiteDbContext>()!);
+                        var pagamentoRepo = new Core.Repositories.BancaPagamentoRepository(App.GetService<Core.Data.CGEasyDbContext>()!);
                         pagamentoRepo.Update(pagamento);
                         
                         // Ricarica i dati

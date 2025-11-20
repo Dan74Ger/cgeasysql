@@ -1,12 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CGEasy.Core.Services;
 using CGEasy.Core.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace CGEasy.App.ViewModels;
 
 public partial class DashboardViewModel : ObservableObject
 {
-    private readonly LiteDbContext _dbContext;
+    private readonly CGEasyDbContext _dbContext;
 
     [ObservableProperty]
     private string _welcomeMessage = string.Empty;
@@ -23,7 +24,7 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     private string _databasePath = string.Empty;
 
-    public DashboardViewModel(LiteDbContext dbContext)
+    public DashboardViewModel(CGEasyDbContext dbContext)
     {
         _dbContext = dbContext;
         LoadData();
@@ -39,12 +40,23 @@ public partial class DashboardViewModel : ObservableObject
             WelcomeMessage = $"{saluto}, {SessionManager.CurrentUser.Nome}!";
         }
 
-        // Carica statistiche database
-        var stats = _dbContext.GetStats();
-        TotalClienti = stats.TotalClienti;
-        TotalProfessionisti = stats.TotalProfessionisti;
-        TotalUtenti = stats.TotalUtenti;
-        DatabasePath = stats.DatabasePath;
+        // Carica statistiche database SQL Server
+        try
+        {
+            // ⚠️ Queste tabelle non sono ancora migrate - usiamo valori di default
+            TotalClienti = 0; // _dbContext.Clienti.Count(); quando sarà migrato
+            TotalProfessionisti = _dbContext.Professionisti.Count();
+            TotalUtenti = _dbContext.Utenti.Count();
+            DatabasePath = "SQL Server: localhost\\SQLEXPRESS - Database: CGEasy";
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Errore caricamento statistiche: {ex.Message}");
+            TotalClienti = 0;
+            TotalProfessionisti = 0;
+            TotalUtenti = 0;
+            DatabasePath = "Errore connessione database";
+        }
     }
 }
 

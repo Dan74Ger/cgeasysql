@@ -15,7 +15,7 @@ namespace CGEasy.App.Views;
 
 public partial class ImportExcelTemplateWizardView : Window
 {
-    private readonly LiteDbContext? _context;
+    private readonly CGEasyDbContext? _context;
     private readonly BilancioTemplateRepository? _repository;
     private readonly ClienteRepository? _clienteRepository;
     
@@ -28,7 +28,7 @@ public partial class ImportExcelTemplateWizardView : Window
         
         try
         {
-            _context = ((App)Application.Current).Services!.GetRequiredService<LiteDbContext>();
+            _context = ((App)Application.Current).Services!.GetRequiredService<CGEasyDbContext>();
             _repository = new BilancioTemplateRepository(_context);
             _clienteRepository = new ClienteRepository(_context);
 

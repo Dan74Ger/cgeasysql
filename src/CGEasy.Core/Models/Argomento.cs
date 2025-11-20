@@ -1,27 +1,32 @@
 using System;
-using LiteDB;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CGEasy.Core.Models
 {
     /// <summary>
-    /// Rappresenta un argomento per classificare le circolari
+    /// Rappresenta un argomento per classificare le circolari - EF Core
     /// </summary>
+    [Table("argomenti")]
     public class Argomento
     {
-        [BsonId]
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [BsonField("nome")]
+        [Column("nome")]
+        [Required]
+        [MaxLength(200)]
         public string Nome { get; set; } = string.Empty;
 
-        [BsonField("descrizione")]
+        [Column("descrizione")]
+        [MaxLength(1000)]
         public string? Descrizione { get; set; }
 
-        [BsonField("data_creazione")]
+        [Column("data_creazione")]
         public DateTime DataCreazione { get; set; } = DateTime.Now;
 
-        [BsonField("utente_id")]
+        [Column("utente_id")]
         public int UtenteId { get; set; }
     }
 }
-

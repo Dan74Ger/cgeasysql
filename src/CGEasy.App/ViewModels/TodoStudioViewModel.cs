@@ -58,7 +58,7 @@ public partial class TodoStudioViewModel : ObservableObject
     /// <summary>
     /// Costruttore con context
     /// </summary>
-    public TodoStudioViewModel(LiteDbContext context)
+    public TodoStudioViewModel(CGEasyDbContext context)
     {
         _todoRepository = new TodoStudioRepository(context);
         _clienteRepository = new ClienteRepository(context);

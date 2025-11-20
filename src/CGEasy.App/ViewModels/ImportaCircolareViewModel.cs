@@ -45,7 +45,7 @@ namespace CGEasy.App.ViewModels
         {
             // Constructor per XAML Designer
             var app = (App)Application.Current;
-            var context = app.Services!.GetRequiredService<LiteDbContext>();
+            var context = app.Services!.GetRequiredService<CGEasyDbContext>();
             _service = new CircolariService(context);
             _argomentiRepo = new ArgomentiRepository(context);
             _auditService = new AuditLogService(context);
@@ -53,7 +53,7 @@ namespace CGEasy.App.ViewModels
             LoadArgomenti();
         }
 
-        public ImportaCircolareViewModel(LiteDbContext context)
+        public ImportaCircolareViewModel(CGEasyDbContext context)
         {
             _service = new CircolariService(context);
             _argomentiRepo = new ArgomentiRepository(context);

@@ -13,7 +13,7 @@ namespace CGEasy.App.ViewModels;
 
 public partial class BilancioDialogViewModel : ObservableObject
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly BilancioContabileRepository _repository;
     private readonly ClienteRepository _clienteRepository;
     private readonly int? _bilancioId;
@@ -45,7 +45,7 @@ public partial class BilancioDialogViewModel : ObservableObject
     public bool IsEditMode => _bilancioId.HasValue;
     public string Title => IsEditMode ? "✏️ Modifica Riga Bilancio" : "➕ Nuova Riga Bilancio";
 
-    public BilancioDialogViewModel(LiteDbContext context, int? bilancioId = null)
+    public BilancioDialogViewModel(CGEasyDbContext context, int? bilancioId = null)
     {
         _context = context;
         _repository = new BilancioContabileRepository(context);

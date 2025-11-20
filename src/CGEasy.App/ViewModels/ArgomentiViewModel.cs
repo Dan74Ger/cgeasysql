@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -14,7 +15,7 @@ using CGEasy.Core.Services;
 namespace CGEasy.App.ViewModels
 {
     /// <summary>
-    /// ViewModel per gestione CRUD Argomenti circolari
+    /// ViewModel per gestione CRUD Argomenti circolari (EF Core async)
     /// </summary>
     public partial class ArgomentiViewModel : ObservableObject
     {
@@ -34,6 +35,9 @@ namespace CGEasy.App.ViewModels
         private bool _isEditing = false;
 
         [ObservableProperty]
+        private bool _isLoading = false;
+
+        [ObservableProperty]
         private string _nomeArgomento = string.Empty;
 
         [ObservableProperty]
@@ -45,31 +49,32 @@ namespace CGEasy.App.ViewModels
         {
             // Constructor per XAML Designer
             var app = (App)Application.Current;
-            var context = app.Services!.GetRequiredService<LiteDbContext>();
+            var context = app.Services!.GetRequiredService<CGEasyDbContext>();
             _repository = new ArgomentiRepository(context);
             _auditService = new AuditLogService(context);
 
-            LoadArgomenti();
+            _ = LoadArgomentiAsync();
         }
 
-        public ArgomentiViewModel(LiteDbContext context)
+        public ArgomentiViewModel(CGEasyDbContext context)
         {
             _repository = new ArgomentiRepository(context);
             _auditService = new AuditLogService(context);
 
-            LoadArgomenti();
+            _ = LoadArgomentiAsync();
         }
 
         /// <summary>
         /// Carica tutti gli argomenti
         /// </summary>
-        private void LoadArgomenti()
+        private async Task LoadArgomentiAsync()
         {
+            IsLoading = true;
             try
             {
                 var lista = string.IsNullOrWhiteSpace(SearchText)
-                    ? _repository.GetAll()
-                    : _repository.Search(SearchText);
+                    ? await _repository.GetAllAsync()
+                    : await _repository.SearchAsync(SearchText);
 
                 Argomenti = new ObservableCollection<Argomento>(lista);
             }
@@ -78,12 +83,16 @@ namespace CGEasy.App.ViewModels
                 MessageBox.Show($"Errore caricamento argomenti:\n{ex.Message}", 
                     "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         [RelayCommand]
-        private void Search()
+        private async Task SearchAsync()
         {
-            LoadArgomenti();
+            await LoadArgomentiAsync();
         }
 
         [RelayCommand]
@@ -112,7 +121,7 @@ namespace CGEasy.App.ViewModels
         }
 
         [RelayCommand]
-        private void SalvaArgomento()
+        private async Task SalvaArgomentoAsync()
         {
             // Validazione
             if (string.IsNullOrWhiteSpace(NomeArgomento))
@@ -122,12 +131,13 @@ namespace CGEasy.App.ViewModels
                 return;
             }
 
+            IsLoading = true;
             try
             {
                 if (_editingId.HasValue)
                 {
                     // Modifica
-                    var argomento = _repository.GetById(_editingId.Value);
+                    var argomento = await _repository.GetByIdAsync(_editingId.Value);
                     if (argomento != null)
                     {
                         argomento.Nome = NomeArgomento.Trim();
@@ -135,7 +145,7 @@ namespace CGEasy.App.ViewModels
                             ? null 
                             : DescrizioneArgomento.Trim();
 
-                        _repository.Update(argomento);
+                        await _repository.UpdateAsync(argomento);
 
                         _auditService.Log(
                             SessionManager.CurrentUser?.Id ?? 0,
@@ -163,7 +173,7 @@ namespace CGEasy.App.ViewModels
                         UtenteId = SessionManager.CurrentUser?.Id ?? 0
                     };
 
-                    _repository.Insert(argomento);
+                    await _repository.InsertAsync(argomento);
 
                     _auditService.Log(
                         SessionManager.CurrentUser?.Id ?? 0,
@@ -179,12 +189,16 @@ namespace CGEasy.App.ViewModels
                 }
 
                 AnnullaModifica();
-                LoadArgomenti();
+                await LoadArgomentiAsync();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Errore salvataggio:\n{ex.Message}", 
                     "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
@@ -198,7 +212,7 @@ namespace CGEasy.App.ViewModels
         }
 
         [RelayCommand]
-        private void EliminaArgomento()
+        private async Task EliminaArgomentoAsync()
         {
             if (ArgomentoSelezionato == null)
             {
@@ -208,9 +222,9 @@ namespace CGEasy.App.ViewModels
             }
 
             // Verifica se ha circolari associate
-            if (_repository.HasCircolariAssociate(ArgomentoSelezionato.Id))
+            if (await _repository.HasCircolariAssociateAsync(ArgomentoSelezionato.Id))
             {
-                var count = _repository.CountCircolari(ArgomentoSelezionato.Id);
+                var count = await _repository.CountCircolariAsync(ArgomentoSelezionato.Id);
                 MessageBox.Show($"Impossibile eliminare l'argomento '{ArgomentoSelezionato.Nome}'.\n\n" +
                     $"Esistono {count} circolare/i associate a questo argomento.\n" +
                     "Elimina prima le circolari o riassegnale ad un altro argomento.", 
@@ -226,12 +240,13 @@ namespace CGEasy.App.ViewModels
 
             if (result == MessageBoxResult.Yes)
             {
+                IsLoading = true;
                 try
                 {
                     var nomeArgomento = ArgomentoSelezionato.Nome;
                     var idArgomento = ArgomentoSelezionato.Id;
 
-                    _repository.Delete(idArgomento);
+                    await _repository.DeleteAsync(idArgomento);
 
                     _auditService.Log(
                         SessionManager.CurrentUser?.Id ?? 0,
@@ -245,15 +260,18 @@ namespace CGEasy.App.ViewModels
                     MessageBox.Show("Argomento eliminato con successo!", 
                         "Successo", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    LoadArgomenti();
+                    await LoadArgomentiAsync();
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Errore eliminazione:\n{ex.Message}", 
                         "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+                finally
+                {
+                    IsLoading = false;
+                }
             }
         }
     }
 }
-

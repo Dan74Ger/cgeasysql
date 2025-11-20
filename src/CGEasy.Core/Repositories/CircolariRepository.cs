@@ -1,36 +1,36 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using CGEasy.Core.Data;
 using CGEasy.Core.Models;
 
 namespace CGEasy.Core.Repositories
 {
     /// <summary>
-    /// Repository per gestione Circolari
-    /// Pattern Shared mode per multi-client
+    /// Repository per gestione Circolari (EF Core async)
     /// </summary>
     public class CircolariRepository
     {
-        private readonly LiteDbContext _context;
+        private readonly CGEasyDbContext _context;
 
-        public CircolariRepository(LiteDbContext context)
+        public CircolariRepository(CGEasyDbContext context)
         {
             _context = context;
         }
 
-        /// <summary>
-        /// Ottiene tutte le circolari con nome argomento (join manuale)
-        /// </summary>
-        public List<Circolare> GetAll()
+        public async Task<List<Circolare>> GetAllAsync()
         {
-            var circolari = _context.Circolari
-                .FindAll()
+            var circolari = await _context.Circolari
+                .AsNoTracking()
                 .OrderByDescending(x => x.DataImportazione)
-                .ToList();
+                .ToListAsync();
 
             // Carica argomenti per join
-            var argomenti = _context.Argomenti.FindAll().ToDictionary(a => a.Id, a => a.Nome);
+            var argomenti = await _context.Argomenti
+                .AsNoTracking()
+                .ToDictionaryAsync(a => a.Id, a => a.Nome);
 
             foreach (var circolare in circolari)
             {
@@ -41,26 +41,20 @@ namespace CGEasy.Core.Repositories
             return circolari;
         }
 
-        /// <summary>
-        /// Ottiene circolare per ID
-        /// </summary>
-        public Circolare? GetById(int id)
+        public async Task<Circolare?> GetByIdAsync(int id)
         {
-            var circolare = _context.Circolari.FindById(id);
+            var circolare = await _context.Circolari.FindAsync(id);
             if (circolare != null)
             {
-                var argomento = _context.Argomenti.FindById(circolare.ArgomentoId);
+                var argomento = await _context.Argomenti.FindAsync(circolare.ArgomentoId);
                 circolare.ArgomentoNome = argomento?.Nome;
             }
             return circolare;
         }
 
-        /// <summary>
-        /// Ricerca circolari con filtri multipli
-        /// </summary>
-        public List<Circolare> Search(int? argomentoId = null, int? anno = null, string? searchTerm = null)
+        public async Task<List<Circolare>> SearchAsync(int? argomentoId = null, int? anno = null, string? searchTerm = null)
         {
-            var query = _context.Circolari.Query();
+            var query = _context.Circolari.AsQueryable();
 
             // Filtra per argomento
             if (argomentoId.HasValue && argomentoId.Value > 0)
@@ -74,20 +68,19 @@ namespace CGEasy.Core.Repositories
                 query = query.Where(c => c.Anno == anno.Value);
             }
 
-            var circolari = query.ToList();
-
-            // Filtra per testo (case-insensitive) dopo materializzazione
+            // Filtra per testo
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                var term = searchTerm.ToLowerInvariant();
-                circolari = circolari
-                    .Where(c => c.Descrizione.ToLower().Contains(term) || 
-                                c.NomeFile.ToLower().Contains(term))
-                    .ToList();
+                query = query.Where(c => c.Descrizione.Contains(searchTerm) || 
+                                        c.NomeFile.Contains(searchTerm));
             }
 
+            var circolari = await query.OrderByDescending(x => x.DataImportazione).ToListAsync();
+
             // Carica argomenti per join
-            var argomenti = _context.Argomenti.FindAll().ToDictionary(a => a.Id, a => a.Nome);
+            var argomenti = await _context.Argomenti
+                .AsNoTracking()
+                .ToDictionaryAsync(a => a.Id, a => a.Nome);
 
             foreach (var circolare in circolari)
             {
@@ -95,61 +88,59 @@ namespace CGEasy.Core.Repositories
                     circolare.ArgomentoNome = argomenti[circolare.ArgomentoId];
             }
 
-            return circolari.OrderByDescending(x => x.DataImportazione).ToList();
+            return circolari;
         }
 
-        /// <summary>
-        /// Ottiene tutti gli anni distinti presenti
-        /// </summary>
-        public List<int> GetAnniDistinti()
+        public async Task<List<int>> GetAnniDistintiAsync()
         {
-            return _context.Circolari
-                .FindAll()
+            return await _context.Circolari
                 .Select(c => c.Anno)
                 .Distinct()
                 .OrderByDescending(a => a)
-                .ToList();
+                .ToListAsync();
         }
 
-        /// <summary>
-        /// Inserisce nuova circolare
-        /// </summary>
-        public int Insert(Circolare circolare)
+        public async Task<int> InsertAsync(Circolare circolare)
         {
-            return _context.Circolari.Insert(circolare);
+            _context.Circolari.Add(circolare);
+            await _context.SaveChangesAsync();
+            return circolare.Id;
         }
 
-        /// <summary>
-        /// Aggiorna circolare esistente
-        /// </summary>
-        public bool Update(Circolare circolare)
+        public async Task<bool> UpdateAsync(Circolare circolare)
         {
-            return _context.Circolari.Update(circolare);
+            _context.Circolari.Update(circolare);
+            return await _context.SaveChangesAsync() > 0;
         }
 
-        /// <summary>
-        /// Elimina circolare per ID
-        /// </summary>
-        public bool Delete(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            return _context.Circolari.Delete(id);
+            var entity = await GetByIdAsync(id);
+            if (entity == null) return false;
+            _context.Circolari.Remove(entity);
+            return await _context.SaveChangesAsync() > 0;
         }
 
-        /// <summary>
-        /// Elimina tutte le circolari di un argomento (batch)
-        /// </summary>
-        public int DeleteByArgomento(int argomentoId)
+        public async Task<int> DeleteByArgomentoAsync(int argomentoId)
         {
-            return _context.Circolari.DeleteMany(c => c.ArgomentoId == argomentoId);
+            var circolari = await _context.Circolari
+                .Where(c => c.ArgomentoId == argomentoId)
+                .ToListAsync();
+            _context.Circolari.RemoveRange(circolari);
+            return await _context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Conta circolari totali
-        /// </summary>
-        public int Count()
+        public async Task<int> CountAsync()
         {
-            return _context.Circolari.Count();
+            return await _context.Circolari.CountAsync();
         }
+
+        // ===== WRAPPER SINCRONI PER COMPATIBILITÀ =====
+
+        public List<Circolare> GetAll() => GetAllAsync().GetAwaiter().GetResult();
+        public Circolare? GetById(int id) => GetByIdAsync(id).GetAwaiter().GetResult();
+        public int Insert(Circolare circolare) => InsertAsync(circolare).GetAwaiter().GetResult();
+        public bool Update(Circolare circolare) => UpdateAsync(circolare).GetAwaiter().GetResult();
+        public bool Delete(int id) => DeleteAsync(id).GetAwaiter().GetResult();
     }
 }
-

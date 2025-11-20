@@ -1,185 +1,167 @@
-using CGEasy.Core.Data;
+﻿using CGEasy.Core.Data;
 using CGEasy.Core.Models;
-using LiteDB;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CGEasy.Core.Repositories;
 
 /// <summary>
-/// Repository per gestione clienti licenze e chiavi generate
+/// Repository per gestione clienti licenze e chiavi (EF Core async)
 /// </summary>
 public class LicenseRepository
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
 
-    public LicenseRepository(LiteDbContext context)
+    public LicenseRepository(CGEasyDbContext context)
     {
         _context = context;
     }
 
     // ===== CLIENTI LICENZE =====
 
-    /// <summary>
-    /// Ottiene tutti i clienti licenze
-    /// </summary>
-    public IEnumerable<LicenseClient> GetAllClients()
+    public async Task<List<LicenseClient>> GetAllClientsAsync()
     {
-        return _context.LicenseClients.FindAll().OrderBy(c => c.NomeCliente);
+        return await _context.LicenseClients
+            .AsNoTracking()
+            .OrderBy(c => c.NomeCliente)
+            .ToListAsync();
     }
 
-    /// <summary>
-    /// Ottiene cliente per ID
-    /// </summary>
-    public LicenseClient? GetClientById(int id)
+    public async Task<LicenseClient?> GetClientByIdAsync(int id)
     {
-        return _context.LicenseClients.FindById(id);
+        return await _context.LicenseClients.FindAsync(id);
     }
 
-    /// <summary>
-    /// Inserisce nuovo cliente
-    /// </summary>
-    public int InsertClient(LicenseClient client)
+    public async Task<int> InsertClientAsync(LicenseClient client)
     {
-        return _context.LicenseClients.Insert(client);
+        _context.LicenseClients.Add(client);
+        await _context.SaveChangesAsync();
+        return client.Id;
     }
 
-    /// <summary>
-    /// Aggiorna cliente esistente
-    /// </summary>
-    public bool UpdateClient(LicenseClient client)
+    public async Task<bool> UpdateClientAsync(LicenseClient client)
     {
-        return _context.LicenseClients.Update(client);
+        _context.LicenseClients.Update(client);
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    /// <summary>
-    /// Elimina cliente (e tutte le sue licenze)
-    /// </summary>
-    public bool DeleteClient(int id)
+    public async Task<bool> DeleteClientAsync(int id)
     {
-        // Elimina prima tutte le chiavi del cliente
-        _context.LicenseKeys.DeleteMany(k => k.LicenseClientId == id);
+        var keys = await _context.LicenseKeys.Where(k => k.LicenseClientId == id).ToListAsync();
+        _context.LicenseKeys.RemoveRange(keys);
         
-        // Poi elimina il cliente
-        return _context.LicenseClients.Delete(id);
+        var client = await GetClientByIdAsync(id);
+        if (client == null) return false;
+        _context.LicenseClients.Remove(client);
+        return await _context.SaveChangesAsync() > 0;
     }
 
     // ===== CHIAVI LICENZE =====
 
-    /// <summary>
-    /// Ottiene tutte le chiavi
-    /// </summary>
-    public IEnumerable<LicenseKey> GetAllKeys()
+    public async Task<List<LicenseKey>> GetAllKeysAsync()
     {
-        return _context.LicenseKeys.FindAll().OrderByDescending(k => k.DataGenerazione);
+        return await _context.LicenseKeys
+            .AsNoTracking()
+            .OrderByDescending(k => k.DataGenerazione)
+            .ToListAsync();
     }
 
-    /// <summary>
-    /// Ottiene chiavi per cliente specifico
-    /// </summary>
-    public IEnumerable<LicenseKey> GetKeysByClient(int clientId)
+    public async Task<List<LicenseKey>> GetKeysByClientAsync(int clientId)
     {
-        return _context.LicenseKeys
-            .Find(k => k.LicenseClientId == clientId)
-            .OrderByDescending(k => k.DataGenerazione);
+        return await _context.LicenseKeys
+            .Where(k => k.LicenseClientId == clientId)
+            .OrderByDescending(k => k.DataGenerazione)
+            .ToListAsync();
     }
 
-    /// <summary>
-    /// Ottiene chiavi per modulo specifico
-    /// </summary>
-    public IEnumerable<LicenseKey> GetKeysByModule(string moduleName)
+    public async Task<LicenseKey?> GetKeyByIdAsync(int id)
     {
-        return _context.LicenseKeys
-            .Find(k => k.ModuleName == moduleName)
-            .OrderByDescending(k => k.DataGenerazione);
+        return await _context.LicenseKeys.FindAsync(id);
     }
 
-    /// <summary>
-    /// Verifica se una chiave esiste ed è valida
-    /// </summary>
-    public bool IsKeyValid(string fullKey)
+    public async Task<int> InsertKeyAsync(LicenseKey key)
     {
-        var key = _context.LicenseKeys.FindOne(k => k.FullKey == fullKey);
-        
-        if (key == null)
-            return false;
-        
-        // Verifica che sia attiva e non scaduta
-        return key.IsActive && !key.IsExpired;
+        _context.LicenseKeys.Add(key);
+        await _context.SaveChangesAsync();
+        return key.Id;
     }
 
-    /// <summary>
-    /// Ottiene informazioni su una chiave
-    /// </summary>
-    public LicenseKey? GetKeyByFullKey(string fullKey)
+    public async Task<bool> UpdateKeyAsync(LicenseKey key)
     {
-        return _context.LicenseKeys.FindOne(k => k.FullKey == fullKey);
+        _context.LicenseKeys.Update(key);
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    /// <summary>
-    /// Inserisce nuova chiave
-    /// </summary>
-    public int InsertKey(LicenseKey key)
+    public async Task<bool> DeleteKeyAsync(int id)
     {
-        return _context.LicenseKeys.Insert(key);
+        var key = await GetKeyByIdAsync(id);
+        if (key == null) return false;
+        _context.LicenseKeys.Remove(key);
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    /// <summary>
-    /// Aggiorna chiave (es. per revocarla)
-    /// </summary>
-    public bool UpdateKey(LicenseKey key)
+    // ===== STATISTICHE =====
+
+    public async Task<LicenseStatistics> GetStatisticsAsync()
     {
-        return _context.LicenseKeys.Update(key);
+        var totalClients = await _context.LicenseClients.CountAsync();
+        var totalKeys = await _context.LicenseKeys.CountAsync();
+        var activeKeys = await _context.LicenseKeys.CountAsync(k => k.IsActive && !k.IsExpired);
+
+        return new LicenseStatistics
+        {
+            TotalClients = totalClients,
+            TotalKeys = totalKeys,
+            ActiveKeys = activeKeys
+        };
     }
 
-    /// <summary>
-    /// Revoca una chiave (soft delete)
-    /// </summary>
-    public bool RevokeKey(int keyId)
+    // ===== RICERCA =====
+
+    public async Task<List<LicenseKey>> SearchKeysAsync(string searchTerm)
     {
-        var key = _context.LicenseKeys.FindById(keyId);
-        if (key == null)
-            return false;
-        
-        key.IsActive = false;
-        key.Note = $"Revocata il {DateTime.Now:dd/MM/yyyy HH:mm}";
-        return _context.LicenseKeys.Update(key);
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return await GetAllKeysAsync();
+
+        return await _context.LicenseKeys
+            .Where(k => k.FullKey.Contains(searchTerm) || 
+                       k.ModuleName.Contains(searchTerm))
+            .OrderByDescending(k => k.DataGenerazione)
+            .ToListAsync();
     }
 
-    /// <summary>
-    /// Elimina definitivamente una chiave
-    /// </summary>
-    public bool DeleteKey(int keyId)
+    // ===== METODI PER VALIDAZIONE =====
+
+    public async Task<bool> IsKeyValidAsync(string fullKey)
     {
-        return _context.LicenseKeys.Delete(keyId);
+        var key = await _context.LicenseKeys
+            .FirstOrDefaultAsync(k => k.FullKey == fullKey && k.IsActive && !k.IsExpired);
+        return key != null;
     }
 
-    /// <summary>
-    /// Conta chiavi attive per cliente
-    /// </summary>
-    public int CountActiveKeysByClient(int clientId)
+    public async Task<LicenseKey?> GetKeyByFullKeyAsync(string fullKey)
     {
-        return _context.LicenseKeys.Count(k => 
-            k.LicenseClientId == clientId && 
-            k.IsActive && 
-            !k.IsExpired);
+        return await _context.LicenseKeys
+            .FirstOrDefaultAsync(k => k.FullKey == fullKey);
     }
 
-    /// <summary>
-    /// Ottiene statistiche licenze
-    /// </summary>
-    public (int TotalClients, int TotalKeys, int ActiveKeys, int ExpiredKeys) GetStatistics()
-    {
-        var allKeys = GetAllKeys().ToList();
-        
-        return (
-            TotalClients: _context.LicenseClients.Count(),
-            TotalKeys: allKeys.Count,
-            ActiveKeys: allKeys.Count(k => k.IsActive && !k.IsExpired),
-            ExpiredKeys: allKeys.Count(k => k.IsExpired)
-        );
-    }
+    // ===== WRAPPER SINCRONI per compatibilità =====
+    public bool IsKeyValid(string fullKey) => IsKeyValidAsync(fullKey).Result;
+    public LicenseKey? GetKeyByFullKey(string fullKey) => GetKeyByFullKeyAsync(fullKey).Result;
+    public int InsertKey(LicenseKey key) => InsertKeyAsync(key).Result;
+    public LicenseClient? GetClientById(int id) => GetClientByIdAsync(id).Result;
+    public bool UpdateKey(LicenseKey key) => UpdateKeyAsync(key).Result;
 }
 
-
+/// <summary>
+/// Statistiche licenze
+/// </summary>
+public class LicenseStatistics
+{
+    public int TotalClients { get; set; }
+    public int TotalKeys { get; set; }
+    public int ActiveKeys { get; set; }
+}

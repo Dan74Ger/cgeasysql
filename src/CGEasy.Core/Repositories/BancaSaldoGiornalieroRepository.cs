@@ -1,135 +1,84 @@
-using CGEasy.Core.Data;
+﻿using CGEasy.Core.Data;
 using CGEasy.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CGEasy.Core.Repositories;
 
-/// <summary>
-/// Repository per gestione dello storico Saldi Giornalieri delle Banche
-/// </summary>
 public class BancaSaldoGiornalieroRepository
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
 
-    public BancaSaldoGiornalieroRepository(LiteDbContext context)
+    public BancaSaldoGiornalieroRepository(CGEasyDbContext context)
     {
         _context = context;
     }
 
-    /// <summary>
-    /// Recupera tutti i saldi giornalieri
-    /// </summary>
-    public List<BancaSaldoGiornaliero> GetAll()
+    public async Task<List<BancaSaldoGiornaliero>> GetAllAsync()
     {
-        return _context.BancaSaldoGiornaliero.FindAll().ToList();
+        return await _context.BancaSaldoGiornaliero.AsNoTracking().ToListAsync();
     }
 
-    /// <summary>
-    /// Recupera un saldo giornaliero per ID
-    /// </summary>
-    public BancaSaldoGiornaliero? GetById(int id)
+    public async Task<BancaSaldoGiornaliero?> GetByIdAsync(int id)
     {
-        return _context.BancaSaldoGiornaliero.FindById(id);
+        return await _context.BancaSaldoGiornaliero.FindAsync(id);
     }
 
-    /// <summary>
-    /// Recupera tutti i saldi giornalieri di una banca
-    /// </summary>
-    public List<BancaSaldoGiornaliero> GetByBancaId(int bancaId)
+    public async Task<List<BancaSaldoGiornaliero>> GetByBancaIdAsync(int bancaId)
     {
-        return _context.BancaSaldoGiornaliero
-            .Find(s => s.BancaId == bancaId)
-            .OrderBy(s => s.Data)
-            .ToList();
-    }
-
-    /// <summary>
-    /// Recupera il saldo alla data specificata (o il più recente precedente)
-    /// </summary>
-    public BancaSaldoGiornaliero? GetAllaData(int bancaId, DateTime data)
-    {
-        return _context.BancaSaldoGiornaliero
-            .Find(s => s.BancaId == bancaId && s.Data <= data)
+        return await _context.BancaSaldoGiornaliero
+            .Where(s => s.BancaId == bancaId)
             .OrderByDescending(s => s.Data)
-            .FirstOrDefault();
+            .ToListAsync();
     }
 
-    /// <summary>
-    /// Recupera i saldi in un range di date
-    /// </summary>
-    public List<BancaSaldoGiornaliero> GetByRange(int bancaId, DateTime dataInizio, DateTime dataFine)
+    public async Task<BancaSaldoGiornaliero?> GetByDataAsync(int bancaId, DateTime data)
     {
-        return _context.BancaSaldoGiornaliero
-            .Find(s => s.BancaId == bancaId && s.Data >= dataInizio && s.Data <= dataFine)
-            .OrderBy(s => s.Data)
-            .ToList();
+        return await _context.BancaSaldoGiornaliero
+            .FirstOrDefaultAsync(s => s.BancaId == bancaId && s.Data.Date == data.Date);
     }
 
-    /// <summary>
-    /// Inserisce un nuovo saldo giornaliero
-    /// </summary>
-    public int Insert(BancaSaldoGiornaliero saldo)
+    public async Task<int> InsertAsync(BancaSaldoGiornaliero saldo)
     {
         saldo.DataCreazione = DateTime.Now;
-        return _context.BancaSaldoGiornaliero.Insert(saldo);
+        _context.BancaSaldoGiornaliero.Add(saldo);
+        await _context.SaveChangesAsync();
+        return saldo.Id;
     }
 
-    /// <summary>
-    /// Aggiorna un saldo giornaliero esistente
-    /// </summary>
-    public bool Update(BancaSaldoGiornaliero saldo)
+    public async Task<bool> UpdateAsync(BancaSaldoGiornaliero saldo)
     {
-        return _context.BancaSaldoGiornaliero.Update(saldo);
+        _context.BancaSaldoGiornaliero.Update(saldo);
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    /// <summary>
-    /// Elimina un saldo giornaliero
-    /// </summary>
-    public bool Delete(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        return _context.BancaSaldoGiornaliero.Delete(id);
+        var saldo = await GetByIdAsync(id);
+        if (saldo == null) return false;
+        _context.BancaSaldoGiornaliero.Remove(saldo);
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    /// <summary>
-    /// Elimina tutti i saldi giornalieri di una banca
-    /// </summary>
-    public int DeleteByBancaId(int bancaId)
+    // ===== WRAPPER SINCRONI per compatibilità =====
+    public List<BancaSaldoGiornaliero> GetAll() => GetAllAsync().Result;
+    public BancaSaldoGiornaliero? GetById(int id) => GetByIdAsync(id).Result;
+    public List<BancaSaldoGiornaliero> GetByBancaId(int bancaId) => GetByBancaIdAsync(bancaId).Result;
+    public BancaSaldoGiornaliero? GetByData(int bancaId, DateTime data) => GetByDataAsync(bancaId, data).Result;
+    public BancaSaldoGiornaliero? GetAllaData(int bancaId, DateTime data) => GetByDataAsync(bancaId, data).Result;
+    public int Insert(BancaSaldoGiornaliero saldo) => InsertAsync(saldo).Result;
+    public bool Update(BancaSaldoGiornaliero saldo) => UpdateAsync(saldo).Result;
+    public bool Delete(int id) => DeleteAsync(id).Result;
+    
+    public async Task<int> DeleteByBancaIdAsync(int bancaId)
     {
-        return _context.BancaSaldoGiornaliero.DeleteMany(s => s.BancaId == bancaId);
+        var saldi = await GetByBancaIdAsync(bancaId);
+        _context.BancaSaldoGiornaliero.RemoveRange(saldi);
+        return await _context.SaveChangesAsync();
     }
-
-    /// <summary>
-    /// Salva/aggiorna il saldo alla data specificata
-    /// Se esiste già un record per quella data, lo aggiorna; altrimenti lo crea
-    /// </summary>
-    public bool SaveSaldoAllaData(int bancaId, DateTime data, decimal saldo, string? note = null)
-    {
-        // Cerca un record esistente per questa data
-        var esistente = _context.BancaSaldoGiornaliero
-            .FindOne(s => s.BancaId == bancaId && s.Data.Date == data.Date);
-
-        if (esistente != null)
-        {
-            // Aggiorna il record esistente
-            esistente.Saldo = saldo;
-            esistente.Note = note;
-            return Update(esistente);
-        }
-        else
-        {
-            // Crea un nuovo record
-            var nuovo = new BancaSaldoGiornaliero
-            {
-                BancaId = bancaId,
-                Data = data.Date,
-                Saldo = saldo,
-                Note = note
-            };
-            Insert(nuovo);
-            return true;
-        }
-    }
+    
+    public int DeleteByBancaId(int bancaId) => DeleteByBancaIdAsync(bancaId).Result;
 }
-

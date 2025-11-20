@@ -1,96 +1,116 @@
-using CGEasy.Core.Data;
+﻿using CGEasy.Core.Data;
 using CGEasy.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace CGEasy.Core.Repositories
 {
     /// <summary>
-    /// Repository per gestione Clienti
+    /// Repository per gestione Clienti (EF Core async)
     /// </summary>
-    public class ClienteRepository : IRepository<Cliente>
+    public class ClienteRepository
     {
-        private readonly LiteDbContext _context;
+        private readonly CGEasyDbContext _context;
 
-        public ClienteRepository(LiteDbContext context)
+        public ClienteRepository(CGEasyDbContext context)
         {
             _context = context;
         }
 
-        public IEnumerable<Cliente> GetAll()
+        // ===== METODI ASYNC EF CORE =====
+
+        public async Task<List<Cliente>> GetAllAsync()
         {
-            return _context.Clienti.FindAll();
+            return await _context.Clienti
+                .AsNoTracking()
+                .OrderBy(c => c.NomeCliente)
+                .ToListAsync();
         }
 
-        public Cliente? GetById(int id)
+        public async Task<Cliente?> GetByIdAsync(int id)
         {
-            return _context.Clienti.FindById(id);
+            return await _context.Clienti.FindAsync(id);
         }
 
-        public IEnumerable<Cliente> Find(Expression<Func<Cliente, bool>> predicate)
+        public async Task<List<Cliente>> FindAsync(Expression<Func<Cliente, bool>> predicate)
         {
-            return _context.Clienti.Find(predicate);
+            return await _context.Clienti
+                .Where(predicate)
+                .ToListAsync();
         }
 
-        public Cliente? FindOne(Expression<Func<Cliente, bool>> predicate)
+        public async Task<Cliente?> FindOneAsync(Expression<Func<Cliente, bool>> predicate)
         {
-            return _context.Clienti.FindOne(predicate);
+            return await _context.Clienti
+                .FirstOrDefaultAsync(predicate);
         }
 
-        public int Insert(Cliente entity)
+        public async Task<int> InsertAsync(Cliente entity)
         {
             entity.CreatedAt = DateTime.UtcNow;
             entity.UpdatedAt = DateTime.UtcNow;
             entity.DataAttivazione = DateTime.UtcNow;
             entity.DataModifica = DateTime.UtcNow;
             
-            return _context.Clienti.Insert(entity);
+            _context.Clienti.Add(entity);
+            await _context.SaveChangesAsync();
+            return entity.Id;
         }
 
-        public bool Update(Cliente entity)
+        public async Task<bool> UpdateAsync(Cliente entity)
         {
             entity.UpdatedAt = DateTime.UtcNow;
             entity.DataModifica = DateTime.UtcNow;
             
-            return _context.Clienti.Update(entity);
+            _context.Clienti.Update(entity);
+            return await _context.SaveChangesAsync() > 0;
         }
 
-        public bool Delete(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            return _context.Clienti.Delete(id);
+            var entity = await GetByIdAsync(id);
+            if (entity == null) return false;
+            
+            _context.Clienti.Remove(entity);
+            return await _context.SaveChangesAsync() > 0;
         }
 
-        public int Count()
+        public async Task<int> CountAsync()
         {
-            return _context.Clienti.Count();
+            return await _context.Clienti.CountAsync();
         }
 
-        public int Count(Expression<Func<Cliente, bool>> predicate)
+        public async Task<int> CountAsync(Expression<Func<Cliente, bool>> predicate)
         {
-            return _context.Clienti.Count(predicate);
+            return await _context.Clienti.CountAsync(predicate);
         }
 
-        public bool Exists(Expression<Func<Cliente, bool>> predicate)
+        public async Task<bool> ExistsAsync(Expression<Func<Cliente, bool>> predicate)
         {
-            return _context.Clienti.Exists(predicate);
+            return await _context.Clienti.AnyAsync(predicate);
         }
 
         /// <summary>
         /// Ottiene solo clienti attivi
         /// </summary>
-        public IEnumerable<Cliente> GetActive()
+        public async Task<List<Cliente>> GetActiveAsync()
         {
-            return _context.Clienti.Find(c => c.Attivo);
+            return await _context.Clienti
+                .Where(c => c.Attivo)
+                .OrderBy(c => c.NomeCliente)
+                .ToListAsync();
         }
 
         /// <summary>
         /// Disattiva cliente (soft delete)
         /// </summary>
-        public bool Deactivate(int id)
+        public async Task<bool> DeactivateAsync(int id)
         {
-            var cliente = GetById(id);
+            var cliente = await GetByIdAsync(id);
             if (cliente == null)
                 return false;
 
@@ -98,15 +118,15 @@ namespace CGEasy.Core.Repositories
             cliente.DataCessazione = DateTime.UtcNow;
             cliente.DataModifica = DateTime.UtcNow;
 
-            return Update(cliente);
+            return await UpdateAsync(cliente);
         }
 
         /// <summary>
         /// Riattiva cliente
         /// </summary>
-        public bool Activate(int id)
+        public async Task<bool> ActivateAsync(int id)
         {
-            var cliente = GetById(id);
+            var cliente = await GetByIdAsync(id);
             if (cliente == null)
                 return false;
 
@@ -114,58 +134,45 @@ namespace CGEasy.Core.Repositories
             cliente.DataCessazione = null;
             cliente.DataModifica = DateTime.UtcNow;
 
-            return Update(cliente);
+            return await UpdateAsync(cliente);
         }
 
         /// <summary>
         /// Cerca clienti per nome (case-insensitive)
         /// </summary>
-        public IEnumerable<Cliente> SearchByName(string searchTerm)
+        public async Task<List<Cliente>> SearchByNameAsync(string searchTerm)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
-                return GetAll();
+                return await GetAllAsync();
 
             var lower = searchTerm.ToLower();
-            return _context.Clienti.Find(c => 
-                c.NomeCliente.ToLower().Contains(lower));
+            return await _context.Clienti
+                .Where(c => c.NomeCliente.ToLower().Contains(lower))
+                .OrderBy(c => c.NomeCliente)
+                .ToListAsync();
         }
 
         /// <summary>
         /// Ottiene clienti per professionista
         /// </summary>
-        public IEnumerable<Cliente> GetByProfessionista(int professionistaId)
+        public async Task<List<Cliente>> GetByProfessionistaAsync(int professionistaId)
         {
-            return _context.Clienti.Find(c => c.IdProfessionista == professionistaId);
+            return await _context.Clienti
+                .Where(c => c.IdProfessionista == professionistaId)
+                .OrderBy(c => c.NomeCliente)
+                .ToListAsync();
         }
+
+        // ===== WRAPPER SINCRONI PER COMPATIBILITÀ =====
+
+        public List<Cliente> GetAll() => GetAllAsync().GetAwaiter().GetResult();
+        public Cliente? GetById(int id) => GetByIdAsync(id).GetAwaiter().GetResult();
+        public int Insert(Cliente entity) => InsertAsync(entity).GetAwaiter().GetResult();
+        public bool Update(Cliente entity) => UpdateAsync(entity).GetAwaiter().GetResult();
+        public bool Delete(int id) => DeleteAsync(id).GetAwaiter().GetResult();
+        public int Count() => CountAsync().GetAwaiter().GetResult();
+        public List<Cliente> GetActive() => GetActiveAsync().GetAwaiter().GetResult();
+        public List<Cliente> SearchByName(string searchTerm) => SearchByNameAsync(searchTerm).GetAwaiter().GetResult();
+        public List<Cliente> GetByProfessionista(int professionistaId) => GetByProfessionistaAsync(professionistaId).GetAwaiter().GetResult();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

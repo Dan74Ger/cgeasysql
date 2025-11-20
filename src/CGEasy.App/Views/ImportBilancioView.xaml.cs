@@ -9,8 +9,8 @@ public partial class ImportBilancioView : UserControl
     {
         InitializeComponent();
         
-        // Inizializza ViewModel con LiteDbContext da DI
-        var context = ((App)System.Windows.Application.Current).Services!.GetRequiredService<CGEasy.Core.Data.LiteDbContext>();
+        // Inizializza ViewModel con CGEasyDbContext da DI
+        var context = ((App)System.Windows.Application.Current).Services!.GetRequiredService<CGEasy.Core.Data.CGEasyDbContext>();
         DataContext = new ViewModels.BilancioContabileViewModel(context);
     }
 }

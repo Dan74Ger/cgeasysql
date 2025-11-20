@@ -1,40 +1,48 @@
 using System;
-using LiteDB;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CGEasy.Core.Models
 {
     /// <summary>
-    /// Rappresenta una circolare importata con metadati
+    /// Rappresenta una circolare importata con metadati - EF Core
     /// </summary>
+    [Table("circolari")]
     public class Circolare
     {
-        [BsonId]
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [BsonField("argomento_id")]
+        [Column("argomento_id")]
         public int ArgomentoId { get; set; }
 
-        [BsonField("descrizione")]
+        [Column("descrizione")]
+        [Required]
+        [MaxLength(500)]
         public string Descrizione { get; set; } = string.Empty;
 
-        [BsonField("anno")]
+        [Column("anno")]
         public int Anno { get; set; }
 
-        [BsonField("nome_file")]
+        [Column("nome_file")]
+        [Required]
+        [MaxLength(300)]
         public string NomeFile { get; set; } = string.Empty;
 
-        [BsonField("percorso_file")]
+        [Column("percorso_file")]
+        [Required]
+        [MaxLength(500)]
         public string PercorsoFile { get; set; } = string.Empty;
 
-        [BsonField("data_importazione")]
+        [Column("data_importazione")]
         public DateTime DataImportazione { get; set; } = DateTime.Now;
 
-        [BsonField("utente_id")]
+        [Column("utente_id")]
         public int UtenteId { get; set; }
 
         // Proprietà di navigazione (non salvata in DB)
-        [BsonIgnore]
+        [NotMapped]
         public string? ArgomentoNome { get; set; }
     }
 }
-

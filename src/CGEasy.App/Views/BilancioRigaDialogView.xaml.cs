@@ -10,7 +10,7 @@ namespace CGEasy.App.Views;
 
 public partial class BilancioRigaDialogView : Window
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly BilancioContabileRepository _repository;
     private readonly int _rigaId;
     private bool _isSaving = false;  // Flag per evitare doppio salvataggio
@@ -23,7 +23,7 @@ public partial class BilancioRigaDialogView : Window
     {
         InitializeComponent();
         
-        _context = ((App)Application.Current).Services!.GetRequiredService<LiteDbContext>();
+        _context = ((App)Application.Current).Services!.GetRequiredService<CGEasyDbContext>();
         _repository = new BilancioContabileRepository(_context);
         _rigaId = rigaId;
 

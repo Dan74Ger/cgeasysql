@@ -73,7 +73,7 @@ public partial class IncassoDialogViewModel : ObservableObject
 
     public bool DialogResult { get; private set; }
 
-    public IncassoDialogViewModel(LiteDbContext context, int bancaId, BancaIncasso? incassoEsistente = null)
+    public IncassoDialogViewModel(CGEasyDbContext context, int bancaId, BancaIncasso? incassoEsistente = null)
     {
         _incassoRepo = new BancaIncassoRepository(context);
         _auditService = new AuditLogService(context);

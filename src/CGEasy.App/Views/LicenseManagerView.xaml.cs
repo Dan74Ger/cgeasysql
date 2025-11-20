@@ -25,7 +25,7 @@ public partial class LicenseManagerView : Window
                 return;
             }
             
-            var context = serviceProvider.GetRequiredService<LiteDbContext>();
+            var context = serviceProvider.GetRequiredService<CGEasyDbContext>();
             
             // Inizializza ViewModel con context condiviso
             DataContext = new LicenseManagerViewModel(context);

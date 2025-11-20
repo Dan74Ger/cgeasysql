@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace CGEasy.Core.Models;
@@ -7,88 +9,153 @@ namespace CGEasy.Core.Models;
 /// <summary>
 /// Modello per TODO dello studio professionale
 /// </summary>
+[Table("todo_studio")]
 public class TodoStudio
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     
     // ===== INFORMAZIONI BASE =====
+    [Column("titolo")]
+    [Required]
+    [MaxLength(300)]
     public string Titolo { get; set; } = string.Empty;
+    
+    [Column("descrizione")]
     public string? Descrizione { get; set; }
+    
+    [Column("note")]
     public string? Note { get; set; }
     
     // ===== CLASSIFICAZIONE =====
+    [Column("categoria")]
     public CategoriaTodo Categoria { get; set; }
+    
+    [Column("priorita")]
     public PrioritaTodo Priorita { get; set; }
+    
+    [Column("stato")]
     public StatoTodo Stato { get; set; }
     
     // ===== RELAZIONI =====
     /// <summary>
     /// ID del tipo di pratica collegata (730, 740, DRIVA, etc.)
     /// </summary>
+    [Column("tipo_pratica_id")]
     public int? TipoPraticaId { get; set; }
     
     /// <summary>
     /// Nome del tipo pratica (denormalizzato per performance)
     /// </summary>
+    [Column("tipo_pratica_nome")]
+    [MaxLength(200)]
     public string? TipoPraticaNome { get; set; }
     
     /// <summary>
     /// ID del cliente collegato
     /// </summary>
+    [Column("cliente_id")]
     public int? ClienteId { get; set; }
     
     /// <summary>
     /// Nome cliente (denormalizzato per performance)
     /// </summary>
+    [Column("cliente_nome")]
+    [MaxLength(200)]
     public string? ClienteNome { get; set; }
     
     /// <summary>
     /// ID del professionista che ha creato il TODO
     /// </summary>
+    [Column("creatore_id")]
     public int CreatoreId { get; set; }
     
     /// <summary>
     /// Nome creatore (denormalizzato)
     /// </summary>
+    [Column("creatore_nome")]
+    [Required]
+    [MaxLength(200)]
     public string CreatoreNome { get; set; } = string.Empty;
     
     /// <summary>
-    /// Lista ID dei professionisti assegnati
+    /// Lista ID dei professionisti assegnati (JSON)
     /// </summary>
-    public List<int> ProfessionistiAssegnatiIds { get; set; } = new();
+    [Column("professionisti_assegnati_ids_json")]
+    public string ProfessionistiAssegnatiIdsJson { get; set; } = "[]";
     
     /// <summary>
-    /// Lista nomi professionisti assegnati (denormalizzato)
+    /// Lista nomi professionisti assegnati (JSON)
     /// </summary>
-    public List<string> ProfessionistiAssegnatiNomi { get; set; } = new();
+    [Column("professionisti_assegnati_nomi_json")]
+    public string ProfessionistiAssegnatiNomiJson { get; set; } = "[]";
+    
+    // Per retrocompatibilità con il codice esistente, mappiamo List<> su JSON
+    [NotMapped]
+    public List<int> ProfessionistiAssegnatiIds
+    {
+        get => string.IsNullOrWhiteSpace(ProfessionistiAssegnatiIdsJson) || ProfessionistiAssegnatiIdsJson == "[]"
+            ? new List<int>()
+            : System.Text.Json.JsonSerializer.Deserialize<List<int>>(ProfessionistiAssegnatiIdsJson) ?? new List<int>();
+        set => ProfessionistiAssegnatiIdsJson = System.Text.Json.JsonSerializer.Serialize(value ?? new List<int>());
+    }
+    
+    [NotMapped]
+    public List<string> ProfessionistiAssegnatiNomi
+    {
+        get => string.IsNullOrWhiteSpace(ProfessionistiAssegnatiNomiJson) || ProfessionistiAssegnatiNomiJson == "[]"
+            ? new List<string>()
+            : System.Text.Json.JsonSerializer.Deserialize<List<string>>(ProfessionistiAssegnatiNomiJson) ?? new List<string>();
+        set => ProfessionistiAssegnatiNomiJson = System.Text.Json.JsonSerializer.Serialize(value ?? new List<string>());
+    }
     
     // ===== DATE =====
+    [Column("data_creazione")]
     public DateTime DataCreazione { get; set; }
     
     /// <summary>
     /// Data di inizio attività (opzionale)
     /// </summary>
+    [Column("data_inizio")]
     public DateTime? DataInizio { get; set; }
     
+    [Column("data_scadenza")]
     public DateTime? DataScadenza { get; set; }
+    
+    [Column("data_completamento")]
     public DateTime? DataCompletamento { get; set; }
+    
+    [Column("data_ultima_modifica")]
     public DateTime? DataUltimaModifica { get; set; }
     
     /// <summary>
     /// Orario di inizio attività (opzionale)
     /// </summary>
+    [Column("orario_inizio")]
     public TimeSpan? OrarioInizio { get; set; }
     
     /// <summary>
     /// Orario di fine attività (opzionale)
     /// </summary>
+    [Column("orario_fine")]
     public TimeSpan? OrarioFine { get; set; }
     
     // ===== ALLEGATI =====
     /// <summary>
-    /// Lista percorsi relativi dei file allegati
+    /// Lista percorsi relativi dei file allegati (JSON)
     /// </summary>
-    public List<string> Allegati { get; set; } = new();
+    [Column("allegati_json")]
+    public string AllegatiJson { get; set; } = "[]";
+    
+    [NotMapped]
+    public List<string> Allegati
+    {
+        get => string.IsNullOrWhiteSpace(AllegatiJson) || AllegatiJson == "[]"
+            ? new List<string>()
+            : System.Text.Json.JsonSerializer.Deserialize<List<string>>(AllegatiJson) ?? new List<string>();
+        set => AllegatiJson = System.Text.Json.JsonSerializer.Serialize(value ?? new List<string>());
+    }
     
     // ===== PROPRIETÀ CALCOLATE =====
     

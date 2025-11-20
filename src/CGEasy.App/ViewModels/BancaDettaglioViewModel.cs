@@ -272,7 +272,7 @@ public partial class BancaDettaglioViewModel : ObservableObject
     {
     }
 
-    public BancaDettaglioViewModel(LiteDbContext context, int bancaId)
+    public BancaDettaglioViewModel(CGEasyDbContext context, int bancaId)
     {
         _bancaRepo = new BancaRepository(context);
         _incassoRepo = new BancaIncassoRepository(context);
@@ -286,13 +286,13 @@ public partial class BancaDettaglioViewModel : ObservableObject
         LoadBanca();
     }
 
-    private static LiteDbContext GetOrCreateContext()
+    private static CGEasyDbContext GetOrCreateContext()
     {
-        var context = App.GetService<LiteDbContext>();
+        var context = App.GetService<CGEasyDbContext>();
         if (context == null)
         {
-            context = new LiteDbContext();
-            context.MarkAsSingleton();
+            context = new CGEasyDbContext();
+            // Singleton context - no special marking needed in EF Core
         }
         return context;
     }

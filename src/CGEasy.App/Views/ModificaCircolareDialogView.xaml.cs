@@ -16,9 +16,9 @@ namespace CGEasy.App.Views
         {
             InitializeComponent();
 
-            // Ottiene Singleton LiteDbContext
+            // Ottiene Singleton CGEasyDbContext
             var app = (App)Application.Current;
-            var context = app.Services!.GetRequiredService<LiteDbContext>();
+            var context = app.Services!.GetRequiredService<CGEasyDbContext>();
 
             // Crea ViewModel
             var viewModel = new ModificaCircolareDialogViewModel(context, circolareId);

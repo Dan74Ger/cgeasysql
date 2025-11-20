@@ -1,8 +1,10 @@
-using CGEasy.Core.Data;
+﻿using CGEasy.Core.Data;
 using CGEasy.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CGEasy.Core.Services
 {
@@ -11,17 +13,17 @@ namespace CGEasy.Core.Services
     /// </summary>
     public class AuditLogService
     {
-        private readonly LiteDbContext _context;
+        private readonly CGEasyDbContext _context;
 
-        public AuditLogService(LiteDbContext context)
+        public AuditLogService(CGEasyDbContext context)
         {
             _context = context;
         }
 
         /// <summary>
-        /// Registra un'operazione nel log
+        /// Registra un'operazione nel log (ASYNC)
         /// </summary>
-        public void Log(int idUtente, string username, string azione, string entita, 
+        public async Task LogAsync(int idUtente, string username, string azione, string entita, 
                        int? idEntita = null, string? descrizione = null, 
                        string? valoriPrecedenti = null, string? valoriNuovi = null)
         {
@@ -40,7 +42,8 @@ namespace CGEasy.Core.Services
                     Timestamp = DateTime.UtcNow
                 };
 
-                _context.AuditLogs.Insert(log);
+                _context.AuditLogs.Add(log);
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -50,118 +53,133 @@ namespace CGEasy.Core.Services
         }
 
         /// <summary>
-        /// Registra operazione dall'utente corrente di sessione
+        /// Registra operazione dall'utente corrente di sessione (ASYNC)
         /// </summary>
-        public void LogFromSession(string azione, string entita, int? idEntita = null, string? descrizione = null)
+        public async Task LogFromSessionAsync(string azione, string entita, int? idEntita = null, string? descrizione = null)
         {
             if (!SessionManager.IsAuthenticated || SessionManager.CurrentUser == null)
                 return;
 
-            Log(SessionManager.CurrentUser.Id, SessionManager.CurrentUser.Username, 
+            await LogAsync(SessionManager.CurrentUser.Id, SessionManager.CurrentUser.Username, 
                 azione, entita, idEntita, descrizione);
         }
 
         /// <summary>
-        /// Ottiene tutti i log
+        /// Ottiene tutti i log (ASYNC)
         /// </summary>
-        public IEnumerable<AuditLog> GetAll()
+        public async Task<List<AuditLog>> GetAllAsync()
         {
-            return _context.AuditLogs.FindAll().OrderByDescending(x => x.Timestamp);
+            return await _context.AuditLogs
+                .OrderByDescending(x => x.Timestamp)
+                .ToListAsync();
         }
 
         /// <summary>
-        /// Ottiene log per utente
+        /// Ottiene log per utente (ASYNC)
         /// </summary>
-        public IEnumerable<AuditLog> GetByUser(int idUtente)
+        public async Task<List<AuditLog>> GetByUserAsync(int idUtente)
         {
-            return _context.AuditLogs.Find(x => x.IdUtente == idUtente)
-                .OrderByDescending(x => x.Timestamp);
+            return await _context.AuditLogs
+                .Where(x => x.IdUtente == idUtente)
+                .OrderByDescending(x => x.Timestamp)
+                .ToListAsync();
         }
 
         /// <summary>
-        /// Ottiene log per entità
+        /// Ottiene log per entità (ASYNC)
         /// </summary>
-        public IEnumerable<AuditLog> GetByEntity(string entita, int? idEntita = null)
+        public async Task<List<AuditLog>> GetByEntityAsync(string entita, int? idEntita = null)
         {
             if (idEntita.HasValue)
             {
-                return _context.AuditLogs.Find(x => x.Entita == entita && x.IdEntita == idEntita)
-                    .OrderByDescending(x => x.Timestamp);
+                return await _context.AuditLogs
+                    .Where(x => x.Entita == entita && x.IdEntita == idEntita)
+                    .OrderByDescending(x => x.Timestamp)
+                    .ToListAsync();
             }
             else
             {
-                return _context.AuditLogs.Find(x => x.Entita == entita)
-                    .OrderByDescending(x => x.Timestamp);
+                return await _context.AuditLogs
+                    .Where(x => x.Entita == entita)
+                    .OrderByDescending(x => x.Timestamp)
+                    .ToListAsync();
             }
         }
 
         /// <summary>
-        /// Ottiene log per periodo
+        /// Ottiene log per periodo (ASYNC)
         /// </summary>
-        public IEnumerable<AuditLog> GetByPeriod(DateTime dataInizio, DateTime dataFine)
+        public async Task<List<AuditLog>> GetByPeriodAsync(DateTime dataInizio, DateTime dataFine)
         {
-            return _context.AuditLogs.Find(x => x.Timestamp >= dataInizio && x.Timestamp <= dataFine)
-                .OrderByDescending(x => x.Timestamp);
+            return await _context.AuditLogs
+                .Where(x => x.Timestamp >= dataInizio && x.Timestamp <= dataFine)
+                .OrderByDescending(x => x.Timestamp)
+                .ToListAsync();
         }
 
         /// <summary>
-        /// Ottiene log per azione
+        /// Ottiene log per azione (ASYNC)
         /// </summary>
-        public IEnumerable<AuditLog> GetByAction(string azione)
+        public async Task<List<AuditLog>> GetByActionAsync(string azione)
         {
-            return _context.AuditLogs.Find(x => x.Azione == azione)
-                .OrderByDescending(x => x.Timestamp);
+            return await _context.AuditLogs
+                .Where(x => x.Azione == azione)
+                .OrderByDescending(x => x.Timestamp)
+                .ToListAsync();
         }
 
         /// <summary>
-        /// Cerca nei log
+        /// Cerca nei log (ASYNC)
         /// </summary>
-        public IEnumerable<AuditLog> Search(string searchTerm)
+        public async Task<List<AuditLog>> SearchAsync(string searchTerm)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
-                return GetAll();
+                return await GetAllAsync();
 
             var lower = searchTerm.ToLower();
-            return _context.AuditLogs.Find(x => 
-                x.Username.ToLower().Contains(lower) ||
-                x.Azione.ToLower().Contains(lower) ||
-                x.Entita.ToLower().Contains(lower) ||
-                (x.Descrizione != null && x.Descrizione.ToLower().Contains(lower)))
-                .OrderByDescending(x => x.Timestamp);
+            return await _context.AuditLogs
+                .Where(x => 
+                    EF.Functions.Like(x.Username.ToLower(), $"%{lower}%") ||
+                    EF.Functions.Like(x.Azione.ToLower(), $"%{lower}%") ||
+                    EF.Functions.Like(x.Entita.ToLower(), $"%{lower}%") ||
+                    (x.Descrizione != null && EF.Functions.Like(x.Descrizione.ToLower(), $"%{lower}%")))
+                .OrderByDescending(x => x.Timestamp)
+                .ToListAsync();
         }
 
         /// <summary>
-        /// Conta log totali
+        /// Conta log totali (ASYNC)
         /// </summary>
-        public int Count()
+        public async Task<int> CountAsync()
         {
-            return _context.AuditLogs.Count();
+            return await _context.AuditLogs.CountAsync();
         }
 
         /// <summary>
-        /// Elimina log più vecchi di X giorni (pulizia)
+        /// Elimina log più vecchi di X giorni (pulizia) (ASYNC)
         /// </summary>
-        public int DeleteOlderThan(int days)
+        public async Task<int> DeleteOlderThanAsync(int days)
         {
             var cutoffDate = DateTime.UtcNow.AddDays(-days);
-            var oldLogs = _context.AuditLogs.Find(x => x.Timestamp < cutoffDate);
+            var oldLogs = await _context.AuditLogs
+                .Where(x => x.Timestamp < cutoffDate)
+                .ToListAsync();
             
-            int deleted = 0;
-            foreach (var log in oldLogs)
-            {
-                if (_context.AuditLogs.Delete(log.Id))
-                    deleted++;
-            }
+            if (oldLogs.Count == 0)
+                return 0;
+
+            _context.AuditLogs.RemoveRange(oldLogs);
+            await _context.SaveChangesAsync();
             
-            return deleted;
+            return oldLogs.Count;
         }
 
         /// <summary>
-        /// Ottiene statistiche log
+        /// Ottiene statistiche log (ASYNC)
         /// </summary>
-        public AuditLogStats GetStatistics()
+        public async Task<AuditLogStats> GetStatisticsAsync()
         {
-            var allLogs = _context.AuditLogs.FindAll().ToList();
+            var allLogs = await _context.AuditLogs.ToListAsync();
             
             return new AuditLogStats
             {
@@ -177,6 +195,20 @@ namespace CGEasy.Core.Services
                     .OrderByDescending(g => g.Count())
                     .FirstOrDefault()?.Key ?? "N/A"
             };
+        }
+
+        // ===== WRAPPER SINCRONI PER COMPATIBILITÀ =====
+
+        public void Log(int idUtente, string username, string azione, string entita, 
+                       int? idEntita = null, string? descrizione = null, 
+                       string? valoriPrecedenti = null, string? valoriNuovi = null)
+        {
+            LogAsync(idUtente, username, azione, entita, idEntita, descrizione, valoriPrecedenti, valoriNuovi).Wait();
+        }
+
+        public void LogFromSession(string azione, string entita, int? idEntita = null, string? descrizione = null)
+        {
+            LogFromSessionAsync(azione, entita, idEntita, descrizione).Wait();
         }
     }
 
@@ -194,33 +226,3 @@ namespace CGEasy.Core.Services
         public string MostCommonAction { get; set; } = string.Empty;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

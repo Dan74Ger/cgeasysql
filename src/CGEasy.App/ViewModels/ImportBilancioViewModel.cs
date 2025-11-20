@@ -15,7 +15,7 @@ namespace CGEasy.App.ViewModels;
 
 public partial class ImportBilancioViewModel : ObservableObject
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly BilancioContabileRepository _repository;
     private readonly ClienteRepository _clienteRepository;
 
@@ -64,7 +64,7 @@ public partial class ImportBilancioViewModel : ObservableObject
         "Lug", "Ago", "Set", "Ott", "Nov", "Dic"
     };
 
-    public ImportBilancioViewModel(LiteDbContext context)
+    public ImportBilancioViewModel(CGEasyDbContext context)
     {
         _context = context;
         _repository = new BilancioContabileRepository(context);

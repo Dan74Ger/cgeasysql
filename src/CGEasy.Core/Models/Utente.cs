@@ -1,54 +1,112 @@
-using LiteDB;
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CGEasy.Core.Models
 {
     /// <summary>
-    /// Modello Utente per autenticazione e gestione profilo
+    /// Modello Utente per autenticazione e gestione profilo - SQL Server (EF Core)
     /// </summary>
+    [Table("utenti")]
     public class Utente
     {
-        [BsonId]
+        /// <summary>
+        /// ID univoco utente (auto-increment)
+        /// </summary>
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [BsonField("username")]
+        /// <summary>
+        /// Username univoco per login
+        /// </summary>
+        [Column("username")]
+        [Required]
+        [MaxLength(100)]
         public string Username { get; set; } = string.Empty;
 
-        [BsonField("email")]
+        /// <summary>
+        /// Email utente
+        /// </summary>
+        [Column("email")]
+        [Required]
+        [MaxLength(150)]
+        [EmailAddress]
         public string Email { get; set; } = string.Empty;
 
-        [BsonField("password_hash")]
+        /// <summary>
+        /// Password hash (BCrypt)
+        /// </summary>
+        [Column("password_hash")]
+        [Required]
+        [MaxLength(500)]
         public string PasswordHash { get; set; } = string.Empty;
 
-        [BsonField("nome")]
+        /// <summary>
+        /// Nome utente
+        /// </summary>
+        [Column("nome")]
+        [Required]
+        [MaxLength(100)]
         public string Nome { get; set; } = string.Empty;
 
-        [BsonField("cognome")]
+        /// <summary>
+        /// Cognome utente
+        /// </summary>
+        [Column("cognome")]
+        [Required]
+        [MaxLength(100)]
         public string Cognome { get; set; } = string.Empty;
 
-        [BsonField("ruolo")]
+        /// <summary>
+        /// Ruolo utente (Administrator, UserSenior, User)
+        /// </summary>
+        [Column("ruolo")]
+        [Required]
         public RuoloUtente Ruolo { get; set; } = RuoloUtente.User;
 
-        [BsonField("attivo")]
+        /// <summary>
+        /// Stato attivo/disabilitato
+        /// </summary>
+        [Column("attivo")]
         public bool Attivo { get; set; } = true;
 
-        [BsonField("data_creazione")]
+        /// <summary>
+        /// Data creazione utente
+        /// </summary>
+        [Column("data_creazione")]
         public DateTime DataCreazione { get; set; } = DateTime.UtcNow;
 
-        [BsonField("data_modifica")]
+        /// <summary>
+        /// Data ultima modifica
+        /// </summary>
+        [Column("data_modifica")]
         public DateTime DataModifica { get; set; } = DateTime.UtcNow;
 
-        [BsonField("ultimo_accesso")]
+        /// <summary>
+        /// Data ultimo accesso
+        /// </summary>
+        [Column("ultimo_accesso")]
         public DateTime? UltimoAccesso { get; set; }
 
-        [BsonField("data_cessazione")]
+        /// <summary>
+        /// Data cessazione (se disabilitato)
+        /// </summary>
+        [Column("data_cessazione")]
         public DateTime? DataCessazione { get; set; }
 
-        // Proprietà calcolata
-        [BsonIgnore]
+        // ===== PROPRIETÀ CALCOLATE (NON MAPPATE SU DB) =====
+
+        /// <summary>
+        /// Nome completo (Nome + Cognome)
+        /// </summary>
+        [NotMapped]
         public string NomeCompleto => $"{Nome} {Cognome}";
 
-        [BsonIgnore]
+        /// <summary>
+        /// Descrizione ruolo testuale
+        /// </summary>
+        [NotMapped]
         public string RuoloDescrizione => Ruolo switch
         {
             RuoloUtente.Administrator => "Amministratore",
@@ -57,7 +115,10 @@ namespace CGEasy.Core.Models
             _ => "Sconosciuto"
         };
 
-        [BsonIgnore]
+        /// <summary>
+        /// Colore ruolo per UI
+        /// </summary>
+        [NotMapped]
         public string RuoloUtenteColor => Ruolo switch
         {
             RuoloUtente.Administrator => "#e74c3c",  // Rosso

@@ -9,7 +9,7 @@ public partial class ImportBilancioTemplateView : UserControl
     {
         InitializeComponent();
         
-        var context = ((App)System.Windows.Application.Current).Services!.GetRequiredService<CGEasy.Core.Data.LiteDbContext>();
+        var context = ((App)System.Windows.Application.Current).Services!.GetRequiredService<CGEasy.Core.Data.CGEasyDbContext>();
         DataContext = new ViewModels.BilancioTemplateViewModel(context);
     }
 }

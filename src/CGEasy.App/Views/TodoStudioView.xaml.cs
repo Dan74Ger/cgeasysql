@@ -17,7 +17,7 @@ public partial class TodoStudioView : Window
         {
             // Ottiene il context Singleton dall'app
             var app = (App)Application.Current;
-            var context = app.Services!.GetRequiredService<LiteDbContext>();
+            var context = app.Services!.GetRequiredService<CGEasyDbContext>();
             
             // Inizializza ViewModel
             DataContext = new TodoStudioViewModel(context);

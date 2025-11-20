@@ -1,61 +1,55 @@
 using System;
-using System.Collections.Generic;
-using LiteDB;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CGEasy.Core.Models;
 
-/// <summary>
-/// Rappresenta una statistica SP salvata per poterla ricaricare in seguito
-/// </summary>
+[Table("statistica_sp_salvata")]
 public class StatisticaSPSalvata
 {
-    [BsonId]
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     
-    /// <summary>
-    /// Nome descrittivo dato dall'utente
-    /// </summary>
+    [Column("nome_statistica")]
+    [Required]
+    [MaxLength(200)]
     public string NomeStatistica { get; set; } = string.Empty;
     
-    /// <summary>
-    /// Cliente di riferimento
-    /// </summary>
+    [Column("cliente_id")]
     public int ClienteId { get; set; }
+    
+    [Column("nome_cliente")]
+    [Required]
+    [MaxLength(200)]
     public string NomeCliente { get; set; } = string.Empty;
     
-    /// <summary>
-    /// Template usato
-    /// </summary>
+    [Column("template_mese")]
     public int TemplateMese { get; set; }
+    
+    [Column("template_anno")]
     public int TemplateAnno { get; set; }
+    
+    [Column("template_descrizione")]
+    [MaxLength(500)]
     public string TemplateDescrizione { get; set; } = string.Empty;
     
-    /// <summary>
-    /// Lista dei periodi selezionati (JSON serializzato)
-    /// Formato: [{"Mese":9,"Anno":2025},{"Mese":10,"Anno":2025}]
-    /// </summary>
+    [Column("periodi_json")]
     public string PeriodiJson { get; set; } = string.Empty;
     
-    /// <summary>
-    /// Dati statistiche (JSON serializzato)
-    /// Contiene l'intera lista di BilancioStatisticaMultiPeriodo
-    /// </summary>
+    [Column("dati_statistiche_json")]
     public string DatiStatisticheJson { get; set; } = string.Empty;
     
-    /// <summary>
-    /// Data creazione
-    /// </summary>
+    [Column("data_creazione")]
     public DateTime DataCreazione { get; set; } = DateTime.Now;
     
-    /// <summary>
-    /// Utente che ha creato
-    /// </summary>
+    [Column("utente_id")]
     public int UtenteId { get; set; }
+    
+    [Column("nome_utente")]
+    [MaxLength(100)]
     public string NomeUtente { get; set; } = string.Empty;
     
-    /// <summary>
-    /// Note opzionali
-    /// </summary>
+    [Column("note")]
     public string? Note { get; set; }
 }
-

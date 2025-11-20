@@ -26,7 +26,7 @@ public partial class LoginViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Login(object parameter)
+    private async void Login(object parameter)
     {
         ErrorMessage = string.Empty;
 
@@ -48,7 +48,8 @@ public partial class LoginViewModel : ObservableObject
 
         try
         {
-            var utente = _authService.Login(Username, password);
+            // Login ASYNC
+            var utente = await _authService.LoginAsync(Username, password);
 
             if (utente == null)
             {
@@ -62,8 +63,8 @@ public partial class LoginViewModel : ObservableObject
                 return;
             }
 
-            // Login effettuato: imposta sessione
-            var permissions = _authService.GetUserPermissions(utente.Id);
+            // Login effettuato: imposta sessione - ASYNC
+            var permissions = await _authService.GetUserPermissionsAsync(utente.Id);
             SessionManager.Login(utente, permissions);
 
             // Mostra MainWindow

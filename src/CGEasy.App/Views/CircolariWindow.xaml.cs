@@ -11,7 +11,7 @@ namespace CGEasy.App.Views
     /// </summary>
     public partial class CircolariWindow : Window
     {
-        private readonly LiteDbContext _context;
+        private readonly CGEasyDbContext _context;
         private ImportaCircolareViewModel? _importaViewModel;
         private RicercaCircolariViewModel? _ricercaViewModel;
 
@@ -19,9 +19,9 @@ namespace CGEasy.App.Views
         {
             InitializeComponent();
 
-            // Ottiene Singleton LiteDbContext
+            // Ottiene Singleton CGEasyDbContext
             var app = (App)Application.Current;
-            _context = app.Services!.GetRequiredService<LiteDbContext>();
+            _context = app.Services!.GetRequiredService<CGEasyDbContext>();
 
             // Imposta DataContext per ogni tab
             var argomentiTab = (ArgomentiView)((TabItem)((TabControl)Content).Items[0]).Content;

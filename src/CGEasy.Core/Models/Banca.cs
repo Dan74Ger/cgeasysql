@@ -1,62 +1,55 @@
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CGEasy.Core.Models;
 
 /// <summary>
-/// Rappresenta una banca gestita nel sistema
+/// Rappresenta una banca gestita nel sistema (EF Core)
 /// </summary>
+[Table("banche")]
 public class Banca
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     
-    /// <summary>
-    /// Nome della banca
-    /// </summary>
+    [Column("nome_banca")]
+    [Required]
+    [MaxLength(200)]
     public string NomeBanca { get; set; } = string.Empty;
     
-    /// <summary>
-    /// Codice identificativo della banca (opzionale)
-    /// </summary>
+    [Column("codice_identificativo")]
+    [MaxLength(50)]
     public string? CodiceIdentificativo { get; set; }
     
-    /// <summary>
-    /// IBAN del conto corrente (opzionale)
-    /// </summary>
+    [Column("iban")]
+    [MaxLength(50)]
     public string? IBAN { get; set; }
     
-    /// <summary>
-    /// Note aggiuntive (opzionale)
-    /// </summary>
+    [Column("note")]
     public string? Note { get; set; }
     
-    /// <summary>
-    /// Saldo corrente del conto
-    /// </summary>
+    [Column("saldo_del_giorno")]
+    [Precision(18, 2)]
     public decimal SaldoDelGiorno { get; set; }
     
-    /// <summary>
-    /// Fido C/C accordato (massimale)
-    /// </summary>
+    [Column("fido_cc_accordato")]
+    [Precision(18, 2)]
     public decimal FidoCCAccordato { get; set; }
     
-    /// <summary>
-    /// Anticipo fatture/SBF massimo accordato
-    /// </summary>
+    [Column("anticipo_fatture_massimo")]
+    [Precision(18, 2)]
     public decimal AnticipoFattureMassimo { get; set; }
     
-    /// <summary>
-    /// Interesse percentuale per anticipo fatture
-    /// </summary>
+    [Column("interesse_anticipo_fatture")]
+    [Precision(5, 2)]
     public decimal InteresseAnticipoFatture { get; set; }
     
-    /// <summary>
-    /// Data creazione record
-    /// </summary>
+    [Column("data_creazione")]
     public DateTime DataCreazione { get; set; } = DateTime.Now;
     
-    /// <summary>
-    /// Data ultima modifica
-    /// </summary>
+    [Column("data_ultima_modifica")]
     public DateTime DataUltimaModifica { get; set; } = DateTime.Now;
 }
-

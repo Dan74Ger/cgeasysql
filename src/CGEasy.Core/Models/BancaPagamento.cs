@@ -1,102 +1,76 @@
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CGEasy.Core.Models;
 
 /// <summary>
-/// Rappresenta un pagamento a fornitore per una banca
+/// Rappresenta un pagamento a fornitore per una banca (EF Core)
 /// </summary>
+[Table("banca_pagamenti")]
 public class BancaPagamento
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     
-    /// <summary>
-    /// ID della banca di riferimento
-    /// </summary>
+    [Column("banca_id")]
     public int BancaId { get; set; }
     
-    /// <summary>
-    /// Nome del fornitore/destinatario
-    /// </summary>
+    [Column("nome_fornitore")]
+    [Required]
+    [MaxLength(200)]
     public string NomeFornitore { get; set; } = string.Empty;
     
-    /// <summary>
-    /// Anno di riferimento
-    /// </summary>
+    [Column("anno")]
     public int Anno { get; set; }
     
-    /// <summary>
-    /// Mese di riferimento (1-12)
-    /// </summary>
+    [Column("mese")]
     public int Mese { get; set; }
     
-    /// <summary>
-    /// Importo del pagamento (fattura)
-    /// </summary>
+    [Column("importo")]
+    [Precision(18, 2)]
     public decimal Importo { get; set; }
     
-    /// <summary>
-    /// Percentuale di anticipo richiesta (0-100)
-    /// </summary>
+    [Column("percentuale_anticipo")]
+    [Precision(5, 2)]
     public decimal PercentualeAnticipo { get; set; }
     
-    /// <summary>
-    /// Importo anticipato calcolato (Importo * PercentualeAnticipo / 100)
-    /// </summary>
+    [NotMapped]
     public decimal ImportoAnticipato => Importo * (PercentualeAnticipo / 100);
     
-    /// <summary>
-    /// Data inizio anticipo
-    /// </summary>
+    [Column("data_inizio_anticipo")]
     public DateTime? DataInizioAnticipo { get; set; }
     
-    /// <summary>
-    /// Data scadenza anticipo
-    /// </summary>
+    [Column("data_scadenza_anticipo")]
     public DateTime? DataScadenzaAnticipo { get; set; }
     
-    /// <summary>
-    /// Importo fattura a scadenza (Importo - ImportoAnticipato)
-    /// </summary>
+    [NotMapped]
     public decimal ImportoFatturaScadenza => Importo - ImportoAnticipato;
     
-    /// <summary>
-    /// Flag che indica se il pagamento è stato effettuato
-    /// </summary>
+    [Column("pagato")]
     public bool Pagato { get; set; }
     
-    /// <summary>
-    /// Data di scadenza prevista per il pagamento (fattura)
-    /// </summary>
+    [Column("data_scadenza")]
     public DateTime DataScadenza { get; set; }
     
-    /// <summary>
-    /// Data effettiva di pagamento (se avvenuto)
-    /// </summary>
+    [Column("data_pagamento_effettivo")]
     public DateTime? DataPagamentoEffettivo { get; set; }
     
-    /// <summary>
-    /// Numero fattura fornitore (opzionale)
-    /// </summary>
+    [Column("numero_fattura_fornitore")]
+    [MaxLength(50)]
     public string? NumeroFatturaFornitore { get; set; }
     
-    /// <summary>
-    /// Data fattura fornitore (opzionale)
-    /// </summary>
+    [Column("data_fattura_fornitore")]
     public DateTime? DataFatturaFornitore { get; set; }
     
-    /// <summary>
-    /// Note aggiuntive
-    /// </summary>
+    [Column("note")]
     public string? Note { get; set; }
     
-    /// <summary>
-    /// Data creazione record
-    /// </summary>
+    [Column("data_creazione")]
     public DateTime DataCreazione { get; set; } = DateTime.Now;
     
-    /// <summary>
-    /// Data ultima modifica
-    /// </summary>
+    [Column("data_ultima_modifica")]
     public DateTime DataUltimaModifica { get; set; } = DateTime.Now;
 }
-

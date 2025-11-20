@@ -16,7 +16,7 @@ namespace CGEasy.App.ViewModels;
 
 public partial class StatisticheBilanciCEViewModel : ObservableObject
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly BilancioStatisticaService _service;
     private readonly ClienteRepository _clienteRepository;
     private readonly BilancioContabileRepository _bilancioRepository;
@@ -77,7 +77,7 @@ public partial class StatisticheBilanciCEViewModel : ObservableObject
     [ObservableProperty]
     private StatisticaCESalvata? _statisticaSalvataSelezionata;
 
-    public StatisticheBilanciCEViewModel(LiteDbContext context)
+    public StatisticheBilanciCEViewModel(CGEasyDbContext context)
     {
         _context = context;
         _service = new BilancioStatisticaService(context);
@@ -97,13 +97,13 @@ public partial class StatisticheBilanciCEViewModel : ObservableObject
     {
     }
 
-    private static LiteDbContext GetOrCreateContext()
+    private static CGEasyDbContext GetOrCreateContext()
     {
-        var context = App.GetService<LiteDbContext>();
+        var context = App.GetService<CGEasyDbContext>();
         if (context == null)
         {
-            context = new LiteDbContext();
-            context.MarkAsSingleton(); // Marca anche questo come singleton
+            context = new CGEasyDbContext();
+            // Singleton context - no special marking needed in EF Core
         }
         return context;
     }

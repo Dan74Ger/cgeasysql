@@ -20,7 +20,7 @@ namespace CGEasy.App.Views
             {
                 // ✅ Ottieni context condiviso dall'app (PATTERN TODO)
                 var app = (App)Application.Current;
-                var context = app.Services!.GetRequiredService<LiteDbContext>();
+                var context = app.Services!.GetRequiredService<CGEasyDbContext>();
                 
                 // ✅ Crea ViewModel e passa il context (come TODO)
                 var viewModel = new AssociazioneMastrinoDialogViewModel(context, associazioneId);

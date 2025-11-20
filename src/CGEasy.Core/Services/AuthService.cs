@@ -1,29 +1,33 @@
 using CGEasy.Core.Data;
 using CGEasy.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CGEasy.Core.Services
 {
     /// <summary>
-    /// Service per autenticazione e gestione sessione utente
+    /// Service per autenticazione e gestione sessione utente - SQL Server (EF Core)
     /// </summary>
     public class AuthService
     {
-        private readonly LiteDbContext _context;
+        private readonly CGEasyDbContext _context;
 
-        public AuthService(LiteDbContext context)
+        public AuthService(CGEasyDbContext context)
         {
             _context = context;
         }
 
         /// <summary>
-        /// Autentica utente con username e password
+        /// Autentica utente con username e password (async)
         /// </summary>
         /// <param name="username">Username</param>
         /// <param name="password">Password in chiaro</param>
         /// <returns>Utente autenticato o null se credenziali errate</returns>
-        public Utente? Login(string username, string password)
+        public async Task<Utente?> LoginAsync(string username, string password)
         {
             var logFile = Path.Combine(Path.GetTempPath(), "CGEasy_Login_Debug.txt");
             
@@ -39,9 +43,9 @@ namespace CGEasy.Core.Services
                     return null;
                 }
 
-                // Cerca utente per username (case-insensitive)
-                var utente = _context.Utenti
-                    .FindOne(x => x.Username.ToLower() == username.ToLower());
+                // Cerca utente per username (case-insensitive) - ASYNC
+                var utente = await _context.Utenti
+                    .FirstOrDefaultAsync(x => x.Username.ToLower() == username.ToLower());
 
                 if (utente == null)
                 {
@@ -74,10 +78,10 @@ namespace CGEasy.Core.Services
 
                 File.AppendAllText(logFile, "✅ Password CORRETTA - Login riuscito!\n");
 
-                // Aggiorna ultimo accesso
+                // Aggiorna ultimo accesso - ASYNC
                 utente.UltimoAccesso = DateTime.UtcNow;
                 _context.Utenti.Update(utente);
-                _context.Checkpoint(); // Forza salvataggio
+                await _context.SaveChangesAsync(); // EF Core async
 
                 return utente;
             }
@@ -89,16 +93,9 @@ namespace CGEasy.Core.Services
         }
 
         /// <summary>
-        /// Registra nuovo utente
+        /// Registra nuovo utente (async)
         /// </summary>
-        /// <param name="username">Username (univoco)</param>
-        /// <param name="password">Password in chiaro (verrà hashata)</param>
-        /// <param name="email">Email</param>
-        /// <param name="nome">Nome</param>
-        /// <param name="cognome">Cognome</param>
-        /// <param name="ruolo">Ruolo utente</param>
-        /// <returns>ID utente creato o 0 se username già esistente</returns>
-        public int Register(string username, string password, string email, string nome, string cognome, 
+        public async Task<int> RegisterAsync(string username, string password, string email, string nome, string cognome, 
                            RuoloUtente ruolo = RuoloUtente.User)
         {
             // Validazioni
@@ -108,8 +105,9 @@ namespace CGEasy.Core.Services
             if (password.Length < 6)
                 throw new ArgumentException("La password deve essere di almeno 6 caratteri");
 
-            // Verifica username univoco
-            var existingUser = _context.Utenti.FindOne(x => x.Username.ToLower() == username.ToLower());
+            // Verifica username univoco - ASYNC
+            var existingUser = await _context.Utenti
+                .FirstOrDefaultAsync(x => x.Username.ToLower() == username.ToLower());
             if (existingUser != null)
                 return 0; // Username già esistente
 
@@ -127,58 +125,55 @@ namespace CGEasy.Core.Services
                 DataModifica = DateTime.UtcNow
             };
 
-            var userId = _context.Utenti.Insert(utente);
+            _context.Utenti.Add(utente);
+            await _context.SaveChangesAsync();
+
+            var userId = utente.Id; // EF popola automaticamente l'ID
 
             // Crea permessi di default per utente
             var permissions = new UserPermissions
             {
                 IdUtente = userId,
-                ModuloTodo = ruolo == RuoloUtente.Administrator, // Admin ha tutto attivo di default
+                ModuloTodo = ruolo == RuoloUtente.Administrator,
                 ModuloBilanci = false,
                 ModuloCircolari = false,
                 ModuloControlloGestione = false,
                 ClientiCreate = false,
-                ClientiRead = true, // Tutti possono leggere clienti
+                ClientiRead = true,
                 ClientiUpdate = false,
                 ClientiDelete = false,
                 ProfessionistiCreate = false,
                 ProfessionistiRead = true,
                 ProfessionistiUpdate = false,
                 ProfessionistiDelete = false,
-                UtentiManage = ruolo == RuoloUtente.Administrator, // Solo admin gestisce utenti
+                UtentiManage = ruolo == RuoloUtente.Administrator,
                 DataCreazione = DateTime.UtcNow,
                 DataModifica = DateTime.UtcNow
             };
 
-            _context.UserPermissions.Insert(permissions);
+            _context.UserPermissions.Add(permissions);
+            await _context.SaveChangesAsync();
 
-            // FORZA checkpoint per salvare immediatamente
-            _context.Checkpoint();
             System.Diagnostics.Debug.WriteLine($"✅ Utente {username} creato e salvato (ID: {userId})");
 
             return userId;
         }
 
-
         /// <summary>
-        /// Ottiene permessi utente
+        /// Ottiene permessi utente (async)
         /// </summary>
-        /// <param name="userId">ID utente</param>
-        /// <returns>Permessi utente o null</returns>
-        public UserPermissions? GetUserPermissions(int userId)
+        public async Task<UserPermissions?> GetUserPermissionsAsync(int userId)
         {
-            return _context.UserPermissions.FindOne(x => x.IdUtente == userId);
+            return await _context.UserPermissions
+                .FirstOrDefaultAsync(x => x.IdUtente == userId);
         }
 
         /// <summary>
-        /// Verifica se utente ha accesso a un modulo
+        /// Verifica se utente ha accesso a un modulo (async)
         /// </summary>
-        /// <param name="userId">ID utente</param>
-        /// <param name="moduleName">Nome modulo (todo, bilanci, circolari, controllo)</param>
-        /// <returns>True se ha accesso</returns>
-        public bool HasModuleAccess(int userId, string moduleName)
+        public async Task<bool> HasModuleAccessAsync(int userId, string moduleName)
         {
-            var permissions = GetUserPermissions(userId);
+            var permissions = await GetUserPermissionsAsync(userId);
             if (permissions == null)
                 return false;
 
@@ -186,14 +181,11 @@ namespace CGEasy.Core.Services
         }
 
         /// <summary>
-        /// Attiva/Disattiva utente
+        /// Attiva/Disattiva utente (async)
         /// </summary>
-        /// <param name="userId">ID utente</param>
-        /// <param name="attivo">True per attivare, False per disattivare</param>
-        /// <returns>True se operazione riuscita</returns>
-        public bool SetUserActive(int userId, bool attivo)
+        public async Task<bool> SetUserActiveAsync(int userId, bool attivo)
         {
-            var utente = _context.Utenti.FindById(userId);
+            var utente = await _context.Utenti.FindAsync(userId);
             if (utente == null)
                 return false;
 
@@ -203,59 +195,52 @@ namespace CGEasy.Core.Services
             if (!attivo)
                 utente.DataCessazione = DateTime.UtcNow;
 
-            var success = _context.Utenti.Update(utente);
-            
-            if (success)
-            {
-                _context.Checkpoint(); // Forza salvataggio
-            }
-            
-            return success;
+            _context.Utenti.Update(utente);
+            return await _context.SaveChangesAsync() > 0;
         }
 
         /// <summary>
-        /// Ottiene tutti gli utenti
+        /// Ottiene tutti gli utenti (async)
         /// </summary>
-        /// <param name="includeInactive">Include utenti disattivati</param>
-        /// <returns>Lista utenti</returns>
-        public IEnumerable<Utente> GetAllUsers(bool includeInactive = false)
+        public async Task<List<Utente>> GetAllUsersAsync(bool includeInactive = false)
         {
             if (includeInactive)
-                return _context.Utenti.FindAll();
+                return await _context.Utenti.ToListAsync();
 
-            return _context.Utenti.Find(x => x.Attivo);
+            return await _context.Utenti.Where(x => x.Attivo).ToListAsync();
         }
 
         /// <summary>
-        /// Conta utenti per ruolo
+        /// Conta utenti per ruolo (async)
         /// </summary>
-        public (int Admins, int UserSenior, int Users) CountUsersByRole()
+        public async Task<(int Admins, int UserSenior, int Users)> CountUsersByRoleAsync()
         {
-            var all = _context.Utenti.FindAll().ToList();
+            var all = await _context.Utenti.Where(x => x.Attivo).ToListAsync();
             return (
-                Admins: all.Count(x => x.Ruolo == RuoloUtente.Administrator && x.Attivo),
-                UserSenior: all.Count(x => x.Ruolo == RuoloUtente.UserSenior && x.Attivo),
-                Users: all.Count(x => x.Ruolo == RuoloUtente.User && x.Attivo)
+                Admins: all.Count(x => x.Ruolo == RuoloUtente.Administrator),
+                UserSenior: all.Count(x => x.Ruolo == RuoloUtente.UserSenior),
+                Users: all.Count(x => x.Ruolo == RuoloUtente.User)
             );
         }
 
         /// <summary>
-        /// Trova utente per username
+        /// Trova utente per username (async)
         /// </summary>
-        public Utente? FindUserByUsername(string username)
+        public async Task<Utente?> FindUserByUsernameAsync(string username)
         {
             if (string.IsNullOrWhiteSpace(username))
                 return null;
 
-            return _context.Utenti.FindOne(x => x.Username.ToLower() == username.ToLower());
+            return await _context.Utenti
+                .FirstOrDefaultAsync(x => x.Username.ToLower() == username.ToLower());
         }
 
         /// <summary>
-        /// Modifica dati utente esistente
+        /// Modifica dati utente esistente (async)
         /// </summary>
-        public bool UpdateUser(int userId, string email, string nome, string cognome, RuoloUtente ruolo, bool attivo)
+        public async Task<bool> UpdateUserAsync(int userId, string email, string nome, string cognome, RuoloUtente ruolo, bool attivo)
         {
-            var utente = _context.Utenti.FindById(userId);
+            var utente = await _context.Utenti.FindAsync(userId);
             if (utente == null)
                 return false;
 
@@ -269,22 +254,18 @@ namespace CGEasy.Core.Services
             if (!attivo && utente.DataCessazione == null)
                 utente.DataCessazione = DateTime.UtcNow;
 
-            var success = _context.Utenti.Update(utente);
+            _context.Utenti.Update(utente);
+            var result = await _context.SaveChangesAsync();
             
-            if (success)
-            {
-                // FORZA checkpoint per salvare immediatamente
-                _context.Checkpoint();
-                System.Diagnostics.Debug.WriteLine($"✅ Utente ID {userId} aggiornato e salvato");
-            }
+            System.Diagnostics.Debug.WriteLine($"✅ Utente ID {userId} aggiornato e salvato");
             
-            return success;
+            return result > 0;
         }
 
         /// <summary>
-        /// Cambia password (solo nuova password - per admin che resetta)
+        /// Cambia password (async)
         /// </summary>
-        public bool ChangePassword(int userId, string newPassword)
+        public async Task<bool> ChangePasswordAsync(int userId, string newPassword)
         {
             var logFile = Path.Combine(Path.GetTempPath(), "CGEasy_ChangePassword_Debug.txt");
             
@@ -298,7 +279,7 @@ namespace CGEasy.Core.Services
                     throw new ArgumentException("La password deve essere di almeno 6 caratteri");
                 }
 
-                var utente = _context.Utenti.FindById(userId);
+                var utente = await _context.Utenti.FindAsync(userId);
                 if (utente == null)
                 {
                     File.AppendAllText(logFile, $"❌ Utente ID {userId} non trovato!\n");
@@ -318,18 +299,16 @@ namespace CGEasy.Core.Services
                 utente.PasswordHash = newPasswordHash;
                 utente.DataModifica = DateTime.UtcNow;
 
-                // Salva nel database
-                var success = _context.Utenti.Update(utente);
-                File.AppendAllText(logFile, $"Update returned: {success}\n");
+                // Salva nel database - ASYNC
+                _context.Utenti.Update(utente);
+                var result = await _context.SaveChangesAsync();
                 
-                if (success)
+                File.AppendAllText(logFile, $"SaveChanges returned: {result}\n");
+                
+                if (result > 0)
                 {
-                    // FORZA checkpoint per salvare immediatamente su disco
-                    _context.Checkpoint();
-                    File.AppendAllText(logFile, "Checkpoint eseguito\n");
-                    
                     // Verifica che sia stata salvata
-                    var verificaUtente = _context.Utenti.FindById(userId);
+                    var verificaUtente = await _context.Utenti.FindAsync(userId);
                     if (verificaUtente != null)
                     {
                         var hashSalvato = verificaUtente.PasswordHash;
@@ -348,7 +327,7 @@ namespace CGEasy.Core.Services
                     }
                 }
                 
-                File.AppendAllText(logFile, "❌ Update fallito!\n");
+                File.AppendAllText(logFile, "❌ SaveChanges fallito!\n");
                 return false;
             }
             catch (Exception ex)
@@ -359,39 +338,65 @@ namespace CGEasy.Core.Services
         }
 
         /// <summary>
-        /// Salva permessi utente
+        /// Salva permessi utente (async)
         /// </summary>
-        public bool SaveUserPermissions(UserPermissions permissions)
+        public async Task<bool> SaveUserPermissionsAsync(UserPermissions permissions)
         {
             if (permissions == null || permissions.IdUtente == 0)
                 return false;
 
             permissions.DataModifica = DateTime.UtcNow;
 
-            // Se esiste già un record, aggiorna; altrimenti, inserisci
-            var existing = _context.UserPermissions.FindOne(x => x.IdUtente == permissions.IdUtente);
+            // Se esiste già un record, aggiorna; altrimenti, inserisci - ASYNC
+            var existing = await _context.UserPermissions
+                .FirstOrDefaultAsync(x => x.IdUtente == permissions.IdUtente);
             
-            bool success;
             if (existing != null)
             {
                 permissions.Id = existing.Id;
-                permissions.DataCreazione = existing.DataCreazione; // Mantieni data creazione originale
-                success = _context.UserPermissions.Update(permissions);
+                permissions.DataCreazione = existing.DataCreazione;
+                _context.UserPermissions.Update(permissions);
             }
             else
             {
                 permissions.DataCreazione = DateTime.UtcNow;
-                _context.UserPermissions.Insert(permissions);
-                success = true;
+                _context.UserPermissions.Add(permissions);
             }
             
-            if (success)
-            {
-                _context.Checkpoint(); // Forza salvataggio
-            }
-            
-            return success;
+            return await _context.SaveChangesAsync() > 0;
         }
+
+        // ===== METODI SINCRONIZZATI TEMPORANEI (per retrocompatibilità) =====
+        // Questi metodi verranno rimossi quando tutti i chiamanti saranno async
+
+        public Utente? Login(string username, string password)
+            => LoginAsync(username, password).GetAwaiter().GetResult();
+
+        public UserPermissions? GetUserPermissions(int userId)
+            => GetUserPermissionsAsync(userId).GetAwaiter().GetResult();
+
+        public int Register(string username, string password, string email, string nome, string cognome, RuoloUtente ruolo = RuoloUtente.User)
+            => RegisterAsync(username, password, email, nome, cognome, ruolo).GetAwaiter().GetResult();
+
+        public List<Utente> GetAllUsers(bool includeInactive = false)
+            => GetAllUsersAsync(includeInactive).GetAwaiter().GetResult();
+
+        public (int Admins, int UserSenior, int Users) CountUsersByRole()
+            => CountUsersByRoleAsync().GetAwaiter().GetResult();
+
+        public Utente? FindUserByUsername(string username)
+            => FindUserByUsernameAsync(username).GetAwaiter().GetResult();
+
+        public bool SetUserActive(int userId, bool attivo)
+            => SetUserActiveAsync(userId, attivo).GetAwaiter().GetResult();
+
+        public bool UpdateUser(int userId, string email, string nome, string cognome, RuoloUtente ruolo, bool attivo)
+            => UpdateUserAsync(userId, email, nome, cognome, ruolo, attivo).GetAwaiter().GetResult();
+
+        public bool ChangePassword(int userId, string newPassword)
+            => ChangePasswordAsync(userId, newPassword).GetAwaiter().GetResult();
+
+        public bool SaveUserPermissions(UserPermissions permissions)
+            => SaveUserPermissionsAsync(permissions).GetAwaiter().GetResult();
     }
 }
-

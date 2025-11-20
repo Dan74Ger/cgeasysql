@@ -1,143 +1,95 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using LiteDB;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CGEasy.Core.Models;
 
-public class BilancioTemplate : INotifyPropertyChanged
+[Table("bilancio_template")]
+public class BilancioTemplate
 {
-    [BsonId]
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
+    
+    [Column("cliente_id")]
     public int ClienteId { get; set; }
+    
+    [Column("cliente_nome")]
+    [Required]
+    [MaxLength(200)]
     public string ClienteNome { get; set; } = string.Empty;
-    public int Mese { get; set; } // 1-12
+    
+    [Column("mese")]
+    public int Mese { get; set; }
+    
+    [Column("anno")]
     public int Anno { get; set; }
+    
+    [Column("descrizione_bilancio")]
+    [MaxLength(500)]
     public string? DescrizioneBilancio { get; set; }
-    public string TipoBilancio { get; set; } = "CE"; // CE = Conto Economico, SP = Stato Patrimoniale
     
-    private string _codiceMastrino = string.Empty;
-    public string CodiceMastrino
-    {
-        get => _codiceMastrino;
-        set
-        {
-            if (_codiceMastrino != value)
-            {
-                _codiceMastrino = value;
-                OnPropertyChanged();
-            }
-        }
-    }
+    [Column("tipo_bilancio")]
+    [Required]
+    [MaxLength(10)]
+    public string TipoBilancio { get; set; } = "CE";
     
+    [Column("codice_mastrino")]
+    [Required]
+    [MaxLength(50)]
+    public string CodiceMastrino { get; set; } = string.Empty;
+    
+    [Column("descrizione_mastrino")]
+    [Required]
+    [MaxLength(300)]
     public string DescrizioneMastrino { get; set; } = string.Empty;
     
-    private decimal _importo;
-    public decimal Importo
-    {
-        get => _importo;
-        set
-        {
-            if (_importo != value)
-            {
-                _importo = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(ImportoFormatted));
-                OnPropertyChanged(nameof(HasDifferenza));
-            }
-        }
-    }
+    [Column("importo")]
+    [Precision(18, 2)]
+    public decimal Importo { get; set; }
     
+    [Column("note")]
     public string? Note { get; set; }
-    public DateTime DataImport { get; set; }
+    
+    [Column("data_import")]
+    public DateTime DataImport { get; set; } = DateTime.Now;
+    
+    [Column("imported_by")]
     public int ImportedBy { get; set; }
+    
+    [Column("imported_by_name")]
+    [MaxLength(100)]
     public string ImportedByName { get; set; } = string.Empty;
-
-    // 🆕 CAMPI PER RICLASSIFICAZIONE
-    private string _segno = "+";
-    public string Segno
-    {
-        get => _segno;
-        set
-        {
-            if (_segno != value)
-            {
-                _segno = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsTestoRosso));
-            }
-        }
-    }
     
-    private string? _formula;
-    public string? Formula
-    {
-        get => _formula;
-        set
-        {
-            if (_formula != value)
-            {
-                _formula = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(HasFormula));
-            }
-        }
-    }
+    [Column("segno")]
+    [MaxLength(1)]
+    public string Segno { get; set; } = "+";
     
-    private decimal _importoCalcolato;
-    public decimal ImportoCalcolato
-    {
-        get => _importoCalcolato;
-        set
-        {
-            if (_importoCalcolato != value)
-            {
-                _importoCalcolato = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(ImportoCalcolatoFormatted));
-                OnPropertyChanged(nameof(HasDifferenza));
-                OnPropertyChanged(nameof(IsTestoRosso));
-            }
-        }
-    }
-
-    // Proprietà calcolate per UI
-    public string PeriodoDisplay => $"{Mese:00}/{Anno}";
+    [Column("formula")]
+    [MaxLength(200)]
+    public string? Formula { get; set; }
+    
+    [Column("ordine")]
+    public int Ordine { get; set; }
+    
+    [Column("livello")]
+    public int Livello { get; set; }
+    
+    [Column("gruppo")]
+    [MaxLength(100)]
+    public string? Gruppo { get; set; }
+    
+    [Column("gruppo_padre")]
+    [MaxLength(100)]
+    public string? GruppoPadre { get; set; }
+    
+    [NotMapped]
     public string ImportoFormatted => Importo.ToString("C2");
-    public string ImportoCalcolatoFormatted => ImportoCalcolato.ToString("C2");
     
-    // Indica se c'è differenza tra importo originale e calcolato
-    public bool HasDifferenza => Math.Abs(Importo - Math.Abs(ImportoCalcolato)) > 0.01m;
+    [NotMapped]
+    public bool HasDifferenza { get; set; }
     
-    // Indica se la riga ha una formula
-    public bool HasFormula => !string.IsNullOrWhiteSpace(Formula);
-    
-    // ✅ Indica se il testo della riga deve essere ROSSO
-    // Rosso SOLO se ImportoCalcolato è negativo (< 0)
-    public bool IsTestoRosso => ImportoCalcolato < 0;
-    
-    public string MeseNome => Mese switch
-    {
-        1 => "Gen",
-        2 => "Feb",
-        3 => "Mar",
-        4 => "Apr",
-        5 => "Mag",
-        6 => "Giu",
-        7 => "Lug",
-        8 => "Ago",
-        9 => "Set",
-        10 => "Ott",
-        11 => "Nov",
-        12 => "Dic",
-        _ => ""
-    };
-    public string PeriodoCompleto => $"{MeseNome} {Anno}";
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-    
-    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
+    [NotMapped]
+    public bool IsTestoRosso => Segno == "-";
 }
-

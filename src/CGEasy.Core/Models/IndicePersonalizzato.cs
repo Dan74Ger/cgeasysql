@@ -1,93 +1,91 @@
-using LiteDB;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CGEasy.Core.Models;
 
-/// <summary>
-/// Rappresenta un indice personalizzato creato dall'utente e salvato nel database
-/// </summary>
-public class IndicePersonalizzato : INotifyPropertyChanged
+[Table("indici_personalizzati")]
+public class IndicePersonalizzato
 {
-    [BsonId(true)]
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     
+    [Column("cliente_id")]
     public int ClienteId { get; set; }
+    
+    [Column("nome_indice")]
+    [Required]
+    [MaxLength(200)]
     public string NomeIndice { get; set; } = string.Empty;
+    
+    [Column("descrizione")]
+    [MaxLength(500)]
     public string Descrizione { get; set; } = string.Empty;
     
-    /// <summary>
-    /// Operatore matematico: "divisione", "moltiplicazione", "somma", "sottrazione"
-    /// </summary>
+    [Column("operatore")]
+    [MaxLength(50)]
     public string Operatore { get; set; } = "divisione";
     
-    /// <summary>
-    /// Moltiplicatore finale (es: 100 per percentuali)
-    /// </summary>
+    [Column("moltiplicatore")]
+    [Precision(18, 2)]
     public decimal Moltiplicatore { get; set; } = 1;
     
-    /// <summary>
-    /// Unità di misura del risultato
-    /// </summary>
+    [Column("unita_misura")]
+    [MaxLength(50)]
     public string UnitaMisura { get; set; } = string.Empty;
     
-    /// <summary>
-    /// Codici delle voci del numeratore (da CE o SP)
-    /// Es: ["FATTURATO", "TOTALE ATTIVITA"]
-    /// </summary>
-    public List<string> CodiciNumeratore { get; set; } = new();
+    // JSON storage per List<string>
+    [Column("codici_numeratore")]
+    public string CodiciNumeratoreJson { get; set; } = "[]";
     
-    /// <summary>
-    /// Codici delle voci del denominatore (da CE o SP)
-    /// Es: ["PATRIMONIO NETTO", "DEBITI CORRENTI"]
-    /// </summary>
-    public List<string> CodiciDenominatore { get; set; } = new();
+    [Column("codici_denominatore")]
+    public string CodiciDenominatoreJson { get; set; } = "[]";
     
-    /// <summary>
-    /// Indica se sommare o moltiplicare le voci del numeratore
-    /// "somma" o "prodotto"
-    /// </summary>
+    [NotMapped]
+    public List<string> CodiciNumeratore 
+    {
+        get => System.Text.Json.JsonSerializer.Deserialize<List<string>>(CodiciNumeratoreJson) ?? new();
+        set => CodiciNumeratoreJson = System.Text.Json.JsonSerializer.Serialize(value);
+    }
+    
+    [NotMapped]
+    public List<string> CodiciDenominatore 
+    {
+        get => System.Text.Json.JsonSerializer.Deserialize<List<string>>(CodiciDenominatoreJson) ?? new();
+        set => CodiciDenominatoreJson = System.Text.Json.JsonSerializer.Serialize(value);
+    }
+    
+    [Column("operazione_numeratore")]
+    [MaxLength(50)]
     public string OperazioneNumeratore { get; set; } = "somma";
     
-    /// <summary>
-    /// Indica se sommare o moltiplicare le voci del denominatore
-    /// "somma" o "prodotto"
-    /// </summary>
+    [Column("operazione_denominatore")]
+    [MaxLength(50)]
     public string OperazioneDenominatore { get; set; } = "somma";
     
+    [Column("data_creazione")]
     public DateTime DataCreazione { get; set; } = DateTime.Now;
-    public DateTime? DataUltimaModifica { get; set; }
     
-    /// <summary>
-    /// Se true, l'indice è attivo e verrà mostrato
-    /// </summary>
+    [Column("creato_by")]
+    public int CreatoBy { get; set; }
+    
+    [Column("data_modifica")]
+    public DateTime? DataModifica { get; set; }
+    
+    // Alias per compatibilità
+    [NotMapped]
+    public DateTime? DataUltimaModifica 
+    { 
+        get => DataModifica; 
+        set => DataModifica = value; 
+    }
+    
+    [Column("ordine")]
+    public int Ordine { get; set; }
+    
+    [Column("attivo")]
     public bool Attivo { get; set; } = true;
-    
-    private bool _abilitato = true;
-    /// <summary>
-    /// Se true, l'indice è abilitato per il calcolo
-    /// </summary>
-    [BsonField("Abilitato")]
-    public bool Abilitato
-    {
-        get => _abilitato;
-        set
-        {
-            if (_abilitato != value)
-            {
-                _abilitato = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
 }
-

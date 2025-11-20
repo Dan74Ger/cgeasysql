@@ -22,7 +22,7 @@ public partial class LicenseClientDialogView : Window
         
         // Usa context Singleton dall'app
         var app = (App)Application.Current;
-        var context = app.Services!.GetRequiredService<LiteDbContext>();
+        var context = app.Services!.GetRequiredService<CGEasyDbContext>();
         _repository = new LicenseRepository(context);
         
         Cliente = new LicenseClient();

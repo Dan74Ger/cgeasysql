@@ -38,7 +38,7 @@ namespace CGEasy.App.ViewModels
 
         public Action<bool>? OnDialogClosed { get; set; }
 
-        public ModificaCircolareDialogViewModel(LiteDbContext context, int circolareId)
+        public ModificaCircolareDialogViewModel(CGEasyDbContext context, int circolareId)
         {
             _circolareId = circolareId;
             _service = new CircolariService(context);

@@ -13,7 +13,7 @@ namespace CGEasy.App.ViewModels;
 
 public partial class BilancioTemplateViewModel : ObservableObject
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly BilancioTemplateRepository _repository;
 
     [ObservableProperty]
@@ -22,7 +22,7 @@ public partial class BilancioTemplateViewModel : ObservableObject
     [ObservableProperty]
     private BilancioGruppo? selectedGruppo;
 
-    public BilancioTemplateViewModel(LiteDbContext context)
+    public BilancioTemplateViewModel(CGEasyDbContext context)
     {
         _context = context;
         _repository = new BilancioTemplateRepository(context);

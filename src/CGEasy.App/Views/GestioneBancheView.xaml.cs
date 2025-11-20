@@ -64,7 +64,7 @@ namespace CGEasy.App.Views
                     await System.Threading.Tasks.Task.Delay(100); // Wait for binding to complete
                     if (DataContext is GestioneBancheViewModel vm && e.Row.Item is Banca banca)
                     {
-                        var bancaRepo = new BancaRepository(App.GetService<Core.Data.LiteDbContext>()!);
+                        var bancaRepo = new BancaRepository(App.GetService<Core.Data.CGEasyDbContext>()!);
                         bancaRepo.Update(banca);
                         vm.LoadBanche(); // Refresh the list
                     }

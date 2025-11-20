@@ -1,67 +1,56 @@
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CGEasy.Core.Models;
 
 /// <summary>
-/// Chiave di licenza generata per un cliente e un modulo specifico
+/// Chiave di licenza per un cliente e modulo (EF Core)
 /// </summary>
+[Table("license_keys")]
 public class LicenseKey
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     
-    /// <summary>
-    /// ID del cliente a cui è stata rilasciata la licenza
-    /// </summary>
+    [Column("license_client_id")]
     public int LicenseClientId { get; set; }
     
-    /// <summary>
-    /// Nome del modulo (TODO-STUDIO, BILANCI, CIRCOLARI, CONTROLLO-GESTIONE)
-    /// </summary>
+    [Column("module_name")]
+    [Required]
+    [MaxLength(100)]
     public string ModuleName { get; set; } = string.Empty;
     
-    /// <summary>
-    /// Chiave completa generata (es: TODO-STUDIO-A1B2C3D4E5F6)
-    /// </summary>
+    [Column("full_key")]
+    [Required]
+    [MaxLength(200)]
     public string FullKey { get; set; } = string.Empty;
     
-    /// <summary>
-    /// GUID unico per questa licenza
-    /// </summary>
+    [Column("license_guid")]
+    [Required]
+    [MaxLength(50)]
     public string LicenseGuid { get; set; } = Guid.NewGuid().ToString();
     
-    /// <summary>
-    /// Data e ora di generazione
-    /// </summary>
+    [Column("data_generazione")]
     public DateTime DataGenerazione { get; set; } = DateTime.Now;
     
-    /// <summary>
-    /// Licenza attiva o revocata
-    /// </summary>
+    [Column("is_active")]
     public bool IsActive { get; set; } = true;
     
-    /// <summary>
-    /// Note sulla licenza
-    /// </summary>
+    [Column("note")]
     public string? Note { get; set; }
     
-    /// <summary>
-    /// Data scadenza (null = licenza perpetua)
-    /// </summary>
+    [Column("data_scadenza")]
     public DateTime? DataScadenza { get; set; }
     
-    /// <summary>
-    /// Utente che ha generato la chiave
-    /// </summary>
+    [Column("generated_by_user_id")]
     public int GeneratedByUserId { get; set; }
     
-    /// <summary>
-    /// Verifica se la licenza è scaduta
-    /// </summary>
+    [NotMapped]
     public bool IsExpired => DataScadenza.HasValue && DataScadenza.Value.Date <= DateTime.Now.Date;
     
-    /// <summary>
-    /// Durata calcolata della licenza (es: "1 anno", "10 anni", "Perpetua")
-    /// </summary>
+    [NotMapped]
     public string DurataDisplay
     {
         get
@@ -84,5 +73,3 @@ public class LicenseKey
         }
     }
 }
-
-

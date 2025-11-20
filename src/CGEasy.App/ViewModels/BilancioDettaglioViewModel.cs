@@ -15,7 +15,7 @@ namespace CGEasy.App.ViewModels;
 
 public partial class BilancioDettaglioViewModel : ObservableObject
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly BilancioContabileRepository _repository;
     private readonly int _clienteId;
     private readonly int _mese;
@@ -44,7 +44,7 @@ public partial class BilancioDettaglioViewModel : ObservableObject
     // Proprietà per gestire la visibilità del pulsante di eliminazione multipla
     public bool HasSelectedRighe => RigheFiltrate.Any(r => r.IsSelected);
 
-    public BilancioDettaglioViewModel(LiteDbContext context, int clienteId, int mese, int anno, string? descrizione)
+    public BilancioDettaglioViewModel(CGEasyDbContext context, int clienteId, int mese, int anno, string? descrizione)
     {
         _context = context;
         _repository = new BilancioContabileRepository(context);
@@ -65,13 +65,17 @@ public partial class BilancioDettaglioViewModel : ObservableObject
             {
                 foreach (BilancioContabile riga in e.NewItems)
                 {
-                    riga.PropertyChanged += (sender, args) =>
-                    {
-                        if (args.PropertyName == nameof(BilancioContabile.IsSelected))
-                        {
-                            OnPropertyChanged(nameof(HasSelectedRighe));
-                        }
-                    };
+                    // TODO: BilancioContabile non implementa INotifyPropertyChanged
+                    // riga.PropertyChanged += (sender, args) =>
+                    // {
+                    //     if (args.PropertyName == nameof(BilancioContabile.IsSelected))
+                    //     {
+                    //         OnPropertyChanged(nameof(HasSelectedRighe));
+                    //     }
+                    // };
+                    
+                    // Workaround temporaneo: aggiorna manualmente quando cambia la selezione
+                    OnPropertyChanged(nameof(HasSelectedRighe));
                 }
             }
             

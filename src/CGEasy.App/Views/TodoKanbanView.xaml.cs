@@ -24,7 +24,7 @@ public partial class TodoKanbanView : Window
         {
             // Ottieni context condiviso dall'app
             var app = (App)Application.Current;
-            var context = app.Services!.GetRequiredService<LiteDbContext>();
+            var context = app.Services!.GetRequiredService<CGEasyDbContext>();
 
             var todoRepo = new TodoStudioRepository(context);
             var clienteRepo = new ClienteRepository(context);

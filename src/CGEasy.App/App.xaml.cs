@@ -36,14 +36,10 @@ public partial class App : Application
     {
         // === CORE SERVICES ===
         
-        // DatabaseConfigService è statico, non necessita registrazione
-        // Ma lo aggiungiamo per completezza e per future estensioni
-        
-        // LiteDbContext (Singleton - unica istanza per tutta l'app)
-        services.AddSingleton<LiteDbContext>(provider =>
+        // CGEasyDbContext (Singleton - SQL Server EF Core)
+        services.AddSingleton<CGEasyDbContext>(provider =>
         {
-            var context = new LiteDbContext();
-            context.MarkAsSingleton(); // Marca come Singleton per non chiudere mai il DB
+            var context = new CGEasyDbContext();
             return context;
         });
 
@@ -105,6 +101,10 @@ public partial class App : Application
 
     private void CheckPendingRestore()
     {
+        // ⚠️ FUNZIONE DISABILITATA: Non più necessaria con SQL Server
+        // Il backup/restore di SQL Server si fa tramite strumenti dedicati (SSMS, sqlcmd, ecc.)
+        
+        /* CODICE LEGACY LITEDB - COMMENTATO
         try
         {
             var dbPath = LiteDbContext.DefaultDatabasePath;
@@ -148,10 +148,15 @@ public partial class App : Application
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
+        */
     }
 
     private void CheckPendingEncryption()
     {
+        // ⚠️ FUNZIONE DISABILITATA: Non più necessaria con SQL Server
+        // La crittografia di SQL Server si gestisce con TDE (Transparent Data Encryption)
+        
+        /* CODICE LEGACY LITEDB - COMMENTATO
         try
         {
             var dbPath = LiteDbContext.DefaultDatabasePath;
@@ -378,6 +383,7 @@ public partial class App : Application
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
+        */
     }
 
     private class EncryptionOperation
@@ -392,53 +398,16 @@ public partial class App : Application
     {
         try
         {
-            var dbContext = _serviceProvider?.GetRequiredService<LiteDbContext>();
+            // ✅ Usa CGEasyDbContext (SQL Server EF Core)
+            var dbContext = _serviceProvider?.GetRequiredService<CGEasyDbContext>();
             if (dbContext != null)
             {
-                // ✅ Inietta il repository globale per validazione licenze
-                var licenseRepo = _serviceProvider?.GetRequiredService<LicenseRepository>();
-                if (licenseRepo != null)
-                {
-                    LicenseService.SetGlobalRepository(licenseRepo);
-                    System.Diagnostics.Debug.WriteLine("✅ Repository licenze globale configurato");
-                }
+                // Verifica che il database sia creato
+                dbContext.Database.EnsureCreated();
+                System.Diagnostics.Debug.WriteLine("✅ Database SQL Server verificato/creato");
                 
-                try
-                {
-                    // Verifica se ci sono utenti
-                    var totalUtenti = dbContext.Utenti.Count();
-                    
-                    if (totalUtenti == 0)
-                    {
-                        // Crea admin di default SENZA messaggi
-                        dbContext.SeedDefaultAdmin();
-                        System.Diagnostics.Debug.WriteLine("✅ Database inizializzato con utenti admin");
-                        System.Diagnostics.Debug.WriteLine("ℹ️ Database creato SENZA criptazione");
-                        
-                        // NON mostrare messaggi - l'utente sa già le credenziali
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"✅ Database connesso: {totalUtenti} utenti");
-                    }
-                }
-                catch (Exception innerEx)
-                {
-                    // Se c'è un errore nel conteggio, prova comunque a creare l'admin
-                    System.Diagnostics.Debug.WriteLine($"⚠️ Errore durante verifica utenti: {innerEx.Message}");
-                    System.Diagnostics.Debug.WriteLine("Tentativo di creazione admin...");
-                    
-                    try
-                    {
-                        dbContext.SeedDefaultAdmin();
-                        System.Diagnostics.Debug.WriteLine("✅ Database riparato e inizializzato");
-                        // NON mostrare messaggi con credenziali
-                    }
-                    catch (Exception seedEx)
-                    {
-                        throw new Exception($"Impossibile inizializzare database: {seedEx.Message}", seedEx);
-                    }
-                }
+                // Gli utenti sono già stati creati tramite migration + seed SQL
+                System.Diagnostics.Debug.WriteLine("✅ Database SQL Server pronto (utenti già presenti da migration)");
             }
         }
         catch (Exception ex)

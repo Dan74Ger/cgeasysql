@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -22,7 +23,7 @@ namespace CGEasy.App.ViewModels
         private readonly CircolariRepository _repository;
         private readonly ArgomentiRepository _argomentiRepo;
         private readonly AuditLogService _auditService;
-        private readonly LiteDbContext _context;
+        private readonly CGEasyDbContext _context;
 
         [ObservableProperty]
         private ObservableCollection<Circolare> _circolari = new();
@@ -45,21 +46,24 @@ namespace CGEasy.App.ViewModels
         [ObservableProperty]
         private string _searchText = string.Empty;
 
+        [ObservableProperty]
+        private bool _isLoading = false;
+
         public RicercaCircolariViewModel()
         {
             // Constructor per XAML Designer
             var app = (App)Application.Current;
-            var context = app.Services!.GetRequiredService<LiteDbContext>();
+            var context = app.Services!.GetRequiredService<CGEasyDbContext>();
             _context = context;
             _service = new CircolariService(context);
             _repository = new CircolariRepository(context);
             _argomentiRepo = new ArgomentiRepository(context);
             _auditService = new AuditLogService(context);
 
-            LoadData();
+            _ = LoadDataAsync();
         }
 
-        public RicercaCircolariViewModel(LiteDbContext context)
+        public RicercaCircolariViewModel(CGEasyDbContext context)
         {
             _context = context;
             _service = new CircolariService(context);
@@ -67,44 +71,45 @@ namespace CGEasy.App.ViewModels
             _argomentiRepo = new ArgomentiRepository(context);
             _auditService = new AuditLogService(context);
 
-            LoadData();
+            _ = LoadDataAsync();
         }
 
-        private void LoadData()
+        private async Task LoadDataAsync()
         {
+            IsLoading = true;
             try
             {
-                // Carica argomenti
-                var argomenti = _argomentiRepo.GetAll();
+                var argomenti = await _argomentiRepo.GetAllAsync();
                 ArgomentiDisponibili = new ObservableCollection<Argomento>(argomenti);
 
-                // Carica anni
-                var anni = _repository.GetAnniDistinti();
+                var anni = await _repository.GetAnniDistintiAsync();
                 AnniDisponibili = new ObservableCollection<int>(anni);
 
-                // Carica circolari
-                LoadCircolari();
+                await LoadCircolariAsync();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Errore caricamento dati:\n{ex.Message}", 
                     "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
-        /// <summary>
-        /// Ricarica tutti i dati (chiamato quando cambia tab)
-        /// </summary>
-        public void RefreshData()
+        public async Task RefreshDataAsync()
         {
-            LoadData();
+            await LoadDataAsync();
         }
 
-        private void LoadCircolari()
+        public void RefreshData() => RefreshDataAsync().GetAwaiter().GetResult();
+
+        private async Task LoadCircolariAsync()
         {
             try
             {
-                var risultati = _repository.Search(
+                var risultati = await _repository.SearchAsync(
                     ArgomentoFiltro?.Id,
                     AnnoFiltro,
                     string.IsNullOrWhiteSpace(SearchText) ? null : SearchText
@@ -120,9 +125,9 @@ namespace CGEasy.App.ViewModels
         }
 
         [RelayCommand]
-        private void Cerca()
+        private async Task CercaAsync()
         {
-            LoadCircolari();
+            await LoadCircolariAsync();
         }
 
         [RelayCommand]
@@ -131,7 +136,7 @@ namespace CGEasy.App.ViewModels
             ArgomentoFiltro = null;
             AnnoFiltro = null;
             SearchText = string.Empty;
-            LoadCircolari();
+            _ = LoadCircolariAsync(); // Call async without await
         }
 
         [RelayCommand]
@@ -177,7 +182,7 @@ namespace CGEasy.App.ViewModels
                 if (dialog.DialogResult)
                 {
                     // Ricarica lista dopo modifica
-                    LoadCircolari();
+                    _ = LoadCircolariAsync(); // Call async without await
                 }
             }
             catch (Exception ex)
@@ -227,7 +232,7 @@ namespace CGEasy.App.ViewModels
                         MessageBox.Show("Circolare eliminata con successo!", 
                             "Successo", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                        LoadCircolari();
+                        _ = LoadCircolariAsync(); // Call async without await
                     }
                     else
                     {

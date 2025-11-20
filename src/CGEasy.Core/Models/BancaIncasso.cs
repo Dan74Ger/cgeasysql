@@ -1,112 +1,82 @@
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CGEasy.Core.Models;
 
 /// <summary>
-/// Rappresenta un incasso da cliente per una banca
+/// Rappresenta un incasso da cliente per una banca (EF Core)
 /// </summary>
+[Table("banca_incassi")]
 public class BancaIncasso
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     
-    /// <summary>
-    /// ID della banca di riferimento
-    /// </summary>
+    [Column("banca_id")]
     public int BancaId { get; set; }
     
-    /// <summary>
-    /// Nome del cliente
-    /// </summary>
+    [Column("nome_cliente")]
+    [Required]
+    [MaxLength(200)]
     public string NomeCliente { get; set; } = string.Empty;
     
-    /// <summary>
-    /// Anno di riferimento
-    /// </summary>
+    [Column("anno")]
     public int Anno { get; set; }
     
-    /// <summary>
-    /// Mese di riferimento (1-12)
-    /// </summary>
+    [Column("mese")]
     public int Mese { get; set; }
     
-    /// <summary>
-    /// Importo della fattura
-    /// </summary>
+    [Column("importo")]
+    [Precision(18, 2)]
     public decimal Importo { get; set; }
     
-    /// <summary>
-    /// Percentuale di anticipo richiesta (0-100)
-    /// </summary>
+    [Column("percentuale_anticipo")]
+    [Precision(5, 2)]
     public decimal PercentualeAnticipo { get; set; }
     
-    /// <summary>
-    /// Importo anticipato calcolato (Importo * PercentualeAnticipo / 100)
-    /// </summary>
+    [NotMapped]
     public decimal ImportoAnticipato => Importo * (PercentualeAnticipo / 100);
     
-    /// <summary>
-    /// Data inizio anticipo
-    /// </summary>
+    [Column("data_inizio_anticipo")]
     public DateTime? DataInizioAnticipo { get; set; }
     
-    /// <summary>
-    /// Anticipo gestito tramite C/C (non visibile in Saldo Previsto)
-    /// </summary>
+    [Column("anticipo_gestito_cc")]
     public bool AnticipoGestito_CC { get; set; }
     
-    /// <summary>
-    /// Data scadenza anticipo
-    /// </summary>
+    [Column("data_scadenza_anticipo")]
     public DateTime? DataScadenzaAnticipo { get; set; }
     
-    /// <summary>
-    /// Anticipo chiuso tramite C/C (storno non visibile in Saldo Previsto)
-    /// </summary>
+    [Column("anticipo_chiuso_cc")]
     public bool AnticipoChiuso_CC { get; set; }
     
-    /// <summary>
-    /// Importo fattura a scadenza (Importo - ImportoAnticipato)
-    /// </summary>
+    [NotMapped]
     public decimal ImportoFatturaScadenza => Importo - ImportoAnticipato;
     
-    /// <summary>
-    /// Flag che indica se l'importo è stato incassato
-    /// </summary>
+    [Column("incassato")]
     public bool Incassato { get; set; }
     
-    /// <summary>
-    /// Data di scadenza prevista per l'incasso (fattura)
-    /// </summary>
+    [Column("data_scadenza")]
     public DateTime DataScadenza { get; set; }
     
-    /// <summary>
-    /// Data effettiva di incasso (se avvenuto)
-    /// </summary>
+    [Column("data_incasso_effettivo")]
     public DateTime? DataIncassoEffettivo { get; set; }
     
-    /// <summary>
-    /// Numero fattura cliente (opzionale)
-    /// </summary>
+    [Column("numero_fattura_cliente")]
+    [MaxLength(50)]
     public string? NumeroFatturaCliente { get; set; }
     
-    /// <summary>
-    /// Data fattura cliente (opzionale)
-    /// </summary>
+    [Column("data_fattura_cliente")]
     public DateTime? DataFatturaCliente { get; set; }
     
-    /// <summary>
-    /// Note aggiuntive
-    /// </summary>
+    [Column("note")]
     public string? Note { get; set; }
     
-    /// <summary>
-    /// Data creazione record
-    /// </summary>
+    [Column("data_creazione")]
     public DateTime DataCreazione { get; set; } = DateTime.Now;
     
-    /// <summary>
-    /// Data ultima modifica
-    /// </summary>
+    [Column("data_ultima_modifica")]
     public DateTime DataUltimaModifica { get; set; } = DateTime.Now;
 }
-

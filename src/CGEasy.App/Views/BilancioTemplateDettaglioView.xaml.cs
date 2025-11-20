@@ -32,7 +32,7 @@ public partial class BilancioTemplateDettaglioView : UserControl
         if (sender is DataGridRow row && row.Item is CGEasy.Core.Models.BilancioTemplate riga)
         {
             // Recupera i servizi necessari
-            var context = ((App)Application.Current).Services?.GetService<CGEasy.Core.Data.LiteDbContext>();
+            var context = ((App)Application.Current).Services?.GetService<CGEasy.Core.Data.CGEasyDbContext>();
             var auditService = ((App)Application.Current).Services?.GetService<CGEasy.Core.Services.AuditLogService>();
 
             if (context == null || auditService == null) return;

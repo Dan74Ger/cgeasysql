@@ -1,181 +1,233 @@
-using CGEasy.Core.Data;
+﻿using CGEasy.Core.Data;
 using CGEasy.Core.Models;
-using LiteDB;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CGEasy.Core.Repositories;
 
 public class TodoStudioRepository
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     
-    public TodoStudioRepository(LiteDbContext context)
+    public TodoStudioRepository(CGEasyDbContext context)
     {
         _context = context;
     }
     
-    private ILiteCollection<TodoStudio> Collection => _context.TodoStudio;
+    // ===== CRUD BASE ASYNC =====
     
-    // ===== CRUD BASE =====
-    
-    public IEnumerable<TodoStudio> GetAll()
+    public async Task<List<TodoStudio>> GetAllAsync()
     {
-        return Collection.FindAll().OrderByDescending(t => t.DataCreazione);
+        return await _context.TodoStudio
+            .OrderByDescending(t => t.DataCreazione)
+            .ToListAsync();
     }
     
-    public TodoStudio? GetById(int id)
+    public async Task<TodoStudio?> GetByIdAsync(int id)
     {
-        return Collection.FindById(id);
+        return await _context.TodoStudio.FindAsync(id);
     }
     
-    public int Insert(TodoStudio todo)
+    public async Task<int> InsertAsync(TodoStudio todo)
     {
         todo.DataCreazione = DateTime.Now;
         todo.DataUltimaModifica = DateTime.Now;
-        return Collection.Insert(todo);
+        
+        _context.TodoStudio.Add(todo);
+        await _context.SaveChangesAsync();
+        
+        return todo.Id;
     }
     
-    public bool Update(TodoStudio todo)
+    public async Task<bool> UpdateAsync(TodoStudio todo)
     {
-        todo.DataUltimaModifica = DateTime.Now;
-        return Collection.Update(todo);
+        try
+        {
+            todo.DataUltimaModifica = DateTime.Now;
+            
+            _context.TodoStudio.Update(todo);
+            await _context.SaveChangesAsync();
+            
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
     
-    public bool Delete(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        return Collection.Delete(id);
+        try
+        {
+            var todo = await GetByIdAsync(id);
+            if (todo == null) return false;
+            
+            _context.TodoStudio.Remove(todo);
+            await _context.SaveChangesAsync();
+            
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
     
-    // ===== QUERY FILTRATE =====
+    // ===== QUERY FILTRATE ASYNC =====
     
     /// <summary>
     /// Ottiene TODO per stato
     /// </summary>
-    public IEnumerable<TodoStudio> GetByStato(StatoTodo stato)
+    public async Task<List<TodoStudio>> GetByStatoAsync(StatoTodo stato)
     {
-        return Collection.Find(t => t.Stato == stato).OrderByDescending(t => t.DataScadenza);
+        return await _context.TodoStudio
+            .Where(t => t.Stato == stato)
+            .OrderByDescending(t => t.DataScadenza)
+            .ToListAsync();
     }
     
     /// <summary>
-    /// Ottiene TODO per professionista assegnato
+    /// Ottiene TODO per professionista assegnato (controlla nel JSON)
     /// </summary>
-    public IEnumerable<TodoStudio> GetByProfessionista(int professionistaId)
+    public async Task<List<TodoStudio>> GetByProfessionistaAsync(int professionistaId)
     {
-        return Collection.Find(t => t.ProfessionistiAssegnatiIds.Contains(professionistaId))
-                         .OrderByDescending(t => t.DataScadenza);
+        return await _context.TodoStudio
+            .Where(t => EF.Functions.Like(t.ProfessionistiAssegnatiIdsJson, $"%{professionistaId}%"))
+            .OrderByDescending(t => t.DataScadenza)
+            .ToListAsync();
     }
     
     /// <summary>
     /// Ottiene TODO per creatore
     /// </summary>
-    public IEnumerable<TodoStudio> GetByCreatore(int creatoreId)
+    public async Task<List<TodoStudio>> GetByCreatoreAsync(int creatoreId)
     {
-        return Collection.Find(t => t.CreatoreId == creatoreId)
-                         .OrderByDescending(t => t.DataCreazione);
+        return await _context.TodoStudio
+            .Where(t => t.CreatoreId == creatoreId)
+            .OrderByDescending(t => t.DataCreazione)
+            .ToListAsync();
     }
     
     /// <summary>
     /// Ottiene TODO per cliente
     /// </summary>
-    public IEnumerable<TodoStudio> GetByCliente(int clienteId)
+    public async Task<List<TodoStudio>> GetByClienteAsync(int clienteId)
     {
-        return Collection.Find(t => t.ClienteId == clienteId)
-                         .OrderByDescending(t => t.DataScadenza);
+        return await _context.TodoStudio
+            .Where(t => t.ClienteId == clienteId)
+            .OrderByDescending(t => t.DataScadenza)
+            .ToListAsync();
     }
     
     /// <summary>
     /// Ottiene TODO per tipo pratica
     /// </summary>
-    public IEnumerable<TodoStudio> GetByTipoPratica(int tipoPraticaId)
+    public async Task<List<TodoStudio>> GetByTipoPraticaAsync(int tipoPraticaId)
     {
-        return Collection.Find(t => t.TipoPraticaId == tipoPraticaId)
-                         .OrderByDescending(t => t.DataScadenza);
+        return await _context.TodoStudio
+            .Where(t => t.TipoPraticaId == tipoPraticaId)
+            .OrderByDescending(t => t.DataScadenza)
+            .ToListAsync();
     }
     
     /// <summary>
     /// Ottiene TODO per categoria
     /// </summary>
-    public IEnumerable<TodoStudio> GetByCategoria(CategoriaTodo categoria)
+    public async Task<List<TodoStudio>> GetByCategoriaAsync(CategoriaTodo categoria)
     {
-        return Collection.Find(t => t.Categoria == categoria)
-                         .OrderByDescending(t => t.DataScadenza);
+        return await _context.TodoStudio
+            .Where(t => t.Categoria == categoria)
+            .OrderByDescending(t => t.DataScadenza)
+            .ToListAsync();
     }
     
     /// <summary>
     /// Ottiene TODO per priorità
     /// </summary>
-    public IEnumerable<TodoStudio> GetByPriorita(PrioritaTodo priorita)
+    public async Task<List<TodoStudio>> GetByPrioritaAsync(PrioritaTodo priorita)
     {
-        return Collection.Find(t => t.Priorita == priorita)
-                         .OrderByDescending(t => t.DataScadenza);
+        return await _context.TodoStudio
+            .Where(t => t.Priorita == priorita)
+            .OrderByDescending(t => t.DataScadenza)
+            .ToListAsync();
     }
     
     /// <summary>
     /// Ottiene TODO scaduti
     /// </summary>
-    public IEnumerable<TodoStudio> GetScaduti()
+    public async Task<List<TodoStudio>> GetScadutiAsync()
     {
         var oggi = DateTime.Now.Date;
-        return Collection.Find(t => t.DataScadenza.HasValue && 
-                                    t.DataScadenza.Value.Date < oggi &&
-                                    t.Stato != StatoTodo.Completata &&
-                                    t.Stato != StatoTodo.Annullata)
-                         .OrderBy(t => t.DataScadenza);
+        return await _context.TodoStudio
+            .Where(t => t.DataScadenza.HasValue && 
+                        t.DataScadenza.Value.Date < oggi &&
+                        t.Stato != StatoTodo.Completata &&
+                        t.Stato != StatoTodo.Annullata)
+            .OrderBy(t => t.DataScadenza)
+            .ToListAsync();
     }
     
     /// <summary>
     /// Ottiene TODO per range di date scadenza
     /// </summary>
-    public IEnumerable<TodoStudio> GetByScadenzaRange(DateTime dataInizio, DateTime dataFine)
+    public async Task<List<TodoStudio>> GetByScadenzaRangeAsync(DateTime dataInizio, DateTime dataFine)
     {
-        return Collection.Find(t => t.DataScadenza.HasValue &&
-                                    t.DataScadenza.Value.Date >= dataInizio.Date &&
-                                    t.DataScadenza.Value.Date <= dataFine.Date)
-                         .OrderBy(t => t.DataScadenza);
+        return await _context.TodoStudio
+            .Where(t => t.DataScadenza.HasValue &&
+                        t.DataScadenza.Value.Date >= dataInizio.Date &&
+                        t.DataScadenza.Value.Date <= dataFine.Date)
+            .OrderBy(t => t.DataScadenza)
+            .ToListAsync();
     }
     
     /// <summary>
     /// Ottiene TODO per mese specifico
     /// </summary>
-    public IEnumerable<TodoStudio> GetByMese(int anno, int mese)
+    public async Task<List<TodoStudio>> GetByMeseAsync(int anno, int mese)
     {
         var primoGiorno = new DateTime(anno, mese, 1);
         var ultimoGiorno = primoGiorno.AddMonths(1).AddDays(-1);
-        return GetByScadenzaRange(primoGiorno, ultimoGiorno);
+        return await GetByScadenzaRangeAsync(primoGiorno, ultimoGiorno);
     }
     
     /// <summary>
     /// Cerca TODO per testo nel titolo o descrizione
     /// </summary>
-    public IEnumerable<TodoStudio> Search(string searchText)
+    public async Task<List<TodoStudio>> SearchAsync(string searchText)
     {
         if (string.IsNullOrWhiteSpace(searchText))
-            return GetAll();
+            return await GetAllAsync();
         
         searchText = searchText.ToLower();
-        return Collection.Find(t => t.Titolo.ToLower().Contains(searchText) ||
-                                    (t.Descrizione != null && t.Descrizione.ToLower().Contains(searchText)))
-                         .OrderByDescending(t => t.DataScadenza);
+        return await _context.TodoStudio
+            .Where(t => EF.Functions.Like(t.Titolo.ToLower(), $"%{searchText}%") ||
+                        (t.Descrizione != null && EF.Functions.Like(t.Descrizione.ToLower(), $"%{searchText}%")))
+            .OrderByDescending(t => t.DataScadenza)
+            .ToListAsync();
     }
     
     /// <summary>
     /// Ottiene TODO attivi (Da Fare + In Corso)
     /// </summary>
-    public IEnumerable<TodoStudio> GetAttivi()
+    public async Task<List<TodoStudio>> GetAttiviAsync()
     {
-        return Collection.Find(t => t.Stato == StatoTodo.DaFare || t.Stato == StatoTodo.InCorso)
-                         .OrderByDescending(t => t.Priorita)
-                         .ThenBy(t => t.DataScadenza);
+        return await _context.TodoStudio
+            .Where(t => t.Stato == StatoTodo.DaFare || t.Stato == StatoTodo.InCorso)
+            .OrderByDescending(t => t.Priorita)
+            .ThenBy(t => t.DataScadenza)
+            .ToListAsync();
     }
     
     /// <summary>
     /// Cambia stato TODO
     /// </summary>
-    public bool CambiaStato(int id, StatoTodo nuovoStato)
+    public async Task<bool> CambiaStatoAsync(int id, StatoTodo nuovoStato)
     {
-        var todo = GetById(id);
+        var todo = await GetByIdAsync(id);
         if (todo == null) return false;
         
         todo.Stato = nuovoStato;
@@ -192,29 +244,29 @@ public class TodoStudioRepository
             todo.DataCompletamento = null;
         }
         
-        return Update(todo);
+        return await UpdateAsync(todo);
     }
     
     /// <summary>
     /// Aggiorna data scadenza (per drag&drop calendario)
     /// </summary>
-    public bool AggiornaDataScadenza(int id, DateTime nuovaDataScadenza)
+    public async Task<bool> AggiornaDataScadenzaAsync(int id, DateTime nuovaDataScadenza)
     {
-        var todo = GetById(id);
+        var todo = await GetByIdAsync(id);
         if (todo == null) return false;
         
         todo.DataScadenza = nuovaDataScadenza;
         todo.DataUltimaModifica = DateTime.Now;
         
-        return Update(todo);
+        return await UpdateAsync(todo);
     }
 
     /// <summary>
     /// Aggiorna solo lo stato di un TODO (per Kanban drag & drop)
     /// </summary>
-    public bool UpdateStato(int id, StatoTodo nuovoStato)
+    public async Task<bool> UpdateStatoAsync(int id, StatoTodo nuovoStato)
     {
-        var todo = GetById(id);
+        var todo = await GetByIdAsync(id);
         if (todo == null) return false;
         
         todo.Stato = nuovoStato;
@@ -231,25 +283,26 @@ public class TodoStudioRepository
             todo.DataCompletamento = null;
         }
         
-        return Update(todo);
+        return await UpdateAsync(todo);
     }
     
     /// <summary>
     /// Aggiunge allegato
     /// </summary>
-    public bool AggiungiAllegato(int id, string percorsoAllegato)
+    public async Task<bool> AggiungiAllegatoAsync(int id, string percorsoAllegato)
     {
-        var todo = GetById(id);
+        var todo = await GetByIdAsync(id);
         if (todo == null) return false;
         
-        if (todo.Allegati == null)
-            todo.Allegati = new List<string>();
+        // Usa la proprietà NotMapped che gestisce il JSON
+        var allegati = todo.Allegati ?? new List<string>();
         
-        if (!todo.Allegati.Contains(percorsoAllegato))
+        if (!allegati.Contains(percorsoAllegato))
         {
-            todo.Allegati.Add(percorsoAllegato);
+            allegati.Add(percorsoAllegato);
+            todo.Allegati = allegati; // Questo aggiorna automaticamente il JSON
             todo.DataUltimaModifica = DateTime.Now;
-            return Update(todo);
+            return await UpdateAsync(todo);
         }
         
         return false;
@@ -258,35 +311,51 @@ public class TodoStudioRepository
     /// <summary>
     /// Rimuove allegato
     /// </summary>
-    public bool RimuoviAllegato(int id, string percorsoAllegato)
+    public async Task<bool> RimuoviAllegatoAsync(int id, string percorsoAllegato)
     {
-        var todo = GetById(id);
+        var todo = await GetByIdAsync(id);
         if (todo == null) return false;
         
-        if (todo.Allegati != null && todo.Allegati.Remove(percorsoAllegato))
+        // Usa la proprietà NotMapped che gestisce il JSON
+        var allegati = todo.Allegati ?? new List<string>();
+        
+        if (allegati.Remove(percorsoAllegato))
         {
+            todo.Allegati = allegati; // Questo aggiorna automaticamente il JSON
             todo.DataUltimaModifica = DateTime.Now;
-            return Update(todo);
+            return await UpdateAsync(todo);
         }
         
         return false;
     }
     
-    // ===== STATISTICHE =====
+    // ===== STATISTICHE ASYNC =====
     
-    public int Count() => Collection.Count();
+    public async Task<int> CountAsync() => await _context.TodoStudio.CountAsync();
     
-    public int CountByStato(StatoTodo stato) => Collection.Count(t => t.Stato == stato);
+    public async Task<int> CountByStatoAsync(StatoTodo stato) => 
+        await _context.TodoStudio.CountAsync(t => t.Stato == stato);
     
-    public int CountByPriorita(PrioritaTodo priorita) => Collection.Count(t => t.Priorita == priorita);
+    public async Task<int> CountByPrioritaAsync(PrioritaTodo priorita) => 
+        await _context.TodoStudio.CountAsync(t => t.Priorita == priorita);
     
-    public int CountScaduti()
+    public async Task<int> CountScadutiAsync()
     {
         var oggi = DateTime.Now.Date;
-        return Collection.Count(t => t.DataScadenza.HasValue && 
-                                     t.DataScadenza.Value.Date < oggi &&
-                                     t.Stato != StatoTodo.Completata &&
-                                     t.Stato != StatoTodo.Annullata);
+        return await _context.TodoStudio.CountAsync(t => t.DataScadenza.HasValue && 
+                                                         t.DataScadenza.Value.Date < oggi &&
+                                                         t.Stato != StatoTodo.Completata &&
+                                                         t.Stato != StatoTodo.Annullata);
     }
-}
 
+    // ===== WRAPPER SINCRONI PER COMPATIBILITÀ =====
+
+    public List<TodoStudio> GetAll() => GetAllAsync().GetAwaiter().GetResult();
+    public TodoStudio? GetById(int id) => GetByIdAsync(id).GetAwaiter().GetResult();
+    public int Insert(TodoStudio todo) => InsertAsync(todo).GetAwaiter().GetResult();
+    public bool Update(TodoStudio todo) => UpdateAsync(todo).GetAwaiter().GetResult();
+    public bool Delete(int id) => DeleteAsync(id).GetAwaiter().GetResult();
+    public bool CambiaStato(int id, StatoTodo nuovoStato) => CambiaStatoAsync(id, nuovoStato).GetAwaiter().GetResult();
+    public bool UpdateStato(int id, StatoTodo nuovoStato) => UpdateStatoAsync(id, nuovoStato).GetAwaiter().GetResult();
+    public bool AggiornaDataScadenza(int id, DateTime nuovaDataScadenza) => AggiornaDataScadenzaAsync(id, nuovaDataScadenza).GetAwaiter().GetResult();
+}

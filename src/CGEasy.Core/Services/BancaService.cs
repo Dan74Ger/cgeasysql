@@ -1,4 +1,4 @@
-using CGEasy.Core.Data;
+﻿using CGEasy.Core.Data;
 using CGEasy.Core.Models;
 using CGEasy.Core.Repositories;
 using System;
@@ -19,7 +19,7 @@ public class BancaService
     private readonly BancaUtilizzoAnticipoRepository _anticipoRepo;
     private readonly BancaSaldoGiornalieroRepository _saldoRepo;
 
-    public BancaService(LiteDbContext context)
+    public BancaService(CGEasyDbContext context)
     {
         _bancaRepo = new BancaRepository(context);
         _incassoRepo = new BancaIncassoRepository(context);

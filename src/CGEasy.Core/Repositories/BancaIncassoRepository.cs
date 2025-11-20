@@ -1,149 +1,106 @@
-using CGEasy.Core.Data;
+﻿using CGEasy.Core.Data;
 using CGEasy.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CGEasy.Core.Repositories;
 
-/// <summary>
-/// Repository per gestione CRUD degli Incassi da Clienti per Banca
-/// </summary>
 public class BancaIncassoRepository
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
 
-    public BancaIncassoRepository(LiteDbContext context)
+    public BancaIncassoRepository(CGEasyDbContext context)
     {
         _context = context;
     }
 
-    /// <summary>
-    /// Recupera tutti gli incassi
-    /// </summary>
-    public List<BancaIncasso> GetAll()
+    public async Task<List<BancaIncasso>> GetAllAsync()
     {
-        return _context.BancaIncassi.FindAll().ToList();
+        return await _context.BancaIncassi.AsNoTracking().ToListAsync();
     }
 
-    /// <summary>
-    /// Recupera un incasso per ID
-    /// </summary>
-    public BancaIncasso? GetById(int id)
+    public async Task<BancaIncasso?> GetByIdAsync(int id)
     {
-        return _context.BancaIncassi.FindById(id);
+        return await _context.BancaIncassi.FindAsync(id);
     }
 
-    /// <summary>
-    /// Recupera tutti gli incassi di una banca
-    /// </summary>
-    public List<BancaIncasso> GetByBancaId(int bancaId)
+    public async Task<List<BancaIncasso>> GetByBancaIdAsync(int bancaId)
     {
-        return _context.BancaIncassi
-            .Find(i => i.BancaId == bancaId)
+        return await _context.BancaIncassi
+            .Where(i => i.BancaId == bancaId)
             .OrderBy(i => i.DataScadenza)
-            .ToList();
+            .ToListAsync();
     }
 
-    /// <summary>
-    /// Recupera gli incassi per anno e mese
-    /// </summary>
-    public List<BancaIncasso> GetByPeriodo(int bancaId, int anno, int mese)
+    public async Task<List<BancaIncasso>> GetByPeriodoAsync(int bancaId, int anno, int mese)
     {
-        return _context.BancaIncassi
-            .Find(i => i.BancaId == bancaId && i.Anno == anno && i.Mese == mese)
+        return await _context.BancaIncassi
+            .Where(i => i.BancaId == bancaId && i.Anno == anno && i.Mese == mese)
             .OrderBy(i => i.DataScadenza)
-            .ToList();
+            .ToListAsync();
     }
 
-    /// <summary>
-    /// Recupera gli incassi in scadenza entro una certa data
-    /// </summary>
-    public List<BancaIncasso> GetInScadenzaEntro(int bancaId, DateTime dataLimite)
+    public async Task<List<BancaIncasso>> GetInScadenzaAsync(int bancaId, DateTime dataLimite)
     {
-        return _context.BancaIncassi
-            .Find(i => i.BancaId == bancaId && !i.Incassato && i.DataScadenza <= dataLimite)
+        return await _context.BancaIncassi
+            .Where(i => i.BancaId == bancaId && !i.Incassato && i.DataScadenza <= dataLimite)
             .OrderBy(i => i.DataScadenza)
-            .ToList();
+            .ToListAsync();
     }
 
-    /// <summary>
-    /// Recupera gli incassi non ancora incassati
-    /// </summary>
-    public List<BancaIncasso> GetNonIncassati(int bancaId)
-    {
-        return _context.BancaIncassi
-            .Find(i => i.BancaId == bancaId && !i.Incassato)
-            .OrderBy(i => i.DataScadenza)
-            .ToList();
-    }
-
-    /// <summary>
-    /// Inserisce un nuovo incasso
-    /// </summary>
-    public int Insert(BancaIncasso incasso)
+    public async Task<int> InsertAsync(BancaIncasso incasso)
     {
         incasso.DataCreazione = DateTime.Now;
-        incasso.DataUltimaModifica = DateTime.Now;
-        return _context.BancaIncassi.Insert(incasso);
+        _context.BancaIncassi.Add(incasso);
+        await _context.SaveChangesAsync();
+        return incasso.Id;
     }
 
-    /// <summary>
-    /// Aggiorna un incasso esistente
-    /// </summary>
-    public bool Update(BancaIncasso incasso)
+    public async Task<bool> UpdateAsync(BancaIncasso incasso)
     {
         incasso.DataUltimaModifica = DateTime.Now;
-        return _context.BancaIncassi.Update(incasso);
+        _context.BancaIncassi.Update(incasso);
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    /// <summary>
-    /// Elimina un incasso
-    /// </summary>
-    public bool Delete(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        return _context.BancaIncassi.Delete(id);
-    }
-
-    /// <summary>
-    /// Elimina tutti gli incassi di una banca
-    /// </summary>
-    public int DeleteByBancaId(int bancaId)
-    {
-        return _context.BancaIncassi.DeleteMany(i => i.BancaId == bancaId);
-    }
-
-    /// <summary>
-    /// Segna un incasso come incassato
-    /// </summary>
-    public bool SegnaIncassato(int id, DateTime dataIncassoEffettivo)
-    {
-        var incasso = GetById(id);
+        var incasso = await GetByIdAsync(id);
         if (incasso == null) return false;
+        _context.BancaIncassi.Remove(incasso);
+        return await _context.SaveChangesAsync() > 0;
+    }
 
+    // ===== WRAPPER SINCRONI per compatibilità =====
+    public List<BancaIncasso> GetAll() => GetAllAsync().Result;
+    public BancaIncasso? GetById(int id) => GetByIdAsync(id).Result;
+    public List<BancaIncasso> GetByBancaId(int bancaId) => GetByBancaIdAsync(bancaId).Result;
+    public List<BancaIncasso> GetByPeriodo(int bancaId, int anno, int mese) => GetByPeriodoAsync(bancaId, anno, mese).Result;
+    public List<BancaIncasso> GetInScadenzaEntro(int bancaId, DateTime dataLimite) => GetInScadenzaAsync(bancaId, dataLimite).Result;
+    public int Insert(BancaIncasso incasso) => InsertAsync(incasso).Result;
+    public bool Update(BancaIncasso incasso) => UpdateAsync(incasso).Result;
+    public bool Delete(int id) => DeleteAsync(id).Result;
+    
+    public async Task<bool> SegnaIncassatoAsync(int id, DateTime? dataIncasso = null)
+    {
+        var incasso = await GetByIdAsync(id);
+        if (incasso == null) return false;
         incasso.Incassato = true;
-        incasso.DataIncassoEffettivo = dataIncassoEffettivo;
-        return Update(incasso);
+        incasso.DataIncassoEffettivo = dataIncasso ?? DateTime.Now;
+        return await UpdateAsync(incasso);
     }
-
-    /// <summary>
-    /// Calcola il totale degli incassi previsti per un periodo
-    /// </summary>
-    public decimal GetTotaleIncassiPrevisti(int bancaId, int anno, int mese)
+    
+    public bool SegnaIncassato(int id, DateTime? dataIncasso = null) => SegnaIncassatoAsync(id, dataIncasso).Result;
+    
+    public async Task<int> DeleteByBancaIdAsync(int bancaId)
     {
-        return _context.BancaIncassi
-            .Find(i => i.BancaId == bancaId && i.Anno == anno && i.Mese == mese)
-            .Sum(i => i.Importo);
+        var incassi = await GetByBancaIdAsync(bancaId);
+        _context.BancaIncassi.RemoveRange(incassi);
+        return await _context.SaveChangesAsync();
     }
-
-    /// <summary>
-    /// Calcola il totale degli incassi effettivi per un periodo
-    /// </summary>
-    public decimal GetTotaleIncassiEffettivi(int bancaId, int anno, int mese)
-    {
-        return _context.BancaIncassi
-            .Find(i => i.BancaId == bancaId && i.Anno == anno && i.Mese == mese && i.Incassato)
-            .Sum(i => i.Importo);
-    }
+    
+    public int DeleteByBancaId(int bancaId) => DeleteByBancaIdAsync(bancaId).Result;
 }
-

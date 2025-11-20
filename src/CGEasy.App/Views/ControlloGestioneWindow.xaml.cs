@@ -37,11 +37,11 @@ namespace CGEasy.App.Views
         public void MostraDettaglioBanca(int bancaId, string nomeBanca)
         {
             // Ottieni il context Singleton
-            var context = App.GetService<Core.Data.LiteDbContext>();
+            var context = App.GetService<Core.Data.CGEasyDbContext>();
             if (context == null)
             {
-                context = new Core.Data.LiteDbContext();
-                context.MarkAsSingleton();
+                context = new Core.Data.CGEasyDbContext();
+                // Singleton context - no special marking needed in EF Core
             }
 
             // Crea nuovo DataContext per il dettaglio

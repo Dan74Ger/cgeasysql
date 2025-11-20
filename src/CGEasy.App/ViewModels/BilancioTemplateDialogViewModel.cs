@@ -9,7 +9,7 @@ namespace CGEasy.App.ViewModels;
 
 public class BilancioTemplateDialogViewModel : INotifyPropertyChanged
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly AuditLogService _auditService;
     private bool _isNuovaRiga;
     private int _clienteId;
@@ -17,7 +17,7 @@ public class BilancioTemplateDialogViewModel : INotifyPropertyChanged
     private int _anno;
     private string _nomeFile = string.Empty;
 
-    public BilancioTemplateDialogViewModel(LiteDbContext context, AuditLogService auditService)
+    public BilancioTemplateDialogViewModel(CGEasyDbContext context, AuditLogService auditService)
     {
         _context = context;
         _auditService = auditService;
@@ -142,7 +142,8 @@ public class BilancioTemplateDialogViewModel : INotifyPropertyChanged
             };
 
             // Calcola importo iniziale
-            Riga.ImportoCalcolato = Importo * (Segno == "-" ? -1 : 1);
+            // TODO: ImportoCalcolato property non esiste in BilancioTemplate
+            // Riga.ImportoCalcolato = Importo * (Segno == "-" ? -1 : 1);
         }
         else if (Riga != null)
         {

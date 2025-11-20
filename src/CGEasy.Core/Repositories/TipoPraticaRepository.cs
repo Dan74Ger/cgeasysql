@@ -1,45 +1,57 @@
-using CGEasy.Core.Data;
+﻿using CGEasy.Core.Data;
 using CGEasy.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace CGEasy.Core.Repositories
 {
     /// <summary>
-    /// Repository per gestione Tipo Pratiche
+    /// Repository per gestione Tipo Pratiche (EF Core async)
     /// </summary>
-    public class TipoPraticaRepository : IRepository<TipoPratica>
+    public class TipoPraticaRepository
     {
-        private readonly LiteDbContext _context;
+        private readonly CGEasyDbContext _context;
 
-        public TipoPraticaRepository(LiteDbContext context)
+        public TipoPraticaRepository(CGEasyDbContext context)
         {
             _context = context;
         }
 
-        public IEnumerable<TipoPratica> GetAll()
+        // ===== METODI ASYNC EF CORE =====
+
+        public async Task<List<TipoPratica>> GetAllAsync()
         {
-            return _context.TipoPratiche.FindAll();
+            return await _context.TipoPratiche
+                .AsNoTracking()
+                .OrderBy(p => p.Ordine)
+                .ThenBy(p => p.NomePratica)
+                .ToListAsync();
         }
 
-        public TipoPratica? GetById(int id)
+        public async Task<TipoPratica?> GetByIdAsync(int id)
         {
-            return _context.TipoPratiche.FindById(id);
+            return await _context.TipoPratiche.FindAsync(id);
         }
 
-        public IEnumerable<TipoPratica> Find(Expression<Func<TipoPratica, bool>> predicate)
+        public async Task<List<TipoPratica>> FindAsync(Expression<Func<TipoPratica, bool>> predicate)
         {
-            return _context.TipoPratiche.Find(predicate);
+            return await _context.TipoPratiche
+                .Where(predicate)
+                .OrderBy(p => p.Ordine)
+                .ToListAsync();
         }
 
-        public TipoPratica? FindOne(Expression<Func<TipoPratica, bool>> predicate)
+        public async Task<TipoPratica?> FindOneAsync(Expression<Func<TipoPratica, bool>> predicate)
         {
-            return _context.TipoPratiche.FindOne(predicate);
+            return await _context.TipoPratiche
+                .FirstOrDefaultAsync(predicate);
         }
 
-        public int Insert(TipoPratica entity)
+        public async Task<int> InsertAsync(TipoPratica entity)
         {
             entity.CreatedAt = DateTime.UtcNow;
             entity.UpdatedAt = DateTime.UtcNow;
@@ -47,111 +59,138 @@ namespace CGEasy.Core.Repositories
             // Auto-incrementa ordine se non specificato
             if (entity.Ordine == 0)
             {
-                var maxOrdine = _context.TipoPratiche.Max(x => (int?)x.Ordine);
+                var maxOrdine = await _context.TipoPratiche.MaxAsync(x => (int?)x.Ordine);
                 entity.Ordine = (maxOrdine ?? 0) + 1;
             }
             
-            return _context.TipoPratiche.Insert(entity);
+            _context.TipoPratiche.Add(entity);
+            await _context.SaveChangesAsync();
+            return entity.Id;
         }
 
-        public bool Update(TipoPratica entity)
+        public async Task<bool> UpdateAsync(TipoPratica entity)
         {
             entity.UpdatedAt = DateTime.UtcNow;
-            return _context.TipoPratiche.Update(entity);
+            _context.TipoPratiche.Update(entity);
+            return await _context.SaveChangesAsync() > 0;
         }
 
-        public bool Delete(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            return _context.TipoPratiche.Delete(id);
+            var entity = await GetByIdAsync(id);
+            if (entity == null) return false;
+            
+            _context.TipoPratiche.Remove(entity);
+            return await _context.SaveChangesAsync() > 0;
         }
 
-        public int Count()
+        public async Task<int> CountAsync()
         {
-            return _context.TipoPratiche.Count();
+            return await _context.TipoPratiche.CountAsync();
         }
 
-        public int Count(Expression<Func<TipoPratica, bool>> predicate)
+        public async Task<int> CountAsync(Expression<Func<TipoPratica, bool>> predicate)
         {
-            return _context.TipoPratiche.Count(predicate);
+            return await _context.TipoPratiche.CountAsync(predicate);
         }
 
-        public bool Exists(Expression<Func<TipoPratica, bool>> predicate)
+        public async Task<bool> ExistsAsync(Expression<Func<TipoPratica, bool>> predicate)
         {
-            return _context.TipoPratiche.Exists(predicate);
+            return await _context.TipoPratiche.AnyAsync(predicate);
         }
 
         /// <summary>
         /// Ottiene solo pratiche attive
         /// </summary>
-        public IEnumerable<TipoPratica> GetActive()
+        public async Task<List<TipoPratica>> GetActiveAsync()
         {
-            return _context.TipoPratiche.Find(p => p.Attivo);
+            return await _context.TipoPratiche
+                .Where(p => p.Attivo)
+                .OrderBy(p => p.Ordine)
+                .ThenBy(p => p.NomePratica)
+                .ToListAsync();
         }
 
         /// <summary>
         /// Ottiene pratiche per categoria
         /// </summary>
-        public IEnumerable<TipoPratica> GetByCategoria(CategoriaPratica categoria)
+        public async Task<List<TipoPratica>> GetByCategoriaAsync(CategoriaPratica categoria)
         {
-            return _context.TipoPratiche.Find(p => p.Categoria == categoria && p.Attivo);
+            return await _context.TipoPratiche
+                .Where(p => p.Categoria == categoria && p.Attivo)
+                .OrderBy(p => p.Ordine)
+                .ToListAsync();
         }
 
         /// <summary>
         /// Cerca pratiche per nome (case-insensitive)
         /// </summary>
-        public IEnumerable<TipoPratica> SearchByName(string searchTerm)
+        public async Task<List<TipoPratica>> SearchByNameAsync(string searchTerm)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
-                return GetAll();
+                return await GetAllAsync();
 
             var lower = searchTerm.ToLower();
-            return _context.TipoPratiche.Find(p => 
-                p.NomePratica.ToLower().Contains(lower) ||
-                (p.Descrizione != null && p.Descrizione.ToLower().Contains(lower)));
+            return await _context.TipoPratiche
+                .Where(p => 
+                    p.NomePratica.ToLower().Contains(lower) ||
+                    (p.Descrizione != null && p.Descrizione.ToLower().Contains(lower)))
+                .OrderBy(p => p.Ordine)
+                .ToListAsync();
         }
 
         /// <summary>
         /// Riordina pratiche
         /// </summary>
-        public void Reorder(int tipoPraticaId, int newOrdine)
+        public async Task ReorderAsync(int tipoPraticaId, int newOrdine)
         {
-            var pratica = GetById(tipoPraticaId);
+            var pratica = await GetByIdAsync(tipoPraticaId);
             if (pratica == null)
                 return;
 
             pratica.Ordine = newOrdine;
-            Update(pratica);
+            await UpdateAsync(pratica);
         }
 
         /// <summary>
         /// Disattiva pratica (soft delete)
         /// </summary>
-        public bool Deactivate(int id)
+        public async Task<bool> DeactivateAsync(int id)
         {
-            var pratica = GetById(id);
+            var pratica = await GetByIdAsync(id);
             if (pratica == null)
                 return false;
 
             pratica.Attivo = false;
             pratica.UpdatedAt = DateTime.UtcNow;
 
-            return Update(pratica);
+            return await UpdateAsync(pratica);
         }
 
         /// <summary>
         /// Attiva pratica
         /// </summary>
-        public bool Activate(int id)
+        public async Task<bool> ActivateAsync(int id)
         {
-            var pratica = GetById(id);
+            var pratica = await GetByIdAsync(id);
             if (pratica == null)
                 return false;
 
             pratica.Attivo = true;
             pratica.UpdatedAt = DateTime.UtcNow;
 
-            return Update(pratica);
+            return await UpdateAsync(pratica);
         }
+
+        // ===== WRAPPER SINCRONI PER COMPATIBILITÀ =====
+
+        public List<TipoPratica> GetAll() => GetAllAsync().GetAwaiter().GetResult();
+        public TipoPratica? GetById(int id) => GetByIdAsync(id).GetAwaiter().GetResult();
+        public int Insert(TipoPratica entity) => InsertAsync(entity).GetAwaiter().GetResult();
+        public bool Update(TipoPratica entity) => UpdateAsync(entity).GetAwaiter().GetResult();
+        public bool Delete(int id) => DeleteAsync(id).GetAwaiter().GetResult();
+        public int Count() => CountAsync().GetAwaiter().GetResult();
+        public List<TipoPratica> GetActive() => GetActiveAsync().GetAwaiter().GetResult();
+        public List<TipoPratica> SearchByName(string searchTerm) => SearchByNameAsync(searchTerm).GetAwaiter().GetResult();
     }
 }
-

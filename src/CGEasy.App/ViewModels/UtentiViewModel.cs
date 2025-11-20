@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -11,12 +12,12 @@ using CGEasy.Core.Data;
 namespace CGEasy.App.ViewModels;
 
 /// <summary>
-/// ViewModel per gestione Utenti (solo Admin)
+/// ViewModel per gestione Utenti (solo Admin) - EF Core async
 /// </summary>
 public partial class UtentiViewModel : ObservableObject
 {
     private readonly AuthService _authService;
-    private readonly LiteDbContext _dbContext;
+    private readonly CGEasyDbContext _dbContext;
     private readonly AuditLogService _auditLogService;
 
     [ObservableProperty]
@@ -43,28 +44,32 @@ public partial class UtentiViewModel : ObservableObject
     [ObservableProperty]
     private int _totalUser;
 
-    public UtentiViewModel(AuthService authService, LiteDbContext dbContext, AuditLogService auditLogService)
+    [ObservableProperty]
+    private bool _isLoading;
+
+    public UtentiViewModel(AuthService authService, CGEasyDbContext dbContext, AuditLogService auditLogService)
     {
         _authService = authService;
         _dbContext = dbContext;
         _auditLogService = auditLogService;
         _utenti = new ObservableCollection<Utente>();
         
-        LoadData();
+        _ = LoadDataAsync();
     }
 
-    private void LoadData()
+    private async Task LoadDataAsync()
     {
+        IsLoading = true;
         try
         {
-            var utenti = _authService.GetAllUsers(!ShowOnlyActive);
+            var utenti = await _authService.GetAllUsersAsync(!ShowOnlyActive);
 
             // PROTEZIONE: Solo l'utente "admin" può vedere e gestire l'account "admin"
             // Gli altri amministratori NON vedono l'utente "admin" nella lista
             var currentUsername = SessionManager.CurrentUser?.Username?.ToLower();
             if (currentUsername != "admin")
             {
-                utenti = utenti.Where(u => u.Username.ToLower() != "admin");
+                utenti = utenti.Where(u => u.Username.ToLower() != "admin").ToList();
             }
 
             if (!string.IsNullOrWhiteSpace(SearchText))
@@ -74,13 +79,13 @@ public partial class UtentiViewModel : ObservableObject
                     u.Username.ToLower().Contains(lower) ||
                     u.Email.ToLower().Contains(lower) ||
                     u.Nome.ToLower().Contains(lower) ||
-                    u.Cognome.ToLower().Contains(lower));
+                    u.Cognome.ToLower().Contains(lower)).ToList();
             }
 
             Utenti = new ObservableCollection<Utente>(utenti.OrderBy(u => u.Username));
 
             // Statistiche
-            var counts = _authService.CountUsersByRole();
+            var counts = await _authService.CountUsersByRoleAsync();
             TotalAdmin = counts.Admins;
             TotalUserSenior = counts.UserSenior;
             TotalUser = counts.Users;
@@ -91,26 +96,30 @@ public partial class UtentiViewModel : ObservableObject
             MessageBox.Show($"Errore caricamento utenti: {ex.Message}", 
                           "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     [RelayCommand]
-    private void Refresh()
+    private async Task RefreshAsync()
     {
-        LoadData();
+        await LoadDataAsync();
     }
 
     partial void OnSearchTextChanged(string value)
     {
-        LoadData();
+        _ = LoadDataAsync();
     }
 
     partial void OnShowOnlyActiveChanged(bool value)
     {
-        LoadData();
+        _ = LoadDataAsync();
     }
 
     [RelayCommand]
-    private void NewUtente()
+    private async Task NewUtenteAsync()
     {
         try
         {
@@ -118,7 +127,7 @@ public partial class UtentiViewModel : ObservableObject
             
             if (dialog.ShowDialog() == true && dialog.Success)
             {
-                LoadData();
+                await LoadDataAsync();
             }
         }
         catch (Exception ex)
@@ -129,7 +138,7 @@ public partial class UtentiViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void EditUtente()
+    private async Task EditUtenteAsync()
     {
         if (SelectedUtente == null)
         {
@@ -158,7 +167,7 @@ public partial class UtentiViewModel : ObservableObject
             
             if (dialog.ShowDialog() == true && dialog.Success)
             {
-                LoadData();
+                await LoadDataAsync();
             }
         }
         catch (Exception ex)
@@ -169,7 +178,7 @@ public partial class UtentiViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void DeleteUtente()
+    private async Task DeleteUtenteAsync()
     {
         if (SelectedUtente == null)
         {
@@ -210,17 +219,17 @@ public partial class UtentiViewModel : ObservableObject
         {
             try
             {
-                var success = _authService.SetUserActive(SelectedUtente.Id, false);
+                var success = await _authService.SetUserActiveAsync(SelectedUtente.Id, false);
                 
                 if (success)
                 {
                     // Audit log
-                    _auditLogService.LogFromSession(AuditAction.Update, AuditEntity.Utente, 
+                    await _auditLogService.LogFromSessionAsync(AuditAction.Update, AuditEntity.Utente, 
                         SelectedUtente.Id, $"Disattivato utente {SelectedUtente.Username}");
 
                     MessageBox.Show("Utente disattivato con successo.", 
                                   "Successo", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LoadData();
+                    await LoadDataAsync();
                 }
             }
             catch (Exception ex)
@@ -232,7 +241,7 @@ public partial class UtentiViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ActivateUtente()
+    private async Task ActivateUtenteAsync()
     {
         if (SelectedUtente == null || SelectedUtente.Attivo)
         {
@@ -251,17 +260,17 @@ public partial class UtentiViewModel : ObservableObject
         {
             try
             {
-                var success = _authService.SetUserActive(SelectedUtente.Id, true);
+                var success = await _authService.SetUserActiveAsync(SelectedUtente.Id, true);
                 
                 if (success)
                 {
                     // Audit log
-                    _auditLogService.LogFromSession(AuditAction.Update, AuditEntity.Utente, 
+                    await _auditLogService.LogFromSessionAsync(AuditAction.Update, AuditEntity.Utente, 
                         SelectedUtente.Id, $"Riattivato utente {SelectedUtente.Username}");
 
                     MessageBox.Show("Utente riattivato con successo.", 
                                   "Successo", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LoadData();
+                    await LoadDataAsync();
                 }
             }
             catch (Exception ex)
@@ -373,4 +382,3 @@ public partial class UtentiViewModel : ObservableObject
         }
     }
 }
-

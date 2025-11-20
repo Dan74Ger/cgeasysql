@@ -1,49 +1,42 @@
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CGEasy.Core.Models;
 
 /// <summary>
-/// Cliente a cui sono state rilasciate licenze
-/// (DIVERSO dai clienti pratiche - questo è per gestione licenze software)
+/// Cliente a cui sono state rilasciate licenze (EF Core)
 /// </summary>
+[Table("license_clients")]
 public class LicenseClient
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     
-    /// <summary>
-    /// Nome del cliente/azienda
-    /// </summary>
+    [Column("nome_cliente")]
+    [Required]
+    [MaxLength(200)]
     public string NomeCliente { get; set; } = string.Empty;
     
-    /// <summary>
-    /// Email di contatto
-    /// </summary>
+    [Column("email")]
+    [MaxLength(150)]
     public string? Email { get; set; }
     
-    /// <summary>
-    /// Telefono di contatto
-    /// </summary>
+    [Column("telefono")]
+    [MaxLength(50)]
     public string? Telefono { get; set; }
     
-    /// <summary>
-    /// Partita IVA o Codice Fiscale
-    /// </summary>
+    [Column("partita_iva")]
+    [MaxLength(20)]
     public string? PartitaIva { get; set; }
     
-    /// <summary>
-    /// Note aggiuntive
-    /// </summary>
+    [Column("note")]
     public string? Note { get; set; }
     
-    /// <summary>
-    /// Data registrazione cliente
-    /// </summary>
+    [Column("data_registrazione")]
     public DateTime DataRegistrazione { get; set; } = DateTime.Now;
     
-    /// <summary>
-    /// Cliente attivo o disattivato
-    /// </summary>
+    [Column("is_active")]
     public bool IsActive { get; set; } = true;
 }
-
-

@@ -1,4 +1,4 @@
-using CGEasy.Core.Data;
+﻿using CGEasy.Core.Data;
 using CGEasy.Core.Models;
 using CGEasy.Core.Repositories;
 using CGEasy.Core.Helpers;
@@ -20,7 +20,7 @@ public class AssociazioneMastrinoService
     private readonly AuditLogService _auditService;
 
     public AssociazioneMastrinoService(
-        LiteDbContext context,
+        CGEasyDbContext context,
         AuditLogService auditService)
     {
         _repository = new AssociazioneMastrinoRepository(context);
@@ -91,7 +91,7 @@ public class AssociazioneMastrinoService
     /// <summary>
     /// Crea nuova associazione
     /// </summary>
-    public int CreaAssociazione(AssociazioneMastrino associazione)
+    public async Task<int> CreaAssociazione(AssociazioneMastrino associazione)
     {
         // ✅ IMPORTANTE: Verifica se esiste già un'associazione per questo Cliente+Template
         // Un cliente può avere UNA SOLA associazione per template (indipendente dal periodo!)
@@ -116,7 +116,7 @@ public class AssociazioneMastrinoService
         var id = _repository.Insert(associazione);
 
         // Audit log
-        _auditService.LogFromSession(
+        await _auditService.LogFromSessionAsync(
             AuditAction.Create,
             "AssociazioneMastrino",
             id,
@@ -128,14 +128,14 @@ public class AssociazioneMastrinoService
     /// <summary>
     /// Aggiorna associazione
     /// </summary>
-    public bool AggiornaAssociazione(AssociazioneMastrino associazione)
+    public async Task<bool> AggiornaAssociazione(AssociazioneMastrino associazione)
     {
         var result = _repository.Update(associazione);
 
         if (result)
         {
             // Audit log
-            _auditService.LogFromSession(
+            await _auditService.LogFromSessionAsync(
                 AuditAction.Update,
                 "AssociazioneMastrino",
                 associazione.Id,
@@ -148,7 +148,7 @@ public class AssociazioneMastrinoService
     /// <summary>
     /// Elimina associazione
     /// </summary>
-    public bool EliminaAssociazione(int id)
+    public async Task<bool> EliminaAssociazione(int id)
     {
         var associazione = _repository.GetById(id);
         if (associazione == null)
@@ -163,7 +163,7 @@ public class AssociazioneMastrinoService
         if (result)
         {
             // Audit log
-            _auditService.LogFromSession(
+            await _auditService.LogFromSessionAsync(
                 AuditAction.Delete,
                 "AssociazioneMastrino",
                 id,
@@ -234,7 +234,7 @@ public class AssociazioneMastrinoService
     /// <summary>
     /// Salva dettagli associazione (con gestione robusta per modalità Shared)
     /// </summary>
-    public void SalvaDettagli(int associazioneId, List<AssociazioneMastrinoDettaglio> dettagli)
+    public async Task SalvaDettagli(int associazioneId, List<AssociazioneMastrinoDettaglio> dettagli)
     {
         int maxRetries = 3;
         int attempt = 0;
@@ -269,7 +269,7 @@ public class AssociazioneMastrinoService
         }
 
         // Audit log
-        _auditService.LogFromSession(
+        await _auditService.LogFromSessionAsync(
             AuditAction.Update,
             "AssociazioneMastrino",
             associazioneId,

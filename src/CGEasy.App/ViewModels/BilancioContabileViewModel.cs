@@ -13,7 +13,7 @@ namespace CGEasy.App.ViewModels;
 
 public partial class BilancioContabileViewModel : ObservableObject
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly BilancioContabileRepository _repository;
 
     [ObservableProperty]
@@ -25,7 +25,7 @@ public partial class BilancioContabileViewModel : ObservableObject
     // Proprietà per gestire la visibilità del pulsante di eliminazione multipla
     public bool HasSelectedGruppi => Gruppi.Any(g => g.IsSelected);
 
-    public BilancioContabileViewModel(LiteDbContext context)
+    public BilancioContabileViewModel(CGEasyDbContext context)
     {
         _context = context;
         _repository = new BilancioContabileRepository(context);

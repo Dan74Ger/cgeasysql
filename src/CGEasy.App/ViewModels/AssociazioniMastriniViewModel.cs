@@ -12,7 +12,7 @@ namespace CGEasy.App.ViewModels;
 
 public partial class AssociazioniMastriniViewModel : ObservableObject
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly AssociazioneMastrinoService _service = null!;
 
     [ObservableProperty]
@@ -30,7 +30,7 @@ public partial class AssociazioniMastriniViewModel : ObservableObject
     [ObservableProperty]
     private bool _isLoading;
 
-    public AssociazioniMastriniViewModel(LiteDbContext context)
+    public AssociazioniMastriniViewModel(CGEasyDbContext context)
     {
         _context = context;
         
@@ -53,13 +53,13 @@ public partial class AssociazioniMastriniViewModel : ObservableObject
     {
     }
 
-    private static LiteDbContext GetOrCreateContext()
+    private static CGEasyDbContext GetOrCreateContext()
     {
-        var context = App.GetService<LiteDbContext>();
+        var context = App.GetService<CGEasyDbContext>();
         if (context == null)
         {
-            context = new LiteDbContext();
-            context.MarkAsSingleton(); // Marca anche questo come singleton
+            context = new CGEasyDbContext();
+            // Singleton context - no special marking needed in EF Core
         }
         return context;
     }

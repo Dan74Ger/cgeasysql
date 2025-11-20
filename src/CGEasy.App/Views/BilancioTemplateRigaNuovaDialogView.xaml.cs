@@ -12,7 +12,7 @@ namespace CGEasy.App.Views;
 
 public partial class BilancioTemplateRigaNuovaDialogView : Window
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly BilancioTemplateRepository _repository;
     private readonly int _clienteId;
     private readonly int _mese;
@@ -23,7 +23,7 @@ public partial class BilancioTemplateRigaNuovaDialogView : Window
     {
         InitializeComponent();
         
-        _context = ((App)Application.Current).Services!.GetRequiredService<LiteDbContext>();
+        _context = ((App)Application.Current).Services!.GetRequiredService<CGEasyDbContext>();
         _repository = new BilancioTemplateRepository(_context);
         _clienteId = clienteId;
         _mese = mese;

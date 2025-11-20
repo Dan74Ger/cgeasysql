@@ -16,7 +16,7 @@ namespace CGEasy.App.Views
         {
             InitializeComponent();
             
-            var context = ((App)Application.Current).Services!.GetRequiredService<CGEasy.Core.Data.LiteDbContext>();
+            var context = ((App)Application.Current).Services!.GetRequiredService<CGEasy.Core.Data.CGEasyDbContext>();
             _viewModel = new ViewModels.StatisticheBilanciSPViewModel(context);
             DataContext = _viewModel;
 

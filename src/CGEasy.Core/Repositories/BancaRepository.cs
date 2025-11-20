@@ -1,94 +1,72 @@
-using CGEasy.Core.Data;
+﻿using CGEasy.Core.Data;
 using CGEasy.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CGEasy.Core.Repositories;
 
-/// <summary>
-/// Repository per gestione CRUD delle Banche
-/// </summary>
 public class BancaRepository
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
 
-    public BancaRepository(LiteDbContext context)
+    public BancaRepository(CGEasyDbContext context)
     {
         _context = context;
     }
 
-    /// <summary>
-    /// Recupera tutte le banche
-    /// </summary>
-    public List<Banca> GetAll()
+    public async Task<List<Banca>> GetAllAsync()
     {
-        return _context.Banche.FindAll().ToList();
+        return await _context.Banche.AsNoTracking().OrderBy(b => b.NomeBanca).ToListAsync();
     }
 
-    /// <summary>
-    /// Recupera una banca per ID
-    /// </summary>
-    public Banca? GetById(int id)
+    public async Task<Banca?> GetByIdAsync(int id)
     {
-        return _context.Banche.FindById(id);
+        return await _context.Banche.FindAsync(id);
     }
 
-    /// <summary>
-    /// Cerca banche per nome
-    /// </summary>
-    public List<Banca> SearchByNome(string nome)
+    public async Task<List<Banca>> SearchByNomeAsync(string nome)
     {
-        return _context.Banche
-            .Find(b => b.NomeBanca.Contains(nome))
-            .ToList();
+        return await _context.Banche.Where(b => b.NomeBanca.Contains(nome)).ToListAsync();
     }
 
-    /// <summary>
-    /// Inserisce una nuova banca
-    /// </summary>
-    public int Insert(Banca banca)
+    public async Task<int> InsertAsync(Banca banca)
     {
         banca.DataCreazione = DateTime.Now;
         banca.DataUltimaModifica = DateTime.Now;
-        return _context.Banche.Insert(banca);
+        _context.Banche.Add(banca);
+        await _context.SaveChangesAsync();
+        return banca.Id;
     }
 
-    /// <summary>
-    /// Aggiorna una banca esistente
-    /// </summary>
-    public bool Update(Banca banca)
+    public async Task<bool> UpdateAsync(Banca banca)
     {
         banca.DataUltimaModifica = DateTime.Now;
-        return _context.Banche.Update(banca);
+        _context.Banche.Update(banca);
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    /// <summary>
-    /// Elimina una banca
-    /// </summary>
-    public bool Delete(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        return _context.Banche.Delete(id);
-    }
-
-    /// <summary>
-    /// Conta il numero totale di banche
-    /// </summary>
-    public int Count()
-    {
-        return _context.Banche.Count();
-    }
-
-    /// <summary>
-    /// Aggiorna il saldo del giorno per una banca
-    /// </summary>
-    public bool UpdateSaldoDelGiorno(int bancaId, decimal nuovoSaldo)
-    {
-        var banca = GetById(bancaId);
+        var banca = await GetByIdAsync(id);
         if (banca == null) return false;
-
-        banca.SaldoDelGiorno = nuovoSaldo;
-        return Update(banca);
+        _context.Banche.Remove(banca);
+        return await _context.SaveChangesAsync() > 0;
     }
-}
 
+    public async Task<int> CountAsync()
+    {
+        return await _context.Banche.CountAsync();
+    }
+
+    // ===== WRAPPER SINCRONI per compatibilità =====
+    public List<Banca> GetAll() => GetAllAsync().Result;
+    public Banca? GetById(int id) => GetByIdAsync(id).Result;
+    public List<Banca> SearchByNome(string nome) => SearchByNomeAsync(nome).Result;
+    public int Insert(Banca banca) => InsertAsync(banca).Result;
+    public bool Update(Banca banca) => UpdateAsync(banca).Result;
+    public bool Delete(int id) => DeleteAsync(id).Result;
+    public int Count() => CountAsync().Result;
+}

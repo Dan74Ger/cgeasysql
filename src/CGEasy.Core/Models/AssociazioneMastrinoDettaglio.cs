@@ -1,74 +1,57 @@
-using LiteDB;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CGEasy.Core.Models;
 
-/// <summary>
-/// Modello per Dettaglio Associazione Mastrini (Righe)
-/// Rappresenta la mappatura tra un mastrino contabile e una voce template
-/// </summary>
+[Table("associazione_mastrini_dettagli")]
 public class AssociazioneMastrinoDettaglio
 {
-    [BsonId]
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [BsonField("associazione_id")]
+    [Column("associazione_id")]
     public int AssociazioneId { get; set; }
 
-    [BsonField("codice_mastrino")]
+    [Column("codice_mastrino")]
+    [Required]
+    [MaxLength(50)]
     public string CodiceMastrino { get; set; } = string.Empty;
 
-    [BsonField("descrizione_mastrino")]
+    [Column("descrizione_mastrino")]
+    [Required]
+    [MaxLength(300)]
     public string DescrizioneMastrino { get; set; } = string.Empty;
 
-    [BsonField("importo")]
+    [Column("importo")]
+    [Precision(18, 2)]
     public decimal Importo { get; set; }
 
-    [BsonField("template_voce_id")]
+    [Column("template_voce_id")]
     public int? TemplateVoceId { get; set; }
 
-    [BsonField("template_codice")]
+    [Column("template_codice")]
+    [MaxLength(50)]
     public string? TemplateCodice { get; set; }
 
-    [BsonField("template_descrizione")]
+    [Column("template_descrizione")]
+    [MaxLength(300)]
     public string? TemplateDescrizione { get; set; }
 
-    [BsonField("template_segno")]
-    public string? TemplateSegno { get; set; } // + o -
+    [Column("template_segno")]
+    [MaxLength(1)]
+    public string? TemplateSegno { get; set; }
 
-    // Proprietà calcolate per UI
-    [BsonIgnore]
+    [NotMapped]
     public string ImportoFormatted => Importo.ToString("C2");
 
-    [BsonIgnore]
+    [NotMapped]
     public string TemplateDisplay => 
         !string.IsNullOrWhiteSpace(TemplateCodice) 
             ? $"{TemplateCodice} - {TemplateDescrizione} ({TemplateSegno})"
             : "Non associato";
 
-    [BsonIgnore]
+    [NotMapped]
     public bool IsAssociato => TemplateVoceId.HasValue;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

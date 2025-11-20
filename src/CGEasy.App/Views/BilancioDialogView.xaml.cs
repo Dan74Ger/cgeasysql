@@ -10,8 +10,8 @@ public partial class BilancioDialogView : Window
     {
         InitializeComponent();
         
-        // Inizializza ViewModel con LiteDbContext da DI
-        var context = ((App)Application.Current).Services!.GetRequiredService<CGEasy.Core.Data.LiteDbContext>();
+        // Inizializza ViewModel con CGEasyDbContext da DI
+        var context = ((App)Application.Current).Services!.GetRequiredService<CGEasy.Core.Data.CGEasyDbContext>();
         DataContext = new BilancioDialogViewModel(context, bilancioId);
     }
 }

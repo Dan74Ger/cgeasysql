@@ -1,72 +1,57 @@
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CGEasy.Core.Models;
 
 /// <summary>
-/// Rappresenta un utilizzo di anticipo fatture/SBF per una banca
+/// Rappresenta un utilizzo di anticipo fatture/SBF per una banca (EF Core)
 /// </summary>
+[Table("banca_utilizzo_anticipo")]
 public class BancaUtilizzoAnticipo
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     
-    /// <summary>
-    /// ID della banca di riferimento
-    /// </summary>
+    [Column("banca_id")]
     public int BancaId { get; set; }
     
-    /// <summary>
-    /// Fatturato su cui si basa l'anticipo
-    /// </summary>
+    [Column("fatturato")]
+    [Precision(18, 2)]
     public decimal Fatturato { get; set; }
     
-    /// <summary>
-    /// Percentuale di anticipo sul fatturato (es: 80 per 80%)
-    /// </summary>
+    [Column("percentuale_anticipo")]
+    [Precision(5, 2)]
     public decimal PercentualeAnticipo { get; set; }
     
-    /// <summary>
-    /// Importo dell'anticipo utilizzato (calcolato: Fatturato * PercentualeAnticipo / 100)
-    /// </summary>
+    [Column("importo_utilizzo")]
+    [Precision(18, 2)]
     public decimal ImportoUtilizzo { get; set; }
     
-    /// <summary>
-    /// Data inizio utilizzo anticipo
-    /// </summary>
+    [Column("data_inizio_utilizzo")]
     public DateTime DataInizioUtilizzo { get; set; }
     
-    /// <summary>
-    /// Data scadenza/rimborso anticipo
-    /// </summary>
+    [Column("data_scadenza_utilizzo")]
     public DateTime DataScadenzaUtilizzo { get; set; }
     
-    /// <summary>
-    /// Flag che indica se l'anticipo è stato rimborsato
-    /// </summary>
+    [Column("rimborsato")]
     public bool Rimborsato { get; set; }
     
-    /// <summary>
-    /// Data effettiva di rimborso (se avvenuto)
-    /// </summary>
+    [Column("data_rimborso_effettivo")]
     public DateTime? DataRimborsoEffettivo { get; set; }
     
-    /// <summary>
-    /// Interessi maturati sul periodo (calcolato)
-    /// </summary>
+    [Column("interessi_maturati")]
+    [Precision(18, 2)]
     public decimal InteressiMaturati { get; set; }
     
-    /// <summary>
-    /// Note aggiuntive
-    /// </summary>
+    [Column("note")]
     public string? Note { get; set; }
     
-    /// <summary>
-    /// Data creazione record
-    /// </summary>
+    [Column("data_creazione")]
     public DateTime DataCreazione { get; set; } = DateTime.Now;
     
-    /// <summary>
-    /// Data ultima modifica
-    /// </summary>
+    [Column("data_ultima_modifica")]
     public DateTime DataUltimaModifica { get; set; } = DateTime.Now;
 }
-

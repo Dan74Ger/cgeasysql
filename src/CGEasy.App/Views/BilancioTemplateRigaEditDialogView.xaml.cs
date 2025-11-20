@@ -11,7 +11,7 @@ namespace CGEasy.App.Views;
 
 public partial class BilancioTemplateRigaEditDialogView : Window
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly BilancioTemplateRepository _repository;
     private readonly BilancioTemplate _riga;
     private bool _isSaving = false;
@@ -20,7 +20,7 @@ public partial class BilancioTemplateRigaEditDialogView : Window
     {
         InitializeComponent();
         
-        _context = ((App)Application.Current).Services!.GetRequiredService<LiteDbContext>();
+        _context = ((App)Application.Current).Services!.GetRequiredService<CGEasyDbContext>();
         _repository = new BilancioTemplateRepository(_context);
         _riga = riga;
 

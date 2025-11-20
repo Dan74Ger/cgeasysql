@@ -31,7 +31,7 @@ public partial class IndiceSelezionabile : ObservableObject
 
 public partial class IndiciDiBilancioViewModel : ObservableObject
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly ClienteRepository _clienteRepo;
     private readonly StatisticaCESalvataRepository _statisticaCERepo;
     private readonly StatisticaSPSalvataRepository _statisticaSPRepo;
@@ -84,8 +84,8 @@ public partial class IndiciDiBilancioViewModel : ObservableObject
 
     public IndiciDiBilancioViewModel()
     {
-        _context = App.GetService<LiteDbContext>() ?? new LiteDbContext();
-        _context.MarkAsSingleton();
+        _context = App.GetService<CGEasyDbContext>() ?? new CGEasyDbContext();
+        // Singleton context - no special marking needed in EF Core
 
         _clienteRepo = new ClienteRepository(_context);
         _statisticaCERepo = new StatisticaCESalvataRepository(_context);

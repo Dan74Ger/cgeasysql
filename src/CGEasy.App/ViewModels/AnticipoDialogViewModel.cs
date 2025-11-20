@@ -71,7 +71,7 @@ public partial class AnticipoDialogViewModel : ObservableObject
         }
     }
 
-    public AnticipoDialogViewModel(LiteDbContext context, int bancaId, BancaUtilizzoAnticipo? anticipoEsistente = null)
+    public AnticipoDialogViewModel(CGEasyDbContext context, int bancaId, BancaUtilizzoAnticipo? anticipoEsistente = null)
     {
         _anticipoRepo = new BancaUtilizzoAnticipoRepository(context);
         _bancaService = new BancaService(context);

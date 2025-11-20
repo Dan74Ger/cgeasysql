@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,7 +13,7 @@ using ClosedXML.Excel;
 namespace CGEasy.App.ViewModels;
 
 /// <summary>
-/// ViewModel per gestione anagrafica Professionisti - COMPLETO
+/// ViewModel per gestione anagrafica Professionisti (EF Core async)
 /// </summary>
 public partial class ProfessionistiViewModel : ObservableObject
 {
@@ -39,35 +40,39 @@ public partial class ProfessionistiViewModel : ObservableObject
     [ObservableProperty]
     private int _professionistiCessati;
 
+    [ObservableProperty]
+    private bool _isLoading;
+
     public ProfessionistiViewModel(ProfessionistaRepository professionistaRepository)
     {
         _professionistaRepository = professionistaRepository;
         _professionisti = new ObservableCollection<Professionista>();
         
-        LoadData();
+        _ = LoadDataAsync();
     }
 
-    private void LoadData()
+    private async Task LoadDataAsync()
     {
+        IsLoading = true;
         try
         {
             var professionisti = ShowOnlyActive 
-                ? _professionistaRepository.GetActive() 
-                : _professionistaRepository.GetAll();
+                ? await _professionistaRepository.GetActiveAsync() 
+                : await _professionistaRepository.GetAllAsync();
 
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
-                professionisti = _professionistaRepository.SearchByName(SearchText);
+                professionisti = await _professionistaRepository.SearchByNameAsync(SearchText);
                 if (ShowOnlyActive)
-                    professionisti = professionisti.Where(p => p.Attivo);
+                    professionisti = professionisti.Where(p => p.Attivo).ToList();
             }
 
             Professionisti = new ObservableCollection<Professionista>(
                 professionisti.OrderBy(p => p.Cognome).ThenBy(p => p.Nome));
 
             // Statistiche
-            TotalProfessionisti = _professionistaRepository.Count();
-            ProfessionistiAttivi = _professionistaRepository.Count(p => p.Attivo);
+            TotalProfessionisti = await _professionistaRepository.CountAsync();
+            ProfessionistiAttivi = await _professionistaRepository.CountAsync(p => p.Attivo);
             ProfessionistiCessati = TotalProfessionisti - ProfessionistiAttivi;
         }
         catch (Exception ex)
@@ -75,29 +80,33 @@ public partial class ProfessionistiViewModel : ObservableObject
             MessageBox.Show($"Errore caricamento professionisti: {ex.Message}", 
                           "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     [RelayCommand]
-    private void Refresh()
+    private async Task RefreshAsync()
     {
-        LoadData();
+        await LoadDataAsync();
     }
 
     partial void OnSearchTextChanged(string value)
     {
-        LoadData();
+        _ = LoadDataAsync();
     }
 
     partial void OnShowOnlyActiveChanged(bool value)
     {
-        LoadData();
+        _ = LoadDataAsync();
     }
 
     /// <summary>
     /// Nuovo professionista
     /// </summary>
     [RelayCommand]
-    private void NewProfessionista()
+    private async Task NewProfessionistaAsync()
     {
         if (!SessionManager.CanCreate("professionisti"))
         {
@@ -113,7 +122,7 @@ public partial class ProfessionistiViewModel : ObservableObject
 
             if (result == true && dialog.IsSaved)
             {
-                LoadData();
+                await LoadDataAsync();
             }
         }
         catch (Exception ex)
@@ -127,7 +136,7 @@ public partial class ProfessionistiViewModel : ObservableObject
     /// Modifica professionista selezionato
     /// </summary>
     [RelayCommand]
-    private void EditProfessionista()
+    private async Task EditProfessionistaAsync()
     {
         if (SelectedProfessionista == null)
         {
@@ -150,7 +159,7 @@ public partial class ProfessionistiViewModel : ObservableObject
 
             if (result == true && dialog.IsSaved)
             {
-                LoadData();
+                await LoadDataAsync();
             }
         }
         catch (Exception ex)
@@ -164,7 +173,7 @@ public partial class ProfessionistiViewModel : ObservableObject
     /// Disattiva professionista (soft delete)
     /// </summary>
     [RelayCommand]
-    private void DeleteProfessionista()
+    private async Task DeleteProfessionistaAsync()
     {
         if (SelectedProfessionista == null)
         {
@@ -191,13 +200,13 @@ public partial class ProfessionistiViewModel : ObservableObject
         {
             try
             {
-                var success = _professionistaRepository.Deactivate(SelectedProfessionista.Id);
+                var success = await _professionistaRepository.DeactivateAsync(SelectedProfessionista.Id);
                 
                 if (success)
                 {
                     MessageBox.Show("Professionista disattivato con successo.", 
                                   "Successo", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LoadData();
+                    await LoadDataAsync();
                 }
                 else
                 {
@@ -217,7 +226,7 @@ public partial class ProfessionistiViewModel : ObservableObject
     /// Riattiva professionista cessato
     /// </summary>
     [RelayCommand]
-    private void ActivateProfessionista()
+    private async Task ActivateProfessionistaAsync()
     {
         if (SelectedProfessionista == null || SelectedProfessionista.Attivo)
         {
@@ -243,13 +252,13 @@ public partial class ProfessionistiViewModel : ObservableObject
         {
             try
             {
-                var success = _professionistaRepository.Activate(SelectedProfessionista.Id);
+                var success = await _professionistaRepository.ActivateAsync(SelectedProfessionista.Id);
                 
                 if (success)
                 {
                     MessageBox.Show("Professionista riattivato con successo.", 
                                   "Successo", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LoadData();
+                    await LoadDataAsync();
                 }
                 else
                 {
@@ -269,7 +278,7 @@ public partial class ProfessionistiViewModel : ObservableObject
     /// Elimina definitivamente professionista (hard delete) - Solo per inattivi
     /// </summary>
     [RelayCommand]
-    private void DeletePermanently()
+    private async Task DeletePermanentlyAsync()
     {
         if (SelectedProfessionista == null)
         {
@@ -312,13 +321,13 @@ public partial class ProfessionistiViewModel : ObservableObject
                 var profId = SelectedProfessionista.Id;
                 var profNome = SelectedProfessionista.NomeCompleto;
                 
-                var success = _professionistaRepository.Delete(profId);
+                var success = await _professionistaRepository.DeleteAsync(profId);
                 
                 if (success)
                 {
                     MessageBox.Show($"Professionista '{profNome}' eliminato definitivamente.", 
                                   "Eliminato", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LoadData();
+                    await LoadDataAsync();
                 }
                 else
                 {
@@ -363,12 +372,12 @@ public partial class ProfessionistiViewModel : ObservableObject
     /// Export Excel con tutti i dati professionisti - Usa ClosedXML
     /// </summary>
     [RelayCommand]
-    private void ExportExcel()
+    private async Task ExportExcelAsync()
     {
         try
         {
             // Ottieni tutti i professionisti
-            var tuttiProfessionisti = _professionistaRepository.GetAll()
+            var tuttiProfessionisti = (await _professionistaRepository.GetAllAsync())
                 .OrderBy(p => p.Attivo ? 0 : 1)  // Attivi prima
                 .ThenBy(p => p.Cognome)
                 .ThenBy(p => p.Nome)

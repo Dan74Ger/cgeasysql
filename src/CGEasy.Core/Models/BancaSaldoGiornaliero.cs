@@ -1,37 +1,33 @@
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CGEasy.Core.Models;
 
 /// <summary>
-/// Rappresenta lo storico del saldo giornaliero di una banca
+/// Rappresenta lo storico del saldo giornaliero di una banca (EF Core)
 /// </summary>
+[Table("banca_saldo_giornaliero")]
 public class BancaSaldoGiornaliero
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     
-    /// <summary>
-    /// ID della banca di riferimento
-    /// </summary>
+    [Column("banca_id")]
     public int BancaId { get; set; }
     
-    /// <summary>
-    /// Data del saldo
-    /// </summary>
+    [Column("data")]
     public DateTime Data { get; set; }
     
-    /// <summary>
-    /// Saldo alla data specificata
-    /// </summary>
+    [Column("saldo")]
+    [Precision(18, 2)]
     public decimal Saldo { get; set; }
     
-    /// <summary>
-    /// Note aggiuntive
-    /// </summary>
+    [Column("note")]
     public string? Note { get; set; }
     
-    /// <summary>
-    /// Data creazione record
-    /// </summary>
+    [Column("data_creazione")]
     public DateTime DataCreazione { get; set; } = DateTime.Now;
 }
-

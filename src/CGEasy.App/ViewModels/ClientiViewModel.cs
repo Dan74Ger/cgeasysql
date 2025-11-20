@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -11,7 +12,7 @@ using CGEasy.Core.Services;
 namespace CGEasy.App.ViewModels;
 
 /// <summary>
-/// ViewModel per gestione anagrafica Clienti
+/// ViewModel per gestione anagrafica Clienti (EF Core async)
 /// </summary>
 public partial class ClientiViewModel : ObservableObject
 {
@@ -38,37 +39,42 @@ public partial class ClientiViewModel : ObservableObject
     [ObservableProperty]
     private int _clientiCessati;
 
+    [ObservableProperty]
+    private bool _isLoading;
+
     public ClientiViewModel(ClienteRepository clienteRepository)
     {
         _clienteRepository = clienteRepository;
         _clienti = new ObservableCollection<Cliente>();
         
-        LoadData();
+        // Carica dati in modo asincrono
+        _ = LoadDataAsync();
     }
 
     /// <summary>
-    /// Carica dati clienti
+    /// Carica dati clienti (ASYNC)
     /// </summary>
-    private void LoadData()
+    private async Task LoadDataAsync()
     {
+        IsLoading = true;
         try
         {
             var clienti = ShowOnlyActive 
-                ? _clienteRepository.GetActive() 
-                : _clienteRepository.GetAll();
+                ? await _clienteRepository.GetActiveAsync() 
+                : await _clienteRepository.GetAllAsync();
 
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
-                clienti = _clienteRepository.SearchByName(SearchText);
+                clienti = await _clienteRepository.SearchByNameAsync(SearchText);
                 if (ShowOnlyActive)
-                    clienti = clienti.Where(c => c.Attivo);
+                    clienti = clienti.Where(c => c.Attivo).ToList();
             }
 
             Clienti = new ObservableCollection<Cliente>(clienti.OrderBy(c => c.NomeCliente));
 
             // Statistiche
-            TotalClienti = _clienteRepository.Count();
-            ClientiAttivi = _clienteRepository.Count(c => c.Attivo);
+            TotalClienti = await _clienteRepository.CountAsync();
+            ClientiAttivi = await _clienteRepository.CountAsync(c => c.Attivo);
             ClientiCessati = TotalClienti - ClientiAttivi;
         }
         catch (Exception ex)
@@ -76,15 +82,19 @@ public partial class ClientiViewModel : ObservableObject
             MessageBox.Show($"Errore caricamento clienti: {ex.Message}", 
                           "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     /// <summary>
     /// Ricarica lista
     /// </summary>
     [RelayCommand]
-    private void Refresh()
+    private async Task RefreshAsync()
     {
-        LoadData();
+        await LoadDataAsync();
     }
 
     /// <summary>
@@ -92,7 +102,7 @@ public partial class ClientiViewModel : ObservableObject
     /// </summary>
     partial void OnSearchTextChanged(string value)
     {
-        LoadData();
+        _ = LoadDataAsync();
     }
 
     /// <summary>
@@ -100,14 +110,14 @@ public partial class ClientiViewModel : ObservableObject
     /// </summary>
     partial void OnShowOnlyActiveChanged(bool value)
     {
-        LoadData();
+        _ = LoadDataAsync();
     }
 
     /// <summary>
     /// Nuovo cliente
     /// </summary>
     [RelayCommand]
-    private void NewCliente()
+    private async Task NewClienteAsync()
     {
         // Verifica permessi
         if (!SessionManager.CanCreate("clienti"))
@@ -124,7 +134,7 @@ public partial class ClientiViewModel : ObservableObject
 
             if (result == true && dialog.IsSaved)
             {
-                LoadData();
+                await LoadDataAsync();
             }
         }
         catch (Exception ex)
@@ -138,7 +148,7 @@ public partial class ClientiViewModel : ObservableObject
     /// Modifica cliente selezionato
     /// </summary>
     [RelayCommand]
-    private void EditCliente()
+    private async Task EditClienteAsync()
     {
         if (SelectedCliente == null)
         {
@@ -162,7 +172,7 @@ public partial class ClientiViewModel : ObservableObject
 
             if (result == true && dialog.IsSaved)
             {
-                LoadData();
+                await LoadDataAsync();
             }
         }
         catch (Exception ex)
@@ -176,7 +186,7 @@ public partial class ClientiViewModel : ObservableObject
     /// Elimina cliente selezionato (soft delete)
     /// </summary>
     [RelayCommand]
-    private void DeleteCliente()
+    private async Task DeleteClienteAsync()
     {
         if (SelectedCliente == null)
         {
@@ -204,13 +214,13 @@ public partial class ClientiViewModel : ObservableObject
         {
             try
             {
-                var success = _clienteRepository.Deactivate(SelectedCliente.Id);
+                var success = await _clienteRepository.DeactivateAsync(SelectedCliente.Id);
                 
                 if (success)
                 {
                     MessageBox.Show("Cliente disattivato con successo.", 
                                   "Successo", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LoadData();
+                    await LoadDataAsync();
                 }
                 else
                 {
@@ -230,7 +240,7 @@ public partial class ClientiViewModel : ObservableObject
     /// Riattiva cliente cessato
     /// </summary>
     [RelayCommand]
-    private void ActivateCliente()
+    private async Task ActivateClienteAsync()
     {
         if (SelectedCliente == null || SelectedCliente.Attivo)
         {
@@ -257,13 +267,13 @@ public partial class ClientiViewModel : ObservableObject
         {
             try
             {
-                var success = _clienteRepository.Activate(SelectedCliente.Id);
+                var success = await _clienteRepository.ActivateAsync(SelectedCliente.Id);
                 
                 if (success)
                 {
                     MessageBox.Show("Cliente riattivato con successo.", 
                                   "Successo", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LoadData();
+                    await LoadDataAsync();
                 }
                 else
                 {
@@ -307,7 +317,7 @@ public partial class ClientiViewModel : ObservableObject
     /// Elimina definitivamente cliente (hard delete) - Solo per clienti inattivi
     /// </summary>
     [RelayCommand]
-    private void DeletePermanently()
+    private async Task DeletePermanentlyAsync()
     {
         if (SelectedCliente == null)
         {
@@ -351,13 +361,13 @@ public partial class ClientiViewModel : ObservableObject
                 var clienteId = SelectedCliente.Id;
                 var clienteNome = SelectedCliente.NomeCliente;
                 
-                var success = _clienteRepository.Delete(clienteId);
+                var success = await _clienteRepository.DeleteAsync(clienteId);
                 
                 if (success)
                 {
                     MessageBox.Show($"Cliente '{clienteNome}' eliminato definitivamente.", 
                                   "Eliminato", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LoadData();
+                    await LoadDataAsync();
                 }
                 else
                 {
@@ -377,12 +387,12 @@ public partial class ClientiViewModel : ObservableObject
     /// Export Excel con tutti i dati clienti - Usa ClosedXML (gratuito)
     /// </summary>
     [RelayCommand]
-    private void ExportExcel()
+    private async Task ExportExcelAsync()
     {
         try
         {
             // Ottieni tutti i clienti (senza filtri)
-            var tuttiClienti = _clienteRepository.GetAll()
+            var tuttiClienti = (await _clienteRepository.GetAllAsync())
                 .OrderBy(c => c.Attivo ? 0 : 1)  // Attivi prima
                 .ThenBy(c => c.NomeCliente)
                 .ToList();
@@ -542,6 +552,3 @@ public partial class ClientiViewModel : ObservableObject
         }
     }
 }
-
-
-

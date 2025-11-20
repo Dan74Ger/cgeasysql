@@ -13,7 +13,7 @@ namespace CGEasy.App.ViewModels
 {
     public partial class PagamentoMensileDialogViewModel : ObservableObject
     {
-        private readonly LiteDbContext _context;
+        private readonly CGEasyDbContext _context;
         private readonly int _bancaId;
         private readonly BancaPagamentoRepository _pagamentoRepo;
         private readonly AuditLogService _auditService;
@@ -28,7 +28,7 @@ namespace CGEasy.App.ViewModels
 
         [ObservableProperty] private ObservableCollection<PagamentoMensileRow> _righe = new();
 
-        public PagamentoMensileDialogViewModel(LiteDbContext context, int bancaId)
+        public PagamentoMensileDialogViewModel(CGEasyDbContext context, int bancaId)
         {
             _context = context;
             _bancaId = bancaId;

@@ -61,7 +61,7 @@ public partial class GestioneBancheViewModel : ObservableObject
     {
     }
 
-    public GestioneBancheViewModel(LiteDbContext context)
+    public GestioneBancheViewModel(CGEasyDbContext context)
     {
         _bancaRepo = new BancaRepository(context);
         _bancaService = new BancaService(context);
@@ -70,13 +70,13 @@ public partial class GestioneBancheViewModel : ObservableObject
         LoadBanche();
     }
 
-    private static LiteDbContext GetOrCreateContext()
+    private static CGEasyDbContext GetOrCreateContext()
     {
-        var context = App.GetService<LiteDbContext>();
+        var context = App.GetService<CGEasyDbContext>();
         if (context == null)
         {
-            context = new LiteDbContext();
-            context.MarkAsSingleton();
+            context = new CGEasyDbContext();
+            // Singleton context - no special marking needed in EF Core
         }
         return context;
     }

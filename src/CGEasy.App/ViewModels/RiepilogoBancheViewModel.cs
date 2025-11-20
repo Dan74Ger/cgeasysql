@@ -60,7 +60,7 @@ public class MargineTesoreraData
 public partial class RiepilogoBancheViewModel : ObservableObject
 {
     private readonly BancaService _bancaService;
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly BancaRepository _bancaRepo;
     private readonly BancaIncassoRepository _incassoRepo;
     private readonly BancaPagamentoRepository _pagamentoRepo;
@@ -87,7 +87,7 @@ public partial class RiepilogoBancheViewModel : ObservableObject
     {
     }
 
-    public RiepilogoBancheViewModel(LiteDbContext context)
+    public RiepilogoBancheViewModel(CGEasyDbContext context)
     {
         _context = context;
         _bancaService = new BancaService(context);
@@ -97,13 +97,13 @@ public partial class RiepilogoBancheViewModel : ObservableObject
         LoadRiepilogo();
     }
 
-    private static LiteDbContext GetOrCreateContext()
+    private static CGEasyDbContext GetOrCreateContext()
     {
-        var context = App.GetService<LiteDbContext>();
+        var context = App.GetService<CGEasyDbContext>();
         if (context == null)
         {
-            context = new LiteDbContext();
-            context.MarkAsSingleton();
+            context = new CGEasyDbContext();
+            // Singleton context - no special marking needed in EF Core
         }
         return context;
     }

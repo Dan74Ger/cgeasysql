@@ -15,7 +15,7 @@ namespace CGEasy.App.ViewModels;
 
 public partial class ConfigurazioneIndiciViewModel : ObservableObject
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
     private readonly IndicePersonalizzatoRepository _indicePersonalizzatoRepo;
     private readonly Cliente _clienteFisso;
     private readonly StatisticaCESalvata _statisticaCE;
@@ -49,8 +49,8 @@ public partial class ConfigurazioneIndiciViewModel : ObservableObject
     /// </summary>
     public ConfigurazioneIndiciViewModel(Cliente cliente, StatisticaCESalvata statisticaCE, StatisticaSPSalvata statisticaSP)
     {
-        _context = App.GetService<LiteDbContext>() ?? new LiteDbContext();
-        _context.MarkAsSingleton();
+        _context = App.GetService<CGEasyDbContext>() ?? new CGEasyDbContext();
+        // Singleton context - no special marking needed in EF Core
 
         _indicePersonalizzatoRepo = new IndicePersonalizzatoRepository(_context);
         _clienteFisso = cliente;

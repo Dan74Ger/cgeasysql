@@ -72,7 +72,7 @@ public partial class GraficiViewModel : ObservableObject
         _wpfPlot = wpfPlot;
         _wpfPlotPie = wpfPlotPie;
         
-        var context = App.GetService<CGEasy.Core.Data.LiteDbContext>() ?? new CGEasy.Core.Data.LiteDbContext();
+        var context = App.GetService<CGEasy.Core.Data.CGEasyDbContext>() ?? new CGEasy.Core.Data.CGEasyDbContext();
         _clienteRepo = new ClienteRepository(context);
         _statisticaCERepo = new StatisticaCESalvataRepository(context);
         _statisticaSPRepo = new StatisticaSPSalvataRepository(context);

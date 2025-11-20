@@ -1,128 +1,102 @@
-using CGEasy.Core.Data;
+﻿using CGEasy.Core.Data;
 using CGEasy.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CGEasy.Core.Repositories;
 
-/// <summary>
-/// Repository per gestione CRUD dell'Utilizzo Anticipo Fatture/SBF per Banca
-/// </summary>
 public class BancaUtilizzoAnticipoRepository
 {
-    private readonly LiteDbContext _context;
+    private readonly CGEasyDbContext _context;
 
-    public BancaUtilizzoAnticipoRepository(LiteDbContext context)
+    public BancaUtilizzoAnticipoRepository(CGEasyDbContext context)
     {
         _context = context;
     }
 
-    /// <summary>
-    /// Recupera tutti gli utilizzi anticipo
-    /// </summary>
-    public List<BancaUtilizzoAnticipo> GetAll()
+    public async Task<List<BancaUtilizzoAnticipo>> GetAllAsync()
     {
-        return _context.BancaUtilizzoAnticipo.FindAll().ToList();
+        return await _context.BancaUtilizzoAnticipo.AsNoTracking().ToListAsync();
     }
 
-    /// <summary>
-    /// Recupera un utilizzo anticipo per ID
-    /// </summary>
-    public BancaUtilizzoAnticipo? GetById(int id)
+    public async Task<BancaUtilizzoAnticipo?> GetByIdAsync(int id)
     {
-        return _context.BancaUtilizzoAnticipo.FindById(id);
+        return await _context.BancaUtilizzoAnticipo.FindAsync(id);
     }
 
-    /// <summary>
-    /// Recupera tutti gli utilizzi anticipo di una banca
-    /// </summary>
-    public List<BancaUtilizzoAnticipo> GetByBancaId(int bancaId)
+    public async Task<List<BancaUtilizzoAnticipo>> GetByBancaIdAsync(int bancaId)
     {
-        return _context.BancaUtilizzoAnticipo
-            .Find(u => u.BancaId == bancaId)
-            .OrderBy(u => u.DataInizioUtilizzo)
-            .ToList();
+        return await _context.BancaUtilizzoAnticipo
+            .Where(u => u.BancaId == bancaId)
+            .OrderByDescending(u => u.DataInizioUtilizzo)
+            .ToListAsync();
     }
 
-    /// <summary>
-    /// Recupera gli utilizzi anticipo attivi (non ancora rimborsati)
-    /// </summary>
-    public List<BancaUtilizzoAnticipo> GetAttivi(int bancaId)
-    {
-        return _context.BancaUtilizzoAnticipo
-            .Find(u => u.BancaId == bancaId && !u.Rimborsato)
-            .OrderBy(u => u.DataInizioUtilizzo)
-            .ToList();
-    }
-
-    /// <summary>
-    /// Recupera gli utilizzi in scadenza entro una certa data
-    /// </summary>
-    public List<BancaUtilizzoAnticipo> GetInScadenzaEntro(int bancaId, DateTime dataLimite)
-    {
-        return _context.BancaUtilizzoAnticipo
-            .Find(u => u.BancaId == bancaId && !u.Rimborsato && u.DataScadenzaUtilizzo <= dataLimite)
-            .OrderBy(u => u.DataScadenzaUtilizzo)
-            .ToList();
-    }
-
-    /// <summary>
-    /// Inserisce un nuovo utilizzo anticipo
-    /// </summary>
-    public int Insert(BancaUtilizzoAnticipo utilizzo)
+    public async Task<int> InsertAsync(BancaUtilizzoAnticipo utilizzo)
     {
         utilizzo.DataCreazione = DateTime.Now;
-        utilizzo.DataUltimaModifica = DateTime.Now;
-        return _context.BancaUtilizzoAnticipo.Insert(utilizzo);
+        _context.BancaUtilizzoAnticipo.Add(utilizzo);
+        await _context.SaveChangesAsync();
+        return utilizzo.Id;
     }
 
-    /// <summary>
-    /// Aggiorna un utilizzo anticipo esistente
-    /// </summary>
-    public bool Update(BancaUtilizzoAnticipo utilizzo)
+    public async Task<bool> UpdateAsync(BancaUtilizzoAnticipo utilizzo)
     {
         utilizzo.DataUltimaModifica = DateTime.Now;
-        return _context.BancaUtilizzoAnticipo.Update(utilizzo);
+        _context.BancaUtilizzoAnticipo.Update(utilizzo);
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    /// <summary>
-    /// Elimina un utilizzo anticipo
-    /// </summary>
-    public bool Delete(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        return _context.BancaUtilizzoAnticipo.Delete(id);
-    }
-
-    /// <summary>
-    /// Elimina tutti gli utilizzi anticipo di una banca
-    /// </summary>
-    public int DeleteByBancaId(int bancaId)
-    {
-        return _context.BancaUtilizzoAnticipo.DeleteMany(u => u.BancaId == bancaId);
-    }
-
-    /// <summary>
-    /// Segna un utilizzo anticipo come rimborsato
-    /// </summary>
-    public bool SegnaRimborsato(int id, DateTime dataRimborsoEffettivo)
-    {
-        var utilizzo = GetById(id);
+        var utilizzo = await GetByIdAsync(id);
         if (utilizzo == null) return false;
-
-        utilizzo.Rimborsato = true;
-        utilizzo.DataRimborsoEffettivo = dataRimborsoEffettivo;
-        return Update(utilizzo);
+        _context.BancaUtilizzoAnticipo.Remove(utilizzo);
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    /// <summary>
-    /// Calcola il totale degli utilizzi attivi per una banca
-    /// </summary>
+    // ===== WRAPPER SINCRONI per compatibilità =====
+    public List<BancaUtilizzoAnticipo> GetAll() => GetAllAsync().Result;
+    public BancaUtilizzoAnticipo? GetById(int id) => GetByIdAsync(id).Result;
+    public List<BancaUtilizzoAnticipo> GetByBancaId(int bancaId) => GetByBancaIdAsync(bancaId).Result;
+    public int Insert(BancaUtilizzoAnticipo utilizzo) => InsertAsync(utilizzo).Result;
+    public bool Update(BancaUtilizzoAnticipo utilizzo) => UpdateAsync(utilizzo).Result;
+    public bool Delete(int id) => DeleteAsync(id).Result;
+    
     public decimal GetTotaleUtilizziAttivi(int bancaId)
     {
         return _context.BancaUtilizzoAnticipo
-            .Find(u => u.BancaId == bancaId && !u.Rimborsato)
+            .Where(u => u.BancaId == bancaId && !u.Rimborsato)
             .Sum(u => u.ImportoUtilizzo);
     }
+    public List<BancaUtilizzoAnticipo> GetInScadenzaEntro(int bancaId, DateTime dataLimite)
+    {
+        return _context.BancaUtilizzoAnticipo
+            .Where(u => u.BancaId == bancaId && !u.Rimborsato && u.DataScadenzaUtilizzo <= dataLimite)
+            .OrderBy(u => u.DataScadenzaUtilizzo)
+            .ToList();
+    }
+    
+    public async Task<bool> SegnaRimborsatoAsync(int id, DateTime? dataRimborso = null)
+    {
+        var utilizzo = await GetByIdAsync(id);
+        if (utilizzo == null) return false;
+        utilizzo.Rimborsato = true;
+        utilizzo.DataRimborsoEffettivo = dataRimborso ?? DateTime.Now;
+        return await UpdateAsync(utilizzo);
+    }
+    
+    public bool SegnaRimborsato(int id, DateTime? dataRimborso = null) => SegnaRimborsatoAsync(id, dataRimborso).Result;
+    
+    public async Task<int> DeleteByBancaIdAsync(int bancaId)
+    {
+        var utilizzi = await GetByBancaIdAsync(bancaId);
+        _context.BancaUtilizzoAnticipo.RemoveRange(utilizzi);
+        return await _context.SaveChangesAsync();
+    }
+    
+    public int DeleteByBancaId(int bancaId) => DeleteByBancaIdAsync(bancaId).Result;
 }
-

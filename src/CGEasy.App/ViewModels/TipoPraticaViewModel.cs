@@ -1,8 +1,8 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CGEasy.Core.Models;
@@ -13,7 +13,7 @@ using ClosedXML.Excel;
 namespace CGEasy.App.ViewModels;
 
 /// <summary>
-/// ViewModel per gestione Tipo Pratiche (Template TODO) - COMPLETO
+/// ViewModel per gestione Tipo Pratiche (EF Core async)
 /// </summary>
 public partial class TipoPraticaViewModel : ObservableObject
 {
@@ -40,36 +40,40 @@ public partial class TipoPraticaViewModel : ObservableObject
     [ObservableProperty]
     private int _praticheInattive;
 
+    [ObservableProperty]
+    private bool _isLoading;
+
     public TipoPraticaViewModel(TipoPraticaRepository tipoPraticaRepository)
     {
         _tipoPraticaRepository = tipoPraticaRepository;
         _pratiche = new ObservableCollection<TipoPratica>();
         
-        LoadData();
+        _ = LoadDataAsync();
     }
 
-    private void LoadData()
+    private async Task LoadDataAsync()
     {
+        IsLoading = true;
         try
         {
             var pratiche = ShowOnlyActive 
-                ? _tipoPraticaRepository.GetActive() 
-                : _tipoPraticaRepository.GetAll();
+                ? await _tipoPraticaRepository.GetActiveAsync() 
+                : await _tipoPraticaRepository.GetAllAsync();
 
             // Filtro ricerca
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
-                pratiche = _tipoPraticaRepository.SearchByName(SearchText);
+                pratiche = await _tipoPraticaRepository.SearchByNameAsync(SearchText);
                 if (ShowOnlyActive)
-                    pratiche = pratiche.Where(p => p.Attivo);
+                    pratiche = pratiche.Where(p => p.Attivo).ToList();
             }
 
             Pratiche = new ObservableCollection<TipoPratica>(
                 pratiche.OrderBy(p => p.Ordine).ThenBy(p => p.NomePratica));
 
             // Statistiche
-            TotalPratiche = _tipoPraticaRepository.Count();
-            PraticheAttive = _tipoPraticaRepository.Count(p => p.Attivo);
+            TotalPratiche = await _tipoPraticaRepository.CountAsync();
+            PraticheAttive = await _tipoPraticaRepository.CountAsync(p => p.Attivo);
             PraticheInattive = TotalPratiche - PraticheAttive;
         }
         catch (Exception ex)
@@ -77,22 +81,26 @@ public partial class TipoPraticaViewModel : ObservableObject
             MessageBox.Show($"Errore caricamento pratiche: {ex.Message}", 
                           "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     [RelayCommand]
-    private void Refresh()
+    private async Task RefreshAsync()
     {
-        LoadData();
+        await LoadDataAsync();
     }
 
     partial void OnSearchTextChanged(string value)
     {
-        LoadData();
+        _ = LoadDataAsync();
     }
 
     partial void OnShowOnlyActiveChanged(bool value)
     {
-        LoadData();
+        _ = LoadDataAsync();
     }
 
     [RelayCommand]
@@ -106,7 +114,7 @@ public partial class TipoPraticaViewModel : ObservableObject
     /// Nuova pratica
     /// </summary>
     [RelayCommand]
-    private void NewPratica()
+    private async Task NewPraticaAsync()
     {
         if (!SessionManager.IsAdministrator)
         {
@@ -122,7 +130,7 @@ public partial class TipoPraticaViewModel : ObservableObject
 
             if (result == true && dialog.IsSaved)
             {
-                LoadData();
+                await LoadDataAsync();
             }
         }
         catch (Exception ex)
@@ -136,7 +144,7 @@ public partial class TipoPraticaViewModel : ObservableObject
     /// Modifica pratica selezionata
     /// </summary>
     [RelayCommand]
-    private void EditPratica()
+    private async Task EditPraticaAsync()
     {
         if (SelectedPratica == null)
         {
@@ -159,7 +167,7 @@ public partial class TipoPraticaViewModel : ObservableObject
 
             if (result == true && dialog.IsSaved)
             {
-                LoadData();
+                await LoadDataAsync();
             }
         }
         catch (Exception ex)
@@ -173,7 +181,7 @@ public partial class TipoPraticaViewModel : ObservableObject
     /// Disattiva pratica (soft delete)
     /// </summary>
     [RelayCommand]
-    private void DeactivatePratica()
+    private async Task DeactivatePraticaAsync()
     {
         if (SelectedPratica == null)
         {
@@ -200,13 +208,13 @@ public partial class TipoPraticaViewModel : ObservableObject
         {
             try
             {
-                var success = _tipoPraticaRepository.Deactivate(SelectedPratica.Id);
+                var success = await _tipoPraticaRepository.DeactivateAsync(SelectedPratica.Id);
                 
                 if (success)
                 {
                     MessageBox.Show("Pratica disattivata con successo.", 
                                   "Successo", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LoadData();
+                    await LoadDataAsync();
                 }
                 else
                 {
@@ -226,7 +234,7 @@ public partial class TipoPraticaViewModel : ObservableObject
     /// Attiva pratica
     /// </summary>
     [RelayCommand]
-    private void ActivatePratica()
+    private async Task ActivatePraticaAsync()
     {
         if (SelectedPratica == null || SelectedPratica.Attivo)
         {
@@ -252,13 +260,13 @@ public partial class TipoPraticaViewModel : ObservableObject
         {
             try
             {
-                var success = _tipoPraticaRepository.Activate(SelectedPratica.Id);
+                var success = await _tipoPraticaRepository.ActivateAsync(SelectedPratica.Id);
                 
                 if (success)
                 {
                     MessageBox.Show("Pratica attivata con successo.", 
                                   "Successo", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LoadData();
+                    await LoadDataAsync();
                 }
                 else
                 {
@@ -278,7 +286,7 @@ public partial class TipoPraticaViewModel : ObservableObject
     /// Elimina definitivamente pratica (hard delete) - Solo per inattive
     /// </summary>
     [RelayCommand]
-    private void DeletePermanently()
+    private async Task DeletePermanentlyAsync()
     {
         if (SelectedPratica == null)
         {
@@ -321,13 +329,13 @@ public partial class TipoPraticaViewModel : ObservableObject
                 var praticaId = SelectedPratica.Id;
                 var praticaNome = SelectedPratica.NomePratica;
                 
-                var success = _tipoPraticaRepository.Delete(praticaId);
+                var success = await _tipoPraticaRepository.DeleteAsync(praticaId);
                 
                 if (success)
                 {
                     MessageBox.Show($"Pratica '{praticaNome}' eliminata definitivamente.", 
                                   "Eliminata", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LoadData();
+                    await LoadDataAsync();
                 }
                 else
                 {
@@ -358,6 +366,8 @@ public partial class TipoPraticaViewModel : ObservableObject
 
         var details = $"Pratica: {SelectedPratica.NomePratica}\n" +
                      $"Descrizione: {SelectedPratica.Descrizione ?? "N/D"}\n" +
+                     $"Categoria: {SelectedPratica.CategoriaDescrizione} {SelectedPratica.IconaCategoria}\n" +
+                     $"Priorità Default: {SelectedPratica.PrioritaDefault}\n" +
                      $"Ordine: {SelectedPratica.Ordine}\n" +
                      $"Attiva: {(SelectedPratica.Attivo ? "Sì" : "No")}";
 
@@ -368,12 +378,12 @@ public partial class TipoPraticaViewModel : ObservableObject
     /// Export Excel con tutti i dati pratiche - Usa ClosedXML
     /// </summary>
     [RelayCommand]
-    private void ExportExcel()
+    private async Task ExportExcelAsync()
     {
         try
         {
             // Ottieni tutte le pratiche
-            var tuttePratiche = _tipoPraticaRepository.GetAll()
+            var tuttePratiche = (await _tipoPraticaRepository.GetAllAsync())
                 .OrderBy(p => p.Attivo ? 0 : 1)  // Attive prima
                 .ThenBy(p => p.Ordine)
                 .ThenBy(p => p.NomePratica)
@@ -407,7 +417,8 @@ public partial class TipoPraticaViewModel : ObservableObject
             // Intestazioni
             var headers = new[]
             {
-                "ID", "Ordine", "Stato", "Nome Pratica", "Descrizione", "Data Creazione", "Ultima Modifica"
+                "ID", "Ordine", "Stato", "Nome Pratica", "Categoria", "Descrizione", 
+                "Priorità", "Durata (gg)", "Data Creazione", "Ultima Modifica"
             };
 
             for (int i = 0; i < headers.Length; i++)
@@ -428,9 +439,12 @@ public partial class TipoPraticaViewModel : ObservableObject
                 worksheet.Cell(row, 2).Value = pratica.Ordine;
                 worksheet.Cell(row, 3).Value = pratica.Attivo ? "ATTIVA" : "INATTIVA";
                 worksheet.Cell(row, 4).Value = pratica.NomePratica;
-                worksheet.Cell(row, 5).Value = pratica.Descrizione ?? "";
-                worksheet.Cell(row, 6).Value = pratica.CreatedAt;
-                worksheet.Cell(row, 7).Value = pratica.UpdatedAt;
+                worksheet.Cell(row, 5).Value = pratica.CategoriaDescrizione;
+                worksheet.Cell(row, 6).Value = pratica.Descrizione ?? "";
+                worksheet.Cell(row, 7).Value = pratica.PrioritaDefault;
+                worksheet.Cell(row, 8).Value = pratica.DurataStimataGiorni ?? 0;
+                worksheet.Cell(row, 9).Value = pratica.CreatedAt;
+                worksheet.Cell(row, 10).Value = pratica.UpdatedAt;
 
                 // Formattazione colonna Stato
                 worksheet.Cell(row, 3).Style.Font.Bold = true;
@@ -447,8 +461,8 @@ public partial class TipoPraticaViewModel : ObservableObject
             }
 
             // Formattazione date
-            worksheet.Column(6).Style.DateFormat.Format = "dd/mm/yyyy hh:mm";
-            worksheet.Column(7).Style.DateFormat.Format = "dd/mm/yyyy hh:mm";
+            worksheet.Column(9).Style.DateFormat.Format = "dd/mm/yyyy hh:mm";
+            worksheet.Column(10).Style.DateFormat.Format = "dd/mm/yyyy hh:mm";
 
             // Auto-fit colonne
             worksheet.Columns().AdjustToContents();
@@ -480,11 +494,31 @@ public partial class TipoPraticaViewModel : ObservableObject
             statsSheet.Cell(5, 2).Style.Font.FontColor = XLColor.Red;
             statsSheet.Cell(5, 2).Style.Font.Bold = true;
 
-            statsSheet.Cell(7, 1).Value = "Data Export:";
-            statsSheet.Cell(7, 2).Value = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+            // Statistiche per categoria
+            int statRow = 7;
+            statsSheet.Cell(statRow, 1).Value = "PRATICHE PER CATEGORIA:";
+            statsSheet.Cell(statRow, 1).Style.Font.Bold = true;
+            statRow++;
 
-            statsSheet.Cell(8, 1).Value = "Esportato da:";
-            statsSheet.Cell(8, 2).Value = SessionManager.CurrentUser?.Username ?? "N/D";
+            foreach (CategoriaPratica cat in Enum.GetValues(typeof(CategoriaPratica)))
+            {
+                var countCat = tuttePratiche.Count(p => p.Categoria == cat);
+                if (countCat > 0)
+                {
+                    var firstPratica = tuttePratiche.FirstOrDefault(p => p.Categoria == cat);
+                    statsSheet.Cell(statRow, 1).Value = $"{firstPratica?.IconaCategoria} {firstPratica?.CategoriaDescrizione}:";
+                    statsSheet.Cell(statRow, 2).Value = countCat;
+                    statRow++;
+                }
+            }
+
+            statRow++;
+            statsSheet.Cell(statRow, 1).Value = "Data Export:";
+            statsSheet.Cell(statRow, 2).Value = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+            statRow++;
+
+            statsSheet.Cell(statRow, 1).Value = "Esportato da:";
+            statsSheet.Cell(statRow, 2).Value = SessionManager.CurrentUser?.Username ?? "N/D";
 
             statsSheet.Columns().AdjustToContents();
 

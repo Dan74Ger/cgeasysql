@@ -1,50 +1,58 @@
-using LiteDB;
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CGEasy.Core.Models
 {
     /// <summary>
-    /// Modello Audit Log per tracciare operazioni
+    /// Modello Audit Log per tracciare operazioni (EF Core)
     /// </summary>
+    [Table("audit_logs")]
     public class AuditLog
     {
-        [BsonId]
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [BsonField("id_utente")]
+        [Column("id_utente")]
         public int IdUtente { get; set; }
 
-        [BsonField("username")]
+        [Column("username")]
+        [Required]
+        [MaxLength(100)]
         public string Username { get; set; } = string.Empty;
 
-        [BsonField("azione")]
+        [Column("azione")]
+        [Required]
+        [MaxLength(50)]
         public string Azione { get; set; } = string.Empty;
 
-        [BsonField("entita")]
+        [Column("entita")]
+        [Required]
+        [MaxLength(100)]
         public string Entita { get; set; } = string.Empty;
 
-        [BsonField("id_entita")]
+        [Column("id_entita")]
         public int? IdEntita { get; set; }
 
-        [BsonField("descrizione")]
+        [Column("descrizione")]
+        [MaxLength(500)]
         public string? Descrizione { get; set; }
 
-        [BsonField("valori_precedenti")]
+        [Column("valori_precedenti")]
         public string? ValoriPrecedenti { get; set; }
 
-        [BsonField("valori_nuovi")]
+        [Column("valori_nuovi")]
         public string? ValoriNuovi { get; set; }
 
-        [BsonField("timestamp")]
+        [Column("timestamp")]
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
-        [BsonField("ip_address")]
+        [Column("ip_address")]
+        [MaxLength(50)]
         public string? IpAddress { get; set; }
 
-        /// <summary>
-        /// Restituisce descrizione formattata
-        /// </summary>
-        [BsonIgnore]
+        [NotMapped]
         public string DescrizioneCompleta => 
             $"[{Timestamp:dd/MM/yyyy HH:mm:ss}] {Username} - {Azione} {Entita}" +
             (IdEntita.HasValue ? $" (ID: {IdEntita})" : "") +
@@ -82,33 +90,3 @@ namespace CGEasy.Core.Models
         public const string Budget = "Budget";
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
