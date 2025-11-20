@@ -1,20 +1,20 @@
 ﻿CGEasy.App
-1.0.0.0
+
 
 winexe
 C#
 .cs
-c:\CGEASY_sql\appcg_easy_projectsql\src\CGEasy.App\obj\Debug\net8.0-windows\
+C:\CGEASY_sql\appcg_easy_projectsql\src\CGEasy.App\obj\Debug\net8.0-windows\
 CGEasy.App
 none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
-c:\CGEASY_sql\appcg_easy_projectsql\src\CGEasy.App\App.xaml
+C:\CGEASY_sql\appcg_easy_projectsql\src\CGEasy.App\App.xaml
 631284475127
 22-1290247559
-117802630017
-2661579229478
+115-528848268
+266-348295914
 MainWindow.xaml;Views\AnticipoDialogView.xaml;Views\ArgomentiView.xaml;Views\AssociazioneMastrinoDialogView.xaml;Views\AssociazioniMastriniView.xaml;Views\BancaDettaglioView.xaml;Views\BilancioDettaglioView.xaml;Views\BilancioDialogView.xaml;Views\BilancioGruppoEditDialogView.xaml;Views\BilancioRigaDialogView.xaml;Views\BilancioRigaNuovaDialogView.xaml;Views\BilancioTemplateDettaglioView.xaml;Views\BilancioTemplateDialogView.xaml;Views\BilancioTemplateGruppoEditDialogView.xaml;Views\BilancioTemplateRigaEditDialogView.xaml;Views\BilancioTemplateRigaNuovaDialogView.xaml;Views\BilanciView.xaml;Views\CambioPasswordDialogWindow.xaml;Views\CircolariWindow.xaml;Views\ClienteDialogView.xaml;Views\ClientiView.xaml;Views\ConfigurazioneIndiciView.xaml;Views\ControlloGestioneWindow.xaml;Views\DashboardView.xaml;Views\DettaglioAssociazioniDialogView.xaml;Views\FinanziamentoImportDialogView.xaml;Views\GestioneBancheView.xaml;Views\GraficiView.xaml;Views\GraficoMargineView.xaml;Views\ImportaCircolareView.xaml;Views\ImportBilancioTemplateView.xaml;Views\ImportBilancioView.xaml;Views\ImportExcelTemplateWizardView.xaml;Views\ImportExcelWizardView.xaml;Views\IncassoDialogView.xaml;Views\IndicePersonalizzatoDialogView.xaml;Views\IndiciDiBilancioView.xaml;Views\InputDialogView.xaml;Views\LicenseClientDialogView.xaml;Views\LicenseKeyEditDialogView.xaml;Views\LicenseManagerView.xaml;Views\LoginWindow.xaml;Views\MargineTesoreraView.xaml;Views\ModificaCircolareDialogView.xaml;Views\PagamentoDialogView.xaml;Views\PagamentoMensileDialogView.xaml;Views\PermessiDialogWindow.xaml;Views\ProfessionistaDialogView.xaml;Views\ProfessionistiView.xaml;Views\RicercaCircolariView.xaml;Views\RiepilogoBancheView.xaml;Views\SistemaView.xaml;Views\StatisticheBilanciCEView.xaml;Views\StatisticheBilanciSPView.xaml;Views\StatisticheBilanciView.xaml;Views\TipoPraticaDialogView.xaml;Views\TipoPraticaView.xaml;Views\TodoCalendarioView.xaml;Views\TodoDialogView.xaml;Views\TodoKanbanView.xaml;Views\TodoStudioView.xaml;Views\UtenteDialogWindow.xaml;Views\UtentiView.xaml;
 
-True
+False
 

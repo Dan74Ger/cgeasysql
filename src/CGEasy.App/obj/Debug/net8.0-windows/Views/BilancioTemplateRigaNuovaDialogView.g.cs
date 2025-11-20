@@ -81,7 +81,7 @@ namespace CGEasy.App.Views {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/CGEasy.App;V1.0.0.0;component/views/bilanciotemplateriganuovadialogview.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/CGEasy.App;component/views/bilanciotemplateriganuovadialogview.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\Views\BilancioTemplateRigaNuovaDialogView.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
