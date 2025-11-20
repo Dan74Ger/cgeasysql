@@ -21,7 +21,7 @@ if exist "%~dp0git_token.txt" (
 )
 
 REM Vai alla directory del progetto
-cd /d "C:\devcg-group\appcg_easy_project"
+cd /d "C:\CGEASY_sql\appcg_easy_projectsql"
 
 REM Messaggio di commit automatico con data e ora
 for /f "tokens=1-3 delims=/ " %%a in ('date /t') do (set mydate=%%a/%%b/%%c)
@@ -29,7 +29,7 @@ for /f "tokens=1-2 delims=: " %%a in ('time /t') do (set mytime=%%a:%%b)
 set commit_msg=Update %mydate% %mytime%
 
 echo ========================================
-echo   COMMIT E PUSH AUTOMATICO - CGEasy
+echo  COMMIT E PUSH AUTOMATICO - CGEasy SQL
 echo ========================================
 echo.
 
@@ -70,7 +70,7 @@ echo OK - Commit creato!
 echo.
 
 echo [5] Push su GitHub...
-git push https://%GIT_TOKEN%@github.com/Dan74Ger/CGEasy.git master 2>nul
+git push https://%GIT_TOKEN%@github.com/Dan74Ger/cgeasysql.git main 2>nul
 if errorlevel 1 (
     echo ERRORE durante il push!
     echo Verifica la connessione di rete o i permessi.
@@ -85,7 +85,7 @@ echo   COMPLETATO CON SUCCESSO!
 echo ========================================
 echo.
 echo Commit: %commit_msg%
-echo Repository: https://github.com/Dan74Ger/CGEasy
+echo Repository: https://github.com/Dan74Ger/cgeasysql
 echo.
 echo File committati e pushati:
 git diff --name-only HEAD~1 HEAD | findstr /v "^$"

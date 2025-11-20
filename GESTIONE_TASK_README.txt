@@ -6,7 +6,8 @@
 📋 DESCRIZIONE
 ---------------
 Script batch automatico per committare e pushare TUTTI i file del progetto
-CGEasy su GitHub, inclusi file nuovi, modificati ed eliminati.
+CGEasy SQL Server su GitHub (repository: cgeasysql), inclusi file nuovi, 
+modificati ed eliminati.
 
 🔧 COSA FA LO SCRIPT
 --------------------
@@ -16,7 +17,7 @@ CGEasy su GitHub, inclusi file nuovi, modificati ed eliminati.
                      Sopprime i warning LF/CRLF per velocità
 [3] Mostra i file che verranno committati
 [4] Crea commit con timestamp automatico: "Update GG/MM/AAAA HH:MM"
-[5] Push su GitHub (repository Dan74Ger/CGEasy)
+[5] Push su GitHub (repository Dan74Ger/cgeasysql, branch main)
 
 ✅ VANTAGGI DELLO SCRIPT MIGLIORATO
 ------------------------------------
@@ -93,8 +94,8 @@ ESCLUSI automaticamente da .gitignore:
   COMPLETATO CON SUCCESSO!
 ========================================
 
-Commit: Update 17/11/2025 12:30
-Repository: https://github.com/Dan74Ger/CGEasy
+Commit: Update 20/11/2025 18:30
+Repository: https://github.com/Dan74Ger/cgeasysql
 
 File committati e pushati:
 src/CGEasy.App/ViewModels/IndiciDiBilancioViewModel.cs
@@ -112,7 +113,8 @@ Per problemi o domande, verificare sempre:
 3. Lo stato di git status --short manualmente
 
 ═══════════════════════════════════════════════════════════════════════
-Ultimo aggiornamento: 17/11/2025
-Versione script: 2.0 (Multi-add strategy)
+Ultimo aggiornamento: 20/11/2025
+Versione script: 2.1 (SQL Server Migration - Repository cgeasysql)
+Project Path: C:\CGEASY_sql\appcg_easy_projectsql
 ═══════════════════════════════════════════════════════════════════════
 
