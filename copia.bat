@@ -23,20 +23,20 @@ echo.
 
 REM Crea cartella backup se non esiste
 if not exist "%BACKUP_DIR%" (
-    echo [1/4] Creazione cartella backup principale...
+    echo [1/5] Creazione cartella backup principale...
     mkdir "%BACKUP_DIR%"
     echo       FATTO: %BACKUP_DIR%
 ) else (
-    echo [1/4] Cartella backup gia' esistente: OK
+    echo [1/5] Cartella backup gia' esistente: OK
 )
 
 echo.
-echo [2/4] Creazione cartella backup con timestamp...
+echo [2/5] Creazione cartella backup con timestamp...
 mkdir "%BACKUP_FOLDER%"
 echo       FATTO: %BACKUP_FOLDER%
 
 echo.
-echo [3/4] Copia progetto in corso...
+echo [3/5] Copia progetto in corso...
 echo       (Escludo: bin, obj, .vs, .git, node_modules, packages)
 echo.
 
@@ -54,7 +54,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo [4/4] Verifica backup...
+echo [4/5] Verifica backup...
 
 REM Conta file copiati
 for /f %%A in ('dir /s /b "%BACKUP_FOLDER%\*.cs" 2^>nul ^| find /c /v ""') do set CS_COUNT=%%A
@@ -82,10 +82,68 @@ if exist "%SOURCE_DIR%\src\CGEasy.Core\Migrations\" (
     echo       FATTO: Migrations copiate
 )
 
-REM Note: Database SQL Server non viene copiato (gestito da backup SQL Server separato)
 echo.
-echo [INFO] Database SQL Server: Backup gestito separatamente dal server
-echo        Repository: https://github.com/Dan74Ger/cgeasysql
+echo [5/5] Backup database SQL Server...
+echo.
+
+REM Crea cartella Database se non esiste
+if not exist "%BACKUP_FOLDER%\Database\" mkdir "%BACKUP_FOLDER%\Database\"
+
+REM Imposta parametri database
+set DB_NAME=CGEasy
+set DB_SERVER=localhost\SQLEXPRESS
+set DB_BACKUP_FILE=%BACKUP_FOLDER%\Database\CGEasy_%TIMESTAMP%.bak
+
+echo       Database: %DB_NAME%
+echo       Server: %DB_SERVER%
+echo       File: CGEasy_%TIMESTAMP%.bak
+echo.
+
+REM Verifica se sqlcmd e' disponibile
+where sqlcmd >nul 2>&1
+if errorlevel 1 (
+    echo [!] ATTENZIONE: sqlcmd non trovato - Backup database saltato
+    echo     Installa SQL Server Command Line Utilities per abilitare backup automatico
+    echo     Download: https://aka.ms/sqlcmd
+    goto :skip_db_backup
+)
+
+REM Backup database con sqlcmd
+echo       Backup in corso... (potrebbe richiedere alcuni minuti)
+sqlcmd -S %DB_SERVER% -Q "BACKUP DATABASE [%DB_NAME%] TO DISK = N'%DB_BACKUP_FILE%' WITH NOFORMAT, NOINIT, NAME = N'CGEasy-Full Database Backup', SKIP, NOREWIND, NOUNLOAD, STATS = 10, COMPRESSION" -b >nul 2>&1
+
+if errorlevel 1 (
+    echo [!] ATTENZIONE: Impossibile fare backup del database
+    echo     Possibili cause:
+    echo     - Database non in esecuzione
+    echo     - Permessi insufficienti
+    echo     - Nome server/database errato
+    echo.
+    echo     Tentativo backup alternativo con PowerShell...
+    
+    REM Tentativo alternativo con PowerShell
+    powershell -Command "try { Invoke-Sqlcmd -ServerInstance '%DB_SERVER%' -Query \"BACKUP DATABASE [%DB_NAME%] TO DISK = N'%DB_BACKUP_FILE%' WITH COMPRESSION\" -ErrorAction Stop; exit 0 } catch { exit 1 }" >nul 2>&1
+    
+    if errorlevel 1 (
+        echo [!] Backup database non riuscito
+        echo     Il backup del codice e' comunque completo
+    ) else (
+        echo [OK] Backup database completato (via PowerShell)
+        for %%A in ("%DB_BACKUP_FILE%") do set DB_SIZE=%%~zA
+        set /a DB_SIZE_MB=!DB_SIZE! / 1048576
+        echo       Dimensione: !DB_SIZE_MB! MB
+    )
+) else (
+    echo [OK] Backup database completato con successo!
+    for %%A in ("%DB_BACKUP_FILE%") do set DB_SIZE=%%~zA
+    set /a DB_SIZE_MB=!DB_SIZE! / 1048576
+    echo       Dimensione: !DB_SIZE_MB! MB
+)
+
+:skip_db_backup
+
+echo.
+echo [INFO] Repository: https://github.com/Dan74Ger/cgeasysql
 
 echo.
 echo ========================================
