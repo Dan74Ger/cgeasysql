@@ -83,7 +83,13 @@ public partial class BilancioDettaglioViewModel : ObservableObject
             OnPropertyChanged(nameof(HasSelectedRighe));
         };
 
-        LoadData();
+        // Carica dati in modo asincrono per non bloccare l'UI
+        _ = LoadDataAsync();
+    }
+
+    private async System.Threading.Tasks.Task LoadDataAsync()
+    {
+        await System.Threading.Tasks.Task.Run(() => LoadData());
     }
 
     private void LoadData()

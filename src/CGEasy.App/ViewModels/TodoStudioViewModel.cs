@@ -73,7 +73,13 @@ public partial class TodoStudioViewModel : ObservableObject
         // Sottoscrivi evento di modifica TODO per sincronizzare con altre viste
         CGEasy.Core.Services.TodoEventService.TodoChanged += OnTodoChanged;
 
-        LoadData();
+        // Carica dati in modo asincrono per non bloccare l'UI
+        _ = LoadDataAsync();
+    }
+
+    private async System.Threading.Tasks.Task LoadDataAsync()
+    {
+        await System.Threading.Tasks.Task.Run(() => LoadData());
     }
 
     /// <summary>

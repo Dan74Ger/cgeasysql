@@ -27,7 +27,13 @@ public partial class BilancioTemplateViewModel : ObservableObject
         _context = context;
         _repository = new BilancioTemplateRepository(context);
 
-        LoadData();
+        // Carica dati in modo asincrono per non bloccare l'UI
+        _ = LoadDataAsync();
+    }
+
+    private async System.Threading.Tasks.Task LoadDataAsync()
+    {
+        await System.Threading.Tasks.Task.Run(() => LoadData());
     }
 
     private void LoadData()

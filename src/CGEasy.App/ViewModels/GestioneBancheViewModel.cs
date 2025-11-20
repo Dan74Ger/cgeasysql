@@ -67,7 +67,13 @@ public partial class GestioneBancheViewModel : ObservableObject
         _bancaService = new BancaService(context);
         _auditService = new AuditLogService(context);
 
-        LoadBanche();
+        // Carica dati in modo asincrono per non bloccare l'UI
+        _ = LoadBancheAsync();
+    }
+
+    private async System.Threading.Tasks.Task LoadBancheAsync()
+    {
+        await System.Threading.Tasks.Task.Run(() => LoadBanche());
     }
 
     private static CGEasyDbContext GetOrCreateContext()

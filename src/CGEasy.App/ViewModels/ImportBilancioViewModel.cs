@@ -70,7 +70,13 @@ public partial class ImportBilancioViewModel : ObservableObject
         _repository = new BilancioContabileRepository(context);
         _clienteRepository = new ClienteRepository(context);
 
-        LoadData();
+        // Carica dati in modo asincrono per non bloccare l'UI
+        _ = LoadDataAsync();
+    }
+
+    private async System.Threading.Tasks.Task LoadDataAsync()
+    {
+        await System.Threading.Tasks.Task.Run(() => LoadData());
     }
 
     private void LoadData()

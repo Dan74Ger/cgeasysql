@@ -50,7 +50,7 @@ namespace CGEasy.App.ViewModels
             _argomentiRepo = new ArgomentiRepository(context);
             _auditService = new AuditLogService(context);
 
-            LoadArgomenti();
+            _ = LoadArgomentiAsync();
         }
 
         public ImportaCircolareViewModel(CGEasyDbContext context)
@@ -59,7 +59,12 @@ namespace CGEasy.App.ViewModels
             _argomentiRepo = new ArgomentiRepository(context);
             _auditService = new AuditLogService(context);
 
-            LoadArgomenti();
+            _ = LoadArgomentiAsync();
+        }
+
+        private async System.Threading.Tasks.Task LoadArgomentiAsync()
+        {
+            await System.Threading.Tasks.Task.Run(() => LoadArgomenti());
         }
 
         private void LoadArgomenti()
