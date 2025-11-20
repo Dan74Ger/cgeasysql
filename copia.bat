@@ -111,7 +111,7 @@ if errorlevel 1 (
 
 REM Backup database con sqlcmd
 echo       Backup in corso... (potrebbe richiedere alcuni minuti)
-sqlcmd -S %DB_SERVER% -Q "BACKUP DATABASE [%DB_NAME%] TO DISK = N'%DB_BACKUP_FILE%' WITH NOFORMAT, NOINIT, NAME = N'CGEasy-Full Database Backup', SKIP, NOREWIND, NOUNLOAD, STATS = 10, COMPRESSION" -b >nul 2>&1
+sqlcmd -S %DB_SERVER% -E -Q "BACKUP DATABASE [%DB_NAME%] TO DISK = N'%DB_BACKUP_FILE%' WITH NOFORMAT, NOINIT, NAME = N'CGEasy-Full Database Backup', SKIP, NOREWIND, NOUNLOAD, STATS = 10" -b >nul 2>&1
 
 if errorlevel 1 (
     echo [!] ATTENZIONE: Impossibile fare backup del database
@@ -123,7 +123,7 @@ if errorlevel 1 (
     echo     Tentativo backup alternativo con PowerShell...
     
     REM Tentativo alternativo con PowerShell
-    powershell -Command "try { Invoke-Sqlcmd -ServerInstance '%DB_SERVER%' -Query \"BACKUP DATABASE [%DB_NAME%] TO DISK = N'%DB_BACKUP_FILE%' WITH COMPRESSION\" -ErrorAction Stop; exit 0 } catch { exit 1 }" >nul 2>&1
+    powershell -Command "try { Invoke-Sqlcmd -ServerInstance '%DB_SERVER%' -Query \"BACKUP DATABASE [%DB_NAME%] TO DISK = N'%DB_BACKUP_FILE%'\" -ErrorAction Stop; exit 0 } catch { exit 1 }" >nul 2>&1
     
     if errorlevel 1 (
         echo [!] Backup database non riuscito
