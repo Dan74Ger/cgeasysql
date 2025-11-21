@@ -267,13 +267,13 @@
             </StackPanel>
         </Border>
 
-        <!-- Configurazione Database Card -->
+        <!-- Configurazione SQL Server Card -->
         <Border Grid.Row="8" 
                 Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}"
                 CornerRadius="8"
                 Padding="20">
             <StackPanel>
-                <TextBlock Text="🔗 Configurazione Percorso Database" 
+                <TextBlock Text="🔗 Configurazione SQL Server" 
                            FontSize="18" 
                            FontWeight="SemiBold"
                            Margin="0,0,0,15"/>
@@ -289,13 +289,9 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="15"/>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="15"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="15"/>
-                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Percorso Corrente -->
+                    <!-- Connection String Corrente -->
                     <TextBlock Grid.Row="0" Grid.Column="0" 
                                Text="Percorso Corrente:" 
                                FontWeight="SemiBold"
@@ -308,64 +304,29 @@
                                FontFamily="Consolas"
                                FontSize="11"/>
 
-                    <!-- Tipo Percorso -->
-                    <TextBlock Grid.Row="2" Grid.Column="0" 
-                               Text="Tipo:" 
-                               FontWeight="SemiBold"
-                               VerticalAlignment="Center"/>
-                    <TextBlock Grid.Row="2" Grid.Column="1" 
-                               Text="{Binding TipoPercorso}"
-                               VerticalAlignment="Center"
-                               FontWeight="Bold"
-                               Foreground="#2196F3"/>
-
                     <!-- Info Configurazione -->
-                    <TextBlock Grid.Row="4" Grid.Column="0" 
+                    <TextBlock Grid.Row="2" Grid.Column="0" 
                                Text="Info:" 
                                FontWeight="SemiBold"
                                VerticalAlignment="Top"
                                Margin="0,5,0,0"/>
-                    <TextBlock Grid.Row="4" Grid.Column="1" 
-                               Text="{Binding InfoConfigurazione}"
+                    <TextBlock Grid.Row="2" Grid.Column="1" 
                                TextWrapping="Wrap"
                                VerticalAlignment="Top"
                                Margin="0,5,0,0"
                                FontSize="11"
-                               Foreground="#666"/>
+                               Foreground="#666">
+                        <Run Text="Configurazione SQL Server gestita tramite file:"/>
+                        <Run Text=" C:\db_CGEASY\sqlconfig.json" FontWeight="SemiBold" Foreground="#2196F3"/>
+                        <LineBreak/>
+                        <Run Text="Usa il pulsante qui sotto per aprire la finestra di configurazione completa."/>
+                    </TextBlock>
 
-                    <!-- Nuovo Percorso Database -->
-                    <TextBlock Grid.Row="6" Grid.Column="0" 
-                               Text="Nuovo Percorso:" 
-                               FontWeight="SemiBold"
-                               VerticalAlignment="Center"/>
-                    <Grid Grid.Row="6" Grid.Column="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <TextBox Grid.Column="0"
-                                 Text="{Binding NuovoPercorsoDatabase, UpdateSourceTrigger=PropertyChanged}"
-                                 ui:ControlHelper.PlaceholderText="C:\Database\cgeasy.db oppure \\SERVER\Share\cgeasy.db"
-                                 Height="36"
-                                 FontFamily="Consolas"
-                                 FontSize="11"
-                                 VerticalContentAlignment="Center"/>
-                        
-                        <Button Grid.Column="2"
-                                Content="📂 Sfoglia"
-                                Command="{Binding BrowseDatabasePathCommand}"
-                                Height="36"
-                                Padding="15,0"
-                                FontSize="12"/>
-                    </Grid>
-
-                    <!-- Pulsanti Azioni -->
-                    <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" 
+                    <!-- Pulsante Configura SQL Server -->
+                    <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" 
                                 Orientation="Horizontal"
                                 Margin="0,5,0,0">
-                        <Button Content="🧪 Test Connessione" 
+                        <Button Content="⚙️ Configura SQL Server" 
                                 Command="{Binding TestDatabaseConnectionCommand}"
                                 Height="36"
                                 Padding="20,0"
@@ -398,24 +359,28 @@
                         Padding="15"
                         Margin="0,15,0,0">
                     <StackPanel>
-                        <TextBlock Text="ℹ️ Configurazione Database Condiviso" 
+                        <TextBlock Text="ℹ️ Configurazione SQL Server Multi-PC" 
                                    FontWeight="SemiBold"
                                    Foreground="#1976D2"
                                    Margin="0,0,0,8"/>
                         <TextBlock TextWrapping="Wrap" 
                                    Foreground="#1976D2"
                                    LineHeight="20">
-                            <Run Text="• Percorso LOCALE: C:\Cartella\cgeasy.db"/>
+                            <Run Text="• "/>
+                            <Run Text="Database Locale:" FontWeight="Bold"/>
+                            <Run Text=" Server: localhost, Istanza: SQLEXPRESS"/>
                             <LineBreak/>
-                            <Run Text="• Percorso RETE: \\SERVER\Share\cgeasy.db"/>
+                            <Run Text="• "/>
+                            <Run Text="Database Centralizzato:" FontWeight="Bold"/>
+                            <Run Text=" Server: IP del server (es: 192.168.1.12)"/>
                             <LineBreak/>
                             <Run Text="• Testa sempre la connessione PRIMA di salvare"/>
                             <LineBreak/>
-                            <Run Text="• Il server deve avere una cartella condivisa con permessi di lettura/scrittura"/>
+                            <Run Text="• Per database centralizzato: configura TCP/IP e firewall sul server"/>
                             <LineBreak/>
-                            <Run Text="• Tutti i client devono configurare lo stesso percorso per condividere i dati"/>
+                            <Run Text="• Tutti i client devono configurare lo stesso server per condividere i dati"/>
                             <LineBreak/>
-                            <Run Text="• Massimo 10-15 utenti simultanei consigliati"/>
+                            <Run Text="• Consulta CONFIGURAZIONE_SQL_SERVER.md per dettagli completi"/>
                         </TextBlock>
                     </StackPanel>
                 </Border>
