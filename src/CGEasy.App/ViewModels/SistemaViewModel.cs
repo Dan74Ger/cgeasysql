@@ -130,7 +130,14 @@ public partial class SistemaViewModel : ObservableObject
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
             
-            // Chiudi l'applicazione
+            // Riavvia l'applicazione
+            var exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
+            if (!string.IsNullOrEmpty(exePath))
+            {
+                System.Diagnostics.Process.Start(exePath);
+            }
+            
+            // Chiudi l'applicazione corrente
             Application.Current.Shutdown();
         }
         else
