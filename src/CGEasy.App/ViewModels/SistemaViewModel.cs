@@ -3,6 +3,7 @@ using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CGEasy.Core.Data;
+using CGEasy.App.Views;
 
 namespace CGEasy.App.ViewModels;
 
@@ -78,5 +79,21 @@ public partial class SistemaViewModel : ObservableObject
     private void ImportaExcel()
     {
         MessageBox.Show("⚠️ FUNZIONALITÀ IN MIGRAZIONE", "Importazione", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    [RelayCommand]
+    private void ApriConfigurazioneSql()
+    {
+        var view = new ConfigurazioneSqlView();
+        var window = new Window
+        {
+            Title = "Configurazione SQL Server",
+            Content = view,
+            Width = 1000,
+            Height = 800,
+            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            ResizeMode = ResizeMode.CanResize
+        };
+        window.ShowDialog();
     }
 }
