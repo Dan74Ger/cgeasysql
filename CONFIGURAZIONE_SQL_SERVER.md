@@ -16,7 +16,39 @@ Il file viene creato automaticamente al primo avvio con configurazione di defaul
 
 ## 🎯 SCENARI DI INSTALLAZIONE
 
-### **Scenario 1: PC Singolo (Default)**
+### **🔹 IMPORTANTE: Database Locale vs Centralizzato**
+
+CGEasy supporta **2 modalità di installazione**:
+
+#### **A) Database Locale su Ogni PC** 💻
+Ogni PC ha il **SUO database SQL Server separato**.
+- ✅ Ogni utente lavora sui SUOI dati
+- ✅ Nessuna configurazione di rete
+- ✅ Più semplice da installare
+- ❌ Nessuna condivisione dati tra PC
+
+**Configurazione**: Su OGNI PC installi SQL Server + CGEasy, configurazione identica:
+```json
+{
+  "server": "localhost",
+  "instance": "SQLEXPRESS",
+  "database": "CGEasy",
+  "authentication_type": "Windows"
+}
+```
+
+#### **B) Database Centralizzato su Server** 🌐
+Un solo server con SQL Server, tutti i PC si connettono allo stesso database.
+- ✅ Tutti gli utenti vedono gli STESSI dati
+- ✅ Collaborazione in tempo reale
+- ✅ Backup centralizzato
+- ⚠️ Richiede configurazione rete e firewall
+
+**Configurazione**: Solo il server ha SQL Server, i client puntano al server.
+
+---
+
+### **Scenario 1: PC Singolo con Database Locale (Default)**
 Un solo PC con SQL Server Express installato localmente.
 
 ```json
@@ -34,8 +66,29 @@ Un solo PC con SQL Server Express installato localmente.
 
 ---
 
-### **Scenario 2: Server Dedicato con Windows Authentication**
-Più PC client che si connettono a un server SQL centralizzato, usando l'autenticazione Windows.
+### **Scenario 2: Multi-PC con Database Locale su Ogni PC**
+Ogni PC ha SQL Server e il SUO database separato.
+
+**Su OGNI PC** (configurazione identica):
+```json
+{
+  "server": "localhost",
+  "instance": "SQLEXPRESS",
+  "database": "CGEasy",
+  "authentication_type": "Windows"
+}
+```
+
+**Procedura per ogni PC**:
+1. Installa SQL Server Express
+2. Installa CGEasy
+3. Al primo avvio, CGEasy crea automaticamente il database locale
+4. ✅ Fatto! Database separato per ogni PC
+
+---
+
+### **Scenario 3: Server Dedicato con Windows Authentication**
+Più PC client che si connettono a un server SQL **centralizzato**, usando l'autenticazione Windows.
 
 **Su TUTTI i PC client**, modifica `sqlconfig.json`:
 

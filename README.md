@@ -67,7 +67,7 @@ CGEasy/
 
 ### Prerequisiti
 - .NET 8.0 SDK
-- SQL Server (LocalDB o Express)
+- SQL Server (LocalDB, Express o licenziato)
 - Windows 10/11
 
 ### Installazione
@@ -78,10 +78,17 @@ git clone https://github.com/Dan74Ger/cgeasysql.git
 cd cgeasysql
 ```
 
-2. Configura connection string in `C:\db_CGEASY\connectionstring.txt`:
+2. Configura SQL Server in `C:\db_CGEASY\sqlconfig.json`:
+```json
+{
+  "server": "localhost",
+  "instance": "SQLEXPRESS",
+  "database": "CGEasy",
+  "authentication_type": "Windows"
+}
 ```
-Server=localhost\SQLEXPRESS;Database=CGEasy;Trusted_Connection=True;TrustServerCertificate=True;
-```
+
+Per installazioni multi-PC, vedi `CONFIGURAZIONE_SQL_SERVER.md`
 
 3. Applica migrations:
 ```bash
