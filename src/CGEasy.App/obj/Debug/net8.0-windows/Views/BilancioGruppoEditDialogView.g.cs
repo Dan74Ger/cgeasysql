@@ -97,7 +97,7 @@ namespace CGEasy.App.Views {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/CGEasy.App;V1.0.0.0;component/views/bilanciogruppoeditdialogview.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/CGEasy.App;component/views/bilanciogruppoeditdialogview.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\Views\BilancioGruppoEditDialogView.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

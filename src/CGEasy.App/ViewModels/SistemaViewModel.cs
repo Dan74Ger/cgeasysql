@@ -31,12 +31,6 @@ public partial class SistemaViewModel : ObservableObject
     [ObservableProperty]
     private int _numeroBackups = 0;
 
-    [ObservableProperty]
-    private string _statoCrittografia = "SQL Server TDE";
-
-    [ObservableProperty]
-    private string _statoCrittografiaIcon = "🔐";
-
     public SistemaViewModel(CGEasyDbContext context)
     {
         _context = context;
@@ -148,18 +142,6 @@ public partial class SistemaViewModel : ObservableObject
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
-    }
-
-    [RelayCommand]
-    private void CriptaDatabase()
-    {
-        MessageBox.Show("⚠️ FUNZIONALITÀ IN MIGRAZIONE\nSQL Server supporta TDE (Transparent Data Encryption).", "Crittografia", MessageBoxButton.OK, MessageBoxImage.Information);
-    }
-
-    [RelayCommand]
-    private void DecriptaDatabase()
-    {
-        MessageBox.Show("⚠️ FUNZIONALITÀ IN MIGRAZIONE", "Decrittografia", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     [RelayCommand]
