@@ -415,7 +415,7 @@
                             Cursor="Hand">
                         <Border.InputBindings>
                             <MouseBinding MouseAction="LeftClick" 
-                                        Command="{Binding BackupDatabaseCommand}"/>
+                                        Command="{Binding CreaBackupCommand}"/>
                         </Border.InputBindings>
                         <StackPanel HorizontalAlignment="Center">
                             <TextBlock Text="💾" 
@@ -444,7 +444,7 @@
                             Cursor="Hand">
                         <Border.InputBindings>
                             <MouseBinding MouseAction="LeftClick" 
-                                        Command="{Binding RestoreDatabaseCommand}"/>
+                                        Command="{Binding RipristinaBackupCommand}"/>
                         </Border.InputBindings>
                         <StackPanel HorizontalAlignment="Center">
                             <TextBlock Text="⚠️" 
@@ -503,20 +503,31 @@
                         Padding="15"
                         Margin="0,20,0,0">
                     <StackPanel>
-                        <TextBlock Text="ℹ️ Note Importanti" 
+                        <TextBlock Text="ℹ️ Informazioni Backup" 
                                    FontWeight="SemiBold"
                                    Foreground="#856404"
                                    Margin="0,0,0,8"/>
                         <TextBlock TextWrapping="Wrap" 
                                    Foreground="#856404"
                                    LineHeight="20">
-                            <Run Text="• I backup vengono salvati automaticamente nella cartella Backups"/>
+                            <Run Text="📂 Percorso backup: " FontWeight="Bold"/>
+                            <Run Text="C:\db_CGEASY\Backups\" FontFamily="Consolas" FontWeight="Bold" Foreground="#2196F3"/>
                             <LineBreak/>
-                            <Run Text="• Prima di ogni ripristino viene creato un backup automatico di sicurezza"/>
+                            <Run Text="📄 Formato nome file: " FontWeight="Bold"/>
+                            <Run Text="CGEasy_backup_yyyyMMdd_HHmmss.bak" FontFamily="Consolas"/>
                             <LineBreak/>
-                            <Run Text="• Il ripristino richiede il riavvio dell'applicazione"/>
                             <LineBreak/>
-                            <Run Text="• Si consiglia di fare backup regolari (es. settimanali)"/>
+                            <Run Text="• I backup SQL Server sono file .bak standard"/>
+                            <LineBreak/>
+                            <Run Text="• Prima di ogni ripristino viene chiesta conferma"/>
+                            <LineBreak/>
+                            <Run Text="• Il ripristino sostituisce TUTTI i dati attuali"/>
+                            <LineBreak/>
+                            <Run Text="• L'applicazione si chiuderà automaticamente dopo il ripristino"/>
+                            <LineBreak/>
+                            <Run Text="• Si consiglia di fare backup regolari (es. giornalieri o settimanali)"/>
+                            <LineBreak/>
+                            <Run Text="• Puoi copiare i file .bak su altri PC per distribuire il database"/>
                         </TextBlock>
                     </StackPanel>
                 </Border>
