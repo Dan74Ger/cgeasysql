@@ -68,6 +68,8 @@ public class SqlServerBackupService
     /// </summary>
     public async Task<(bool Success, string Message)> RipristinaBackupAsync(string backupPath)
     {
+        SqlConnection? masterConnection = null;
+        
         try
         {
             if (!File.Exists(backupPath))
@@ -75,33 +77,69 @@ public class SqlServerBackupService
                 return (false, "❌ File di backup non trovato.");
             }
 
-            // Ottieni il nome del database
+            // Ottieni il nome del database e il server
             var connectionString = _context.Database.GetConnectionString();
             var builder = new SqlConnectionStringBuilder(connectionString);
             var databaseName = builder.InitialCatalog;
+            var serverName = builder.DataSource;
 
-            // Chiudi tutte le connessioni attive al database
-            var killConnectionsSql = $@"
-                ALTER DATABASE [{databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+            // Crea una connessione al database master (non al database da ripristinare)
+            builder.InitialCatalog = "master";
+            var masterConnectionString = builder.ToString();
+            
+            masterConnection = new SqlConnection(masterConnectionString);
+            await masterConnection.OpenAsync();
+
+            // 1. Imposta il database in modalità single user e forza la chiusura di tutte le connessioni
+            var setSingleUserSql = $@"
+                IF EXISTS (SELECT name FROM sys.databases WHERE name = N'{databaseName}')
+                BEGIN
+                    ALTER DATABASE [{databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+                END
             ";
+            
+            using (var cmd = new SqlCommand(setSingleUserSql, masterConnection))
+            {
+                await cmd.ExecuteNonQueryAsync();
+            }
 
-            // Ripristina il database
+            // 2. Ripristina il database
             var restoreSql = $@"
                 RESTORE DATABASE [{databaseName}] 
                 FROM DISK = @backupPath 
-                WITH REPLACE;
-                
+                WITH REPLACE, RECOVERY;
+            ";
+            
+            using (var cmd = new SqlCommand(restoreSql, masterConnection))
+            {
+                cmd.Parameters.AddWithValue("@backupPath", backupPath);
+                cmd.CommandTimeout = 300; // 5 minuti timeout
+                await cmd.ExecuteNonQueryAsync();
+            }
+
+            // 3. Riporta il database in modalità multi user
+            var setMultiUserSql = $@"
                 ALTER DATABASE [{databaseName}] SET MULTI_USER;
             ";
+            
+            using (var cmd = new SqlCommand(setMultiUserSql, masterConnection))
+            {
+                await cmd.ExecuteNonQueryAsync();
+            }
 
-            await _context.Database.ExecuteSqlRawAsync(killConnectionsSql);
-            await _context.Database.ExecuteSqlRawAsync(restoreSql, new SqlParameter("@backupPath", backupPath));
-
-            return (true, $"✅ Database ripristinato con successo!\n\nL'applicazione verrà riavviata.");
+            return (true, $"✅ Database ripristinato con successo!\n\nL'applicazione verrà chiusa.\nRiaprila per continuare.");
         }
         catch (Exception ex)
         {
-            return (false, $"❌ Errore durante il ripristino:\n{ex.Message}\n\nAssicurati che SQL Server sia in esecuzione e che non ci siano connessioni attive al database.");
+            return (false, $"❌ Errore durante il ripristino:\n\n{ex.Message}\n\nSuggerimenti:\n• Assicurati che SQL Server sia in esecuzione\n• Verifica che il file di backup sia valido\n• L'app verrà riavviata automaticamente");
+        }
+        finally
+        {
+            if (masterConnection != null)
+            {
+                await masterConnection.CloseAsync();
+                await masterConnection.DisposeAsync();
+            }
         }
     }
 

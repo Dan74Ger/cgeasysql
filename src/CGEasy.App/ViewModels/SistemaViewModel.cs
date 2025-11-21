@@ -108,6 +108,10 @@ public partial class SistemaViewModel : ObservableObject
         var confirm = MessageBox.Show(
             "⚠️ ATTENZIONE ⚠️\n\n" +
             "Il ripristino sostituirà TUTTI i dati attuali con quelli del backup.\n\n" +
+            "Operazione:\n" +
+            "1. Chiuderà tutte le connessioni al database\n" +
+            "2. Ripristinerà il database dal backup selezionato\n" +
+            "3. Chiuderà l'applicazione automaticamente\n\n" +
             "Vuoi procedere?",
             "Conferma Ripristino",
             MessageBoxButton.YesNo,
@@ -121,16 +125,21 @@ public partial class SistemaViewModel : ObservableObject
         if (success)
         {
             MessageBox.Show(
-                message + "\n\nL'applicazione si chiuderà ora.\nRiaprila per continuare.",
+                message,
                 "Ripristino Completato",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
             
+            // Chiudi l'applicazione
             Application.Current.Shutdown();
         }
         else
         {
-            MessageBox.Show(message, "Errore Ripristino", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(
+                message,
+                "Errore Ripristino",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
         }
     }
 
